@@ -9,19 +9,19 @@ int main()
 {
 	Window* w1 = Window::CreateInstance("Color", 700, 500, WINDOW_ON_EXIT_DESTROY);
 
-	Bitmap bmp = new Bitmap__(700, 500);
-	memset(bmp->Data, 0xff, 700 * 500 * 4);
+	Renderer r(700, 500); 
 
-	for (unsigned index = 0; index < 700 * 500; index += 5)
-	{
-		bmp->Data[index].G = 0;
-		bmp->Data[index].B = 0;
-	}
+	
+	r.drawRectangle(1, 1, 698, 498, Color(0xff, 0, 0));
+	r.drawRectangle(0, 0, 699, 499, Color(0, 0, 0xff));
+	
+	r.drawCircle(200, 200, 100, Color(0xff000000));
 
-	w1->loadBitmap(bmp);
+	w1->loadBitmap(r.getRenderTarget());
 
 	while (w1->update()) {
 	}
-
+	
+	delete w1;
 	return 0;
 }

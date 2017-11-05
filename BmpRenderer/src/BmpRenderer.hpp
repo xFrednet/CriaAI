@@ -1,5 +1,7 @@
 #pragma once
 
-#include "Window.hpp"
+#include "API/Window.hpp"
 
 #include "Bitmap.hpp"
+
+#include "Renderer.hpp"

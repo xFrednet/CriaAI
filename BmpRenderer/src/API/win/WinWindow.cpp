@@ -13,7 +13,6 @@ namespace bmp_renderer { namespace api {
 		switch (message) {
 		case WM_SETWINDOWCLASS:
 			s_WindowClasses[hwnd] = (WinWindow*)wParam;
-			std::cout << "WM_SETWINDOWCLASS: hwnd:" << hwnd << " Window: " << ((WinWindow*)wParam) << std::endl;
 			break;
 		case WM_PAINT:
 			if (s_WindowClasses[hwnd])
@@ -24,13 +23,11 @@ namespace bmp_renderer { namespace api {
 				HDC memDC = CreateCompatibleDC(hDC);
 				HGDIOBJ memDcOldObject = SelectObject(memDC, s_WindowClasses[hwnd]->m_HBitmap);
 
-				BitBlt(hDC, 0, 0, s_WindowClasses[hwnd]->m_BmpWidth, s_WindowClasses[hwnd]->m_BmpHeight, memDC, 0, 0, SRCCOPY);
+				StretchBlt(hDC, 0, 0, s_WindowClasses[hwnd]->m_BmpWidth, s_WindowClasses[hwnd]->m_BmpHeight, memDC, 0, s_WindowClasses[hwnd]->m_BmpHeight - 1, s_WindowClasses[hwnd]->m_BmpWidth, -(int)s_WindowClasses[hwnd]->m_BmpHeight, SRCCOPY);
 
 				SelectObject(memDC, memDcOldObject);
 				DeleteDC(memDC);
 				EndPaint(hwnd, &ps);
-
-				std::cout << "Redraw" << std::endl;
 			}
 				
 			break;
@@ -55,7 +52,6 @@ namespace bmp_renderer { namespace api {
 			}
 			break;
 		case WM_DESTROY:
-			std::cout << "WM_DESTROY" << std::endl;
 			if (s_WindowClasses[hwnd])
 			{
 				s_WindowClasses[hwnd]->m_Hwnd = nullptr;
@@ -150,7 +146,6 @@ namespace bmp_renderer { namespace api {
 			DispatchMessage(&msg);
 
 			if (msg.message == WM_QUIT) {
-				std::cout << "WM_QUIT m_Hwnd: " << m_Hwnd << std::endl;
 				m_Hwnd = nullptr;
 				return false;
 			}

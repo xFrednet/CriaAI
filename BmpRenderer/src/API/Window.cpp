@@ -5,6 +5,7 @@
 #endif
 
 namespace bmp_renderer {
+
 	Window* Window::CreateInstance(char const* name, unsigned width, unsigned height, WINDOW_ON_EXIT_ACTION onExit)
 	{
 #if defined(_WIN32) || defined(_WIN64)
@@ -27,4 +28,5 @@ namespace bmp_renderer {
 	{
 		m_OnExitAction = action;
 	}
+
 }

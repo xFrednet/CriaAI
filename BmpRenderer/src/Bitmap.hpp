@@ -6,14 +6,21 @@ namespace bmp_renderer
 {
 	typedef unsigned char color_channel;
 
-	struct alignas(32) Color
+	struct Color
 	{
-		color_channel B;
-		color_channel G;
-		color_channel R;
-		color_channel A;
+		union
+		{
+			int ARGB;
+			struct
+			{
+				color_channel B;
+				color_channel G;
+				color_channel R;
+				color_channel A;
+			};
+		};
 
-		Color(unsigned int rgba = 0xff00000);
+		Color(int argb = 0xff00000);
 		Color(color_channel r, color_channel g, color_channel b, color_channel a = 0xff);
 	};
 
@@ -22,18 +29,18 @@ namespace bmp_renderer
 
 	struct Bitmap__
 	{
-		const unsigned WIDTH;
-		const unsigned HEIGHT;
+		const int WIDTH;
+		const int HEIGHT;
 		
 		Color* Data;
 
 		Bitmap__(unsigned width, unsigned height);
 		~Bitmap__();
 
-		Color getPixel(unsigned xPixel, unsigned yPixel) const;
-		void setPixel(unsigned xPixel, unsigned yPixel, Color color);
+		Color getPixel(int xPixel, int yPixel) const;
+		void setPixel(int xPixel, int yPixel, Color color);
 
-		Bitmap__* createSubBitMap(unsigned xPixel, unsigned yPixel, unsigned width, unsigned height) const;
+		Bitmap__* createSubBitMap(int xPixel, int yPixel, unsigned width, unsigned height) const;
 	};
 
 }

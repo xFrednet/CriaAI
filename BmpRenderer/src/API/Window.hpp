@@ -2,8 +2,8 @@
 
 #include "Bitmap.hpp"
 
-namespace bmp_renderer
-{
+namespace bmp_renderer {
+	
 	enum WINDOW_ON_EXIT_ACTION
 	{
 		WINDOW_ON_EXIT_DESTROY = 0,
