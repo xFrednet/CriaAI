@@ -12,6 +12,7 @@ namespace bmp_renderer {
 
 		inline void setPixelWithoutValidation(const int& x, const int& y, const Color& color)
 		{
+			//TODO add alpha blending out = alpha * new + (1 - alpha) * old
 			m_RenderTarget->Data[x + y * m_RenderTarget->WIDTH] = color;
 		}
 
@@ -22,6 +23,7 @@ namespace bmp_renderer {
 
 		Bitmap getRenderTarget();
 		void setRenderTarget(Bitmap renderTarget, bool autoDeleteTarget = false);
+		void clearTarget(Color color = Color(0xffffffff));
 
 		void setPixel(const int& x, const int& y, const Color& color);
 		

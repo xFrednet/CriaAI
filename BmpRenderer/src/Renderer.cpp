@@ -45,6 +45,15 @@ namespace bmp_renderer {
 		m_AutoDeleteTarget = autoDeleteTarget;
 	}
 
+	void Renderer::clearTarget(Color color)
+	{
+		if (!m_RenderTarget) return;
+		for (int pixelNr = 0; pixelNr < m_RenderTarget->WIDTH * m_RenderTarget->HEIGHT; pixelNr++) 
+		{
+			m_RenderTarget->Data[pixelNr] = color;
+		}
+	}
+
 	void Renderer::setPixel(const int& x, const int& y, const Color& color)
 	{
 		if (x < 0 || x >= m_RenderTarget->WIDTH || y < 0 || y >= m_RenderTarget->HEIGHT)
@@ -236,6 +245,30 @@ namespace bmp_renderer {
 		}
 	}
 
+	// The circle will be drawn along both axis. The used axis is always the one where the other 
+	// axis one has only one matching value. The calculations will be done for one quadrant and applied
+	// in the others
+	//
+	// In the following example an "x"s means that it would be drawn along the horizontal-axis
+	// and the "y"s mean that the pixel would be drawn along the vertical-axis.
+	//   
+	// +-------------x
+	// | .           x
+	// |   .        x
+	// |     .    xx
+	// |       . x
+	// |      yy
+	// |   yyy
+	// yyyy
+	// 
+	// The magic join point is at 3/4 at the radius.
+	//
+	// The x value is defined by using cos()
+	// The y value is defined by using sin()
+	// -> y = sin(arccos(x))
+	// -> x = cos(arcsin(y))
+	//
+	// BTW: no I didn't find a better way than copping the loop code to every circle method -.-.(#define [...] looked terrible)
 	void Renderer::drawCircle(int centerX, int centerY, unsigned radius, Color color)
 	{
 		if (!m_RenderTarget) return;
@@ -243,64 +276,50 @@ namespace bmp_renderer {
 			(centerY + (int)radius) < 0 || centerY - (int)radius >= m_RenderTarget->HEIGHT)
 			return;
 
-		float halfRadius = (float)radius / 2.0f;
-
-		// The circle will be drawn along both axis. The used axis is always the one where the other 
-		// axis one has only one matching value. The calculations will be done for one quadrant and applied
-		// in the others
-		//
-		// In the following example an "x"s means that it would be drawn along the horizontal-axis
-		// and the "y"s mean that the pixel would be drawn along the vertical-axis.
-		//   
-		// +-------------x
-		// | .           x
-		// |   .        x
-		// |     .    xx
-		// |       . x
-		// |      yy
-		// |   yyy
-		// yyyy
-		// 
-		// The magic join point is at 3/4 at the radius.
-		//
-		// The x value is defined by using cos()
-		// The y value is defined by using sin()
-		// -> y = sin(arccos(x))
-		// -> x = cos(arcsin(y))
-		//
+		//this is art
 		float fRadius = (float)radius;
-		float oneRadiusUnit = (1.0f / fRadius);
-		float currentUnit = 0;
-		int hAxisXOffset = 0;
-		int hAxisYOffset = 0;
-
-		int vAxisXOffset = 0;
-		int vAxisYOffset = 0;
-		float alpha;
-		for (; currentUnit <= 0.75f; currentUnit += oneRadiusUnit) {
+		int mainAxisOffset = 0; // offset along the "moveAxis" from origin
+		int sideAxisOffset;
+		for (float currentUnit = 0, oneRadiusUnit = (1.0f / fRadius); currentUnit <= 0.75f; currentUnit += oneRadiusUnit, mainAxisOffset++)
+		{
 			//vertical axis
-			alpha = acosf(currentUnit);
-			hAxisXOffset++;
-			hAxisYOffset = (int)(fRadius * sinf(alpha));
+			sideAxisOffset = (int)(fRadius * sinf(acosf(currentUnit))); // is positive
 
-			// 1 2
-			// 4 3
-			setPixel(centerX - hAxisXOffset, centerY + hAxisYOffset, color);
-			setPixel(centerX + hAxisXOffset, centerY + hAxisYOffset, color);
-			setPixel(centerX + hAxisXOffset, centerY - hAxisYOffset, color);
-			setPixel(centerX - hAxisXOffset, centerY - hAxisYOffset, color);
-			
-			//horizontal axis
-			alpha = asinf(currentUnit);
-			vAxisXOffset = (int)(fRadius * cosf(alpha));
-			vAxisYOffset++;
+			setPixel(centerX - mainAxisOffset, centerY + sideAxisOffset, color);
+			setPixel(centerX + mainAxisOffset, centerY + sideAxisOffset, color);
+			setPixel(centerX + mainAxisOffset, centerY - sideAxisOffset, color);
+			setPixel(centerX - mainAxisOffset, centerY - sideAxisOffset, color);
+			//TODO the center is overdrawn multiple times this my case issues with transparent colors
 
-			// 1 2
-			// 4 3
-			setPixel(centerX - vAxisXOffset, centerY + vAxisYOffset, color);
-			setPixel(centerX + vAxisXOffset, centerY + vAxisYOffset, color);
-			setPixel(centerX + vAxisXOffset, centerY - vAxisYOffset, color);
-			setPixel(centerX - vAxisXOffset, centerY - vAxisYOffset, color);
+			setPixel(centerX - sideAxisOffset, centerY + mainAxisOffset, color);
+			setPixel(centerX + sideAxisOffset, centerY + mainAxisOffset, color);
+			setPixel(centerX + sideAxisOffset, centerY - mainAxisOffset, color);
+			setPixel(centerX - sideAxisOffset, centerY - mainAxisOffset, color);
+		}
+	}
+
+	void Renderer::drawFilledCircle(int centerX, int centerY, unsigned radius, Color color)
+	{
+		if (!m_RenderTarget) return;
+		if ((centerX + (int)radius) < 0 || centerX - (int)radius >= m_RenderTarget->WIDTH ||
+			(centerY + (int)radius) < 0 || centerY - (int)radius >= m_RenderTarget->HEIGHT)
+			return;
+
+		//this is art
+		float fRadius = (float)radius;
+		int mainAxisOffset = 0; // offset along the "moveAxis" from origin
+		int sideAxisOffset;
+		for (float currentUnit = 0, oneRadiusUnit = (1.0f / fRadius); currentUnit <= 0.75f; currentUnit += oneRadiusUnit, mainAxisOffset++)
+		{
+			//vertical axis
+			sideAxisOffset = (int)(fRadius * sinf(acosf(currentUnit))); // is positive
+
+			drawVerticalLine(centerX - mainAxisOffset, centerY - sideAxisOffset, sideAxisOffset * 2, color);
+			drawVerticalLine(centerX + mainAxisOffset, centerY - sideAxisOffset, sideAxisOffset * 2, color);
+			//TODO the center is overdrawn multiple times this my case issues with transparent colors
+
+			drawHorizontalLine(centerX - sideAxisOffset, centerY - mainAxisOffset, sideAxisOffset * 2, color);
+			drawHorizontalLine(centerX - sideAxisOffset, centerY + mainAxisOffset, sideAxisOffset * 2, color);
 		}
 	}
 }
