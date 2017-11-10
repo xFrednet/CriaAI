@@ -13,7 +13,21 @@ namespace bmp_renderer {
 		inline void setPixelWithoutValidation(const int& x, const int& y, const Color& color)
 		{
 			//TODO add alpha blending out = alpha * new + (1 - alpha) * old
-			m_RenderTarget->Data[x + y * m_RenderTarget->WIDTH] = color;
+			if (color.A == 0xff)
+			{
+				m_RenderTarget->Data[x + y * m_RenderTarget->WIDTH] = color;
+			} else
+			{
+				Color* bmpColor = &m_RenderTarget->Data[x + y * m_RenderTarget->WIDTH];
+				float alpha = color.A / 255.0f;
+				bmpColor->R = (color_channel)((color.R * alpha) + (bmpColor->R * (1 - alpha)));
+				bmpColor->G = (color_channel)((color.G * alpha) + (bmpColor->G * (1 - alpha)));
+				bmpColor->B = (color_channel)((color.B * alpha) + (bmpColor->B * (1 - alpha)));
+				bmpColor->A += color.A;
+				if (bmpColor->A > 0xff)
+					bmpColor->A = 0xff;
+			}
+
 		}
 
 	public:

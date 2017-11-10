@@ -283,7 +283,7 @@ namespace bmp_renderer {
 		for (float currentUnit = 0, oneRadiusUnit = (1.0f / fRadius); currentUnit <= 0.75f; currentUnit += oneRadiusUnit, mainAxisOffset++)
 		{
 			//vertical axis
-			sideAxisOffset = (int)(fRadius * sinf(acosf(currentUnit))); // is positive
+			sideAxisOffset = (int)roundf((fRadius * sinf(acosf(currentUnit)))); // is positive
 
 			setPixel(centerX - mainAxisOffset, centerY + sideAxisOffset, color);
 			setPixel(centerX + mainAxisOffset, centerY + sideAxisOffset, color);

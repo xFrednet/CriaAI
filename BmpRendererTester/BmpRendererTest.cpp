@@ -12,11 +12,16 @@ int main()
 	Renderer r(700, 500); 
 
 	
-	r.drawRectangle(1, 1, 698, 498, Color(0xff, 0, 0));
-	r.drawRectangle(0, 0, 699, 499, Color(0, 0, 0xff));
+	r.clearTarget(Color(0xffffffff));
+	r.drawFilledRectangle(100, 100, 600, 400, Color(0xff, 0, 0, 0xff / 4));
+	r.drawFilledRectangle(100, 100, 600, 400, Color(0xff, 0, 0, 0xff / 4));
+	r.drawFilledRectangle(100, 100, 600, 400, Color(0xff, 0, 0, 0xff / 4));
+	r.drawFilledRectangle(100, 100, 600, 400, Color(0xff, 0, 0, 0xff / 4));
+
 	
-	for (int radius = 0; radius < 100; radius += 10)
-		r.drawCircle(200, 200, radius, Color(0xff000000));
+	for (int y = 0; y <= 500; y += 50)
+		for (int x = 0; x <= 700; x += 50)
+			r.drawCircle(x, y, 100, Color(0x22000000));
 
 	w1->loadBitmap(r.getRenderTarget());
 
