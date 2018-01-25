@@ -5,6 +5,26 @@
 #define MAX(x, y)                      ((x > y) ? x : y)
 #define MIN(x, y)                      ((x < y) ? x : y)
 
+#define CLAMP_VALUE(x, min, max) \
+if (min <= max) {\
+		if (x < min)\
+			x = min; \
+		else if (x > max)\
+			x = max; \
+}
+#define SWAP_INTS(x, y) \
+{\
+	int oldValue = x;\
+	x = y;\
+	y = oldValue; \
+}
+#define SWAP_FLOATS(x, y) \
+{\
+	float oldValue = x;\
+	x = y;\
+	y = oldValue; \
+}
+
 #include <stdio.h>
 
 #ifdef CRIA_DEBUG_ENABLE_INFO
@@ -17,4 +37,15 @@
 #	define CRIA_ERROR_PRINTF(...)           printf("CRIA [ERROR]: "); printf(__VA_ARGS__); printf("\n");
 #endif
 
-void LibTest();
+#if defined(CRIA_AUTO_TEST_RESULTS) || defined(CRIA_DEBUG_ENABLE_INFO)
+#	define CRIA_AUTO_ASSERT(x, ...) \
+		if (!(x)) { \
+			CRIA_ERROR_PRINTF("CRIA_AUTO_ASSERT(%s) failed", #x); \
+			CRIA_ERROR_PRINTF("File: %s", __FILE__); \
+			CRIA_ERROR_PRINTF("Line: %u", __LINE__); \
+			CRIA_ERROR_PRINTF(__VA_ARGS__);\
+			getchar(); \
+		} 
+#else
+#	define CRIA_AUTO_ASSERT(x, ...)
+#endif

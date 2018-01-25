@@ -1,18 +1,48 @@
-#pragma once
+/******************************************************************************
+* BmpRenderer - A library that can render and display bitmaps.                *
+*               <https://github.com/xFrednet/BmpRenderer>                     *
+*                                                                             *
+* =========================================================================== *
+* Copyright (C) 2017, xFrednet <xFrednet@gmail.com>                           *
+*                                                                             *
+* This software is provided 'as-is', without any express or implied warranty. *
+* In no event will the authors be held liable for any damages arising from    *
+* the use of this software.                                                   *
+*                                                                             *
+* Permission is hereby granted, free of charge, to anyone to use this         *
+* software for any purpose(including commercial applications), including the  *
+* rights to use, copy, modify, merge, publish, distribute, sublicense, and/or *
+* sell copies of this software, subject to the following conditions:          *
+*                                                                             *
+*   1.  The origin of this software must not be misrepresented; you           *
+*       must not claim that you wrote the original software. If you           *
+*       use this software in a product, an acknowledgment in the              *
+*       product documentation would be greatly appreciated but is not         *
+*       required                                                              *
+*                                                                             *
+*   2.  Altered source versions should be plainly marked as such, and         *
+*       must not be misrepresented as being the original software.            *
+*                                                                             *
+*   3.  This code should not be used for any military or malicious            *
+*       purposes.                                                             *
+*                                                                             *
+*   4.  This notice may not be removed or altered from any source             *
+*       distribution.                                                         *
+*                                                                             *
+******************************************************************************/
+
+#ifndef __BMPRENDERER_BITMAP_H__
+#define __BMPRENDERER_BITMAP_H__
 
 #define BMP_RENDERER_BITMAP_BASE_COLOR 0xffff00ff
 
-namespace bmp_renderer
-{
+namespace bmp_renderer {
 	typedef unsigned char color_channel;
 
-	struct Color
-	{
-		union
-		{
+	struct Color {
+		union {
 			int ARGB;
-			struct
-			{
+			struct {
 				color_channel B;
 				color_channel G;
 				color_channel R;
@@ -22,25 +52,33 @@ namespace bmp_renderer
 
 		Color(int argb = 0xff00000);
 		Color(color_channel r, color_channel g, color_channel b, color_channel a = 0xff);
+
+		Color operator+(Color& other);
+		Color& operator+=(Color& other);
 	};
 
-	struct Bitmap__;
-	typedef Bitmap__* Bitmap;
+	Color Add(const Color& a, const Color& b);
 
-	struct Bitmap__
+}
+namespace bmp_renderer {
+
+	struct Bitmap
 	{
 		const int WIDTH;
 		const int HEIGHT;
 		
 		Color* Data;
-
-		Bitmap__(unsigned width, unsigned height);
-		~Bitmap__();
-
-		Color getPixel(int xPixel, int yPixel) const;
-		void setPixel(int xPixel, int yPixel, Color color);
-
-		Bitmap__* createSubBitMap(int xPixel, int yPixel, unsigned width, unsigned height) const;
 	};
+	
+	Bitmap* CreateBmp(unsigned width, unsigned height);
+	Bitmap* LoadBmp(const char* bmpFile);
+	Bitmap* CreateSubBitmap(Bitmap const* src, int srcX0, int srcY0, int srcX1, int srcY1);
+	int  SaveBitmap(Bitmap const* src, const char* fileName);
+	void DeleteBmp(Bitmap* bmp);
 
+	Color SampleBitmap(Bitmap const* bmp, int srcX0, int srcY0, int srcX1, int srcY1);
+
+	Bitmap* ReplaceColor(Bitmap const* bmp, Color oldColor, Color newColor);
 }
+
+#endif /*__BMPRENDERER_BITMAP_H__*/

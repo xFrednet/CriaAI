@@ -1,68 +1,77 @@
+/******************************************************************************
+* BmpRenderer - A library that can render and display bitmaps.                *
+*               <https://github.com/xFrednet/BmpRenderer>                     *
+*                                                                             *
+* =========================================================================== *
+* Copyright (C) 2017, xFrednet <xFrednet@gmail.com>                           *
+*                                                                             *
+* This software is provided 'as-is', without any express or implied warranty. *
+* In no event will the authors be held liable for any damages arising from    *
+* the use of this software.                                                   *
+*                                                                             *
+* Permission is hereby granted, free of charge, to anyone to use this         *
+* software for any purpose(including commercial applications), including the  *
+* rights to use, copy, modify, merge, publish, distribute, sublicense, and/or *
+* sell copies of this software, subject to the following conditions:          *
+*                                                                             *
+*   1.  The origin of this software must not be misrepresented; you           *
+*       must not claim that you wrote the original software. If you           *
+*       use this software in a product, an acknowledgment in the              *
+*       product documentation would be greatly appreciated but is not         *
+*       required                                                              *
+*                                                                             *
+*   2.  Altered source versions should be plainly marked as such, and         *
+*       must not be misrepresented as being the original software.            *
+*                                                                             *
+*   3.  This code should not be used for any military or malicious            *
+*       purposes.                                                             *
+*                                                                             *
+*   4.  This notice may not be removed or altered from any source             *
+*       distribution.                                                         *
+*                                                                             *
+******************************************************************************/
+
 #pragma once
 
-#include <Bitmap.hpp>
+#include "Bitmap.hpp"
 
 namespace bmp_renderer {
-	
-	class Renderer
-	{
-	private:
-		Bitmap m_RenderTarget;
-		bool m_AutoDeleteTarget;
 
-		inline void setPixelWithoutValidation(const int& x, const int& y, const Color& color)
-		{
-			//TODO add alpha blending out = alpha * new + (1 - alpha) * old
-			if (color.A == 0xff)
-			{
-				m_RenderTarget->Data[x + y * m_RenderTarget->WIDTH] = color;
-			} else
-			{
-				Color* bmpColor = &m_RenderTarget->Data[x + y * m_RenderTarget->WIDTH];
-				float alpha = color.A / 255.0f;
-				bmpColor->R = (color_channel)((color.R * alpha) + (bmpColor->R * (1 - alpha)));
-				bmpColor->G = (color_channel)((color.G * alpha) + (bmpColor->G * (1 - alpha)));
-				bmpColor->B = (color_channel)((color.B * alpha) + (bmpColor->B * (1 - alpha)));
-				bmpColor->A += color.A;
-				if (bmpColor->A > 0xff)
-					bmpColor->A = 0xff;
-			}
+	/* ====================================== */
+	// = utility =
+	/* ====================================== */
+	void FillBitmap(Bitmap* dest, Color fillColor = 0xffffffff);
+	void DrawPixel(Bitmap* dest, int xPixel, int yPixel, Color color);
+	void SetPixel(Bitmap* dest, int xPixel, int yPixel, Color color); /* ignores alpha values */
+	Color GetPixel(Bitmap const* src, int x, int y);
 
-		}
+	/* ====================================== */
+	// = lines =
+	/* ====================================== */
+	void DrawLine(Bitmap* dest, int startX, int startY, int endX, int endY, Color color);
+	void DrawHorizontalLine(Bitmap* dest, int startX, int startY, int length, Color color);
+	void DrawVerticalLine(Bitmap* dest, int startX, int startY, int length, Color color);
 
-	public:
-		Renderer(unsigned width, unsigned height);
-		Renderer(Bitmap renderTarget, bool autoDeleteTarget = false);
-		~Renderer();
+	/* ====================================== */
+	// = shapes =
+	/* ====================================== */
+	void DrawRectangle(Bitmap* dest, int x0, int y0, int x1, int y1, Color color);
+	void DrawRectangleFilled(Bitmap* dest, int x0, int y0, int x1, int y1, Color color);
 
-		Bitmap getRenderTarget();
-		void setRenderTarget(Bitmap renderTarget, bool autoDeleteTarget = false);
-		void clearTarget(Color color = Color(0xffffffff));
+	void DrawCircle(Bitmap* dest, int centerX, int centerY, unsigned radius, Color color);
+	void DrawCircleFilled(Bitmap* dest, int centerX, int centerY, unsigned radius, Color color);
 
-		void setPixel(const int& x, const int& y, const Color& color);
-		
-		/* ======================================*/
-		// = lines =
-		/* ======================================*/
-		void drawLine(int startX, int startY, int endX, int endY, Color color);
-		void drawHorizontalLine(int startX, int startY, int length, Color color);
-		void drawVerticalLine(int startX, int startY, int length, Color color);
+	/* ====================================== */
+	// = bitmap =
+	/* ====================================== */
+	void DrawBitmap(Bitmap* dest, Bitmap const* src, int destX, int destY);
+	void DrawBitmap(Bitmap* dest, Bitmap const* src,
+		int destX0, int destY0, int destX1, int destY1);
+	void DrawBitmap(Bitmap* dest, Bitmap const* src,
+		int destX0, int destY0, int destX1, int destY1, 
+		int srcX0 , int srcY0 , int srcX1 , int srcY1 );
 
-		/* ======================================*/
-		// = shapes =
-		/* ======================================*/
-		void drawRectangle(int x0, int y0, int x1, int y1, Color color);
-		void drawFilledRectangle(int x0, int y0, int x1, int y1, Color color);
-
-		void drawCircle(int centerX, int centerY, unsigned radius, Color color);
-		void drawFilledCircle(int centerX, int centerY, unsigned radius, Color color);
-
-		/* ======================================*/
-		// = bitmap =
-		/* ======================================*/
-		void drawBitmap(Bitmap bitmap, int destX, int destY);
-		void drawBitmap(Bitmap bitmap, int destX1, int destY1, int destX2, int destY2);
-		void drawBitmap(Bitmap bitmap, int destX1, int destY1, int destX2, int destY2, int srcX1, int srcY1, int srcX2, int srcY2);
-	};
-
+	void DrawRotatedBitmap(Bitmap* dest, Bitmap const* src,
+		int destX0, int destY0, float angle, float scale = 1.0f, 
+		bool clipBorders = false);
 }

@@ -15,16 +15,19 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\BmpRenderer.hpp">
+    <ClInclude Include="Dependencies\libbmpread\bmpread.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BmpRenderer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\API\Window.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Bitmap.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\API\win\WinWindow.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\API\Window.hpp">
+    <ClInclude Include="src\Common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Renderer.hpp">
@@ -32,13 +35,13 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Bitmap.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\API\win\WinWindow.cpp">
+    <ClCompile Include="Dependencies\libbmpread\bmpread.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\API\Window.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Bitmap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Renderer.cpp">

@@ -94,8 +94,8 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)BmpRenderer\src;src;$(SolutionDir)Dependencies\pugixml\src</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>CRIA_DEBUG_ENABLE_INFO;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)BmpRenderer;$(SolutionDir)Dependencies\pugixml\src</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;CRIA_AUTO_TEST_RESULTS;CRIA_DEBUG_ENABLE_INFO;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -103,8 +103,8 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)BmpRenderer\src;src;$(SolutionDir)Dependencies\pugixml\src</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>CRIA_DEBUG_ENABLE_INFO;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)BmpRenderer;$(SolutionDir)Dependencies\pugixml\src</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;CRIA_AUTO_TEST_RESULTS;CRIA_DEBUG_ENABLE_INFO;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -114,8 +114,8 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)BmpRenderer\src;src;$(SolutionDir)Dependencies\pugixml\src</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)BmpRenderer;$(SolutionDir)Dependencies\pugixml\src</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;CRIA_AUTO_TEST_RESULTS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -129,8 +129,8 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)BmpRenderer\src;src;$(SolutionDir)Dependencies\pugixml\src</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)BmpRenderer;$(SolutionDir)Dependencies\pugixml\src</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;CRIA_AUTO_TEST_RESULTS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -144,12 +144,18 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Common.hpp" />
-    <ClInclude Include="src\Cria.hpp" />
+    <ClInclude Include="Cria.hpp" />
     <ClInclude Include="src\Macros.hpp" />
+    <ClInclude Include="src\maths\Matrixf.hpp" />
     <ClInclude Include="src\Types.hpp" />
+    <ClInclude Include="src\util\Random.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\util\Source.cpp" />
+    <ClCompile Include="src\maths\Matrixf.cpp" />
+    <ClCompile Include="src\util\Random.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\conventions" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
