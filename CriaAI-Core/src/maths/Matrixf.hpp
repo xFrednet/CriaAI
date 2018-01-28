@@ -29,6 +29,7 @@ namespace cria_ai
 	 * \return This returns 1(true) on success.
 	 */
 	bool       WriteMatrixf(CRMatrixf* mat, char const* fileName, uint decimals = 3);
+	bool       WriteMatrixfBmp(CRMatrixf* mat, char const* fileName);
 
 	void       FillMatrixRand(CRMatrixf* mat);
 

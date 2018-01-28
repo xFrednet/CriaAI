@@ -143,6 +143,13 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Dependencies\BmpRenderer\BmpRenderer.hpp" />
+    <ClInclude Include="Dependencies\BmpRenderer\Dependencies\libbmpread\bmpread.h" />
+    <ClInclude Include="Dependencies\BmpRenderer\src\API\Window.hpp" />
+    <ClInclude Include="Dependencies\BmpRenderer\src\Bitmap.hpp" />
+    <ClInclude Include="Dependencies\BmpRenderer\src\Common.h" />
+    <ClInclude Include="Dependencies\BmpRenderer\src\Renderer.hpp" />
+    <ClInclude Include="src\api\FileSystem.h" />
     <ClInclude Include="src\Common.hpp" />
     <ClInclude Include="Cria.hpp" />
     <ClInclude Include="src\Macros.hpp" />
@@ -151,6 +158,11 @@
     <ClInclude Include="src\util\Random.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Dependencies\BmpRenderer\Dependencies\libbmpread\bmpread.c" />
+    <ClCompile Include="Dependencies\BmpRenderer\src\API\Window.cpp" />
+    <ClCompile Include="Dependencies\BmpRenderer\src\Bitmap.cpp" />
+    <ClCompile Include="Dependencies\BmpRenderer\src\Renderer.cpp" />
+    <ClCompile Include="src\api\FileSystem.cpp" />
     <ClCompile Include="src\maths\Matrixf.cpp" />
     <ClCompile Include="src\util\Random.cpp" />
   </ItemGroup>

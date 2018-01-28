@@ -1,5 +1,10 @@
 #include "Matrixf.hpp"
 
+#include "../../Dependencies/BmpRenderer/BmpRenderer.hpp"
+#include "../api/FileSystem.h"
+
+#include <fstream>
+
 #define VALID_MAT(mat)                 (mat && mat->Cols != 0 && mat->Rows != 0)
 #define CAN_UINT_MUL(a, b)             ((b == 0) || a <= UINT32_MAX / b)
 
@@ -50,6 +55,29 @@ namespace cria_ai
 	{
 		return fread(buffer, 1, size, file) == size;
 	}
+	inline FILE* fileopen(const char* fileName, char const* mode)
+	{
+		FILE* file = nullptr;
+
+		/*
+		 * create directory
+		 */
+		if (!CreateContainingDir(fileName))
+		{
+			CRIA_AUTO_ASSERT("The creation of the containing directory failed, file: \"%s\"", fileName);
+			return nullptr;
+		}
+
+		/*
+		 * open file
+		 */
+		errno_t err = fopen_s(&file, fileName, mode);
+		CRIA_AUTO_ASSERT(file, "fopen_s failed to open the file. fileName:\"%s\", mode:\"%s\", errno_t\"%i\"", fileName, mode, err);
+		if (!file)
+			return nullptr;
+
+		return file;
+	}
 	inline int WriteFileHeader(FILE* file, CR_FILE_HEADER* header)
 	{
 		if (!WriteData(file, &header->Magic[0] , 8)) return 0;
@@ -69,7 +97,7 @@ namespace cria_ai
 	bool SaveMatrixf(CRMatrixf* mat, char const* fileName)
 	{
 		CR_FILE_HEADER header;
-		FILE* file;
+		FILE* file = nullptr;
 
 		/* validation */
 		CRIA_AUTO_ASSERT(VALID_MAT(mat) && fileName, " ");
@@ -83,7 +111,7 @@ namespace cria_ai
 		header.DataStart = 8 + 4 + 4 + 4;
 
 		/* open file */
-		file = fopen(fileName, "w");
+		file = fileopen(fileName, "wb");
 		CRIA_AUTO_ASSERT(file, "");
 		if (!file)
 			return false;
@@ -116,7 +144,7 @@ namespace cria_ai
 			return 0;
 
 		/* open file */
-		file = fopen(fileName, "r");
+		file = fileopen(fileName, "rb");
 		CRIA_AUTO_ASSERT(file, "Hey... I'm not good.");
 		if (!file)
 			return 0;
@@ -159,9 +187,10 @@ namespace cria_ai
 
 	bool WriteMatrixf(CRMatrixf* mat, char const* fileName, uint decimals)
 	{
+		using namespace std;
+
 		uint predecimals;
 		uint index;
-		FILE* file;
 		
 		/* validation */
 		CRIA_AUTO_ASSERT(VALID_MAT(mat), "The matrix has to be valid!");
@@ -175,21 +204,62 @@ namespace cria_ai
 			) + 2 /* plus one for the sign and one because log10 returns one too short */;
 		
 		/* opening the file*/
-		file = fopen(fileName, "w");
-		CRIA_AUTO_ASSERT(file, "The file should be valid sorry");
-		if (!file)
+		CreateContainingDir(fileName);
+		ofstream file(fileName, ifstream::out | ofstream::binary);
+		CRIA_AUTO_ASSERT(file.is_open(), "Failed to create/open the File[%s]", fileName);
+		if (!file.is_open())
 			return false;
 
+		char* str = new char[predecimals + 1 + decimals + 1];
+		str[predecimals + 1 + decimals] = 0;
 		for (index = 0; index < mat->Cols * mat->Rows; index++)
 		{
-			fprintf(file, "%*.*f ", predecimals, decimals, mat->Data[index]);
-
+			sprintf(str, "%*.*f ", predecimals, decimals, mat->Data[index]);
+			file << str;
+			
 			if ((index + 1) % mat->Cols == 0)
-				fprintf(file, "\n");
+				file << std::endl;
 		}
 		//TODO better error test for fprintf
+		delete[] str;
 
-		fclose(file);
+		file.close();
+		return true;
+	}
+	bool WriteMatrixfBmp(CRMatrixf* mat, char const* fileName)
+	{
+		using namespace bmp_renderer;
+
+		CRIA_AUTO_ASSERT(VALID_MAT(mat), "The matrix is invalid");
+		CRIA_AUTO_ASSERT(fileName, "null is not a valid file name, ask your OS");
+		if (!VALID_MAT(mat) || !fileName)
+			return false;
+
+		Bitmap* bmp = CreateBmp(mat->Cols, mat->Cols);
+		CRIA_AUTO_ASSERT(bmp, "The bitmap creation failed, report that to the creator of the BmpRenderer... fuck that's me");
+		if (!bmp)
+			return false;
+
+		uint8_t color;
+		uint row;
+		for (uint col = 0; col < mat->Cols; col++)
+		{
+			for (row = 0; row < mat->Rows; row++)
+			{
+				color = 255.0f * mat->Data[row + col * mat->Rows];
+				SetPixel(bmp, row, col, Color(color, color, color));
+			}
+		}
+		
+		/* saving the file */
+		if (CreateContainingDir(fileName) && !SaveBitmap(bmp, fileName))
+		{
+			CRIA_AUTO_ASSERT(false, "The bitmap could not be saved sorry!!");
+			DeleteBmp(bmp);
+			return false;
+		}
+		
+		DeleteBmp(bmp);
 		return true;
 	}
 
