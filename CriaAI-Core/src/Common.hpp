@@ -10,13 +10,15 @@
  * Utilities
  */
 #include "util/Random.h"
+#include "util/FloatBitmap.h"
 
 /*
  * Provided headers
  */
-#include <vector>
 #include <list>
-#include <math.h>
+#include <vector>
 #include <iostream>
+#include <fstream>
 
+#include <math.h>
 #include <stdlib.h>

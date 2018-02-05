@@ -72,22 +72,22 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(ProjectDir)Lib\$(Configuration)\$(PlatformTarget)\</OutDir>
     <IntDir>$(ProjectDir)Lib\$(Configuration)\$(PlatformTarget)\Intermediates\</IntDir>
-    <LibraryPath>$(SolutionDir)BmpRenderer\Lib\$(Configuration)\$(PlatformTarget)\;$(SolutionDir)Dependencies\pugixml\Lib\$(PlatformTarget)\;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)BmpRenderer\Lib\$(Configuration)\$(PlatformTarget)\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(ProjectDir)Lib\$(Configuration)\$(PlatformTarget)\</OutDir>
     <IntDir>$(ProjectDir)Lib\$(Configuration)\$(PlatformTarget)\Intermediates\</IntDir>
-    <LibraryPath>$(SolutionDir)BmpRenderer\Lib\$(Configuration)\$(PlatformTarget)\;$(SolutionDir)Dependencies\pugixml\Lib\$(PlatformTarget)\;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)BmpRenderer\Lib\$(Configuration)\$(PlatformTarget)\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(ProjectDir)Lib\$(Configuration)\$(PlatformTarget)\</OutDir>
     <IntDir>$(ProjectDir)Lib\$(Configuration)\$(PlatformTarget)\Intermediates\</IntDir>
-    <LibraryPath>$(SolutionDir)BmpRenderer\Lib\$(Configuration)\$(PlatformTarget)\;$(SolutionDir)Dependencies\pugixml\Lib\$(PlatformTarget)\;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)BmpRenderer\Lib\$(Configuration)\$(PlatformTarget)\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(ProjectDir)Lib\$(Configuration)\$(PlatformTarget)\</OutDir>
     <IntDir>$(ProjectDir)Lib\$(Configuration)\$(PlatformTarget)\Intermediates\</IntDir>
-    <LibraryPath>$(SolutionDir)BmpRenderer\Lib\$(Configuration)\$(PlatformTarget)\;$(SolutionDir)Dependencies\pugixml\Lib\$(PlatformTarget)\;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)BmpRenderer\Lib\$(Configuration)\$(PlatformTarget)\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -154,7 +154,11 @@
     <ClInclude Include="Cria.hpp" />
     <ClInclude Include="src\Macros.hpp" />
     <ClInclude Include="src\maths\Matrixf.hpp" />
+    <ClInclude Include="src\network\Layer.h" />
+    <ClInclude Include="src\network\layers\BmpInLayer.h" />
+    <ClInclude Include="src\network\NeuronNetwork.h" />
     <ClInclude Include="src\Types.hpp" />
+    <ClInclude Include="src\util\FloatBitmap.h" />
     <ClInclude Include="src\util\Random.h" />
   </ItemGroup>
   <ItemGroup>
@@ -164,6 +168,9 @@
     <ClCompile Include="Dependencies\BmpRenderer\src\Renderer.cpp" />
     <ClCompile Include="src\api\FileSystem.cpp" />
     <ClCompile Include="src\maths\Matrixf.cpp" />
+    <ClCompile Include="src\network\layers\BmpInLayer.cpp" />
+    <ClCompile Include="src\network\NeuronNetwork.cpp" />
+    <ClCompile Include="src\util\FloatBitmap.cpp" />
     <ClCompile Include="src\util\Random.cpp" />
   </ItemGroup>
   <ItemGroup>

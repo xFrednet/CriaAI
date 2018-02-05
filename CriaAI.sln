@@ -5,10 +5,6 @@ VisualStudioVersion = 15.0.27004.2010
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CriaAI-Core", "CriaAI-Core\CriaAI-Core.vcxproj", "{5A049547-F971-42A3-9001-95D1405E724D}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dependencies", "Dependencies", "{ABFEAD07-8741-448D-A340-0F4B53F9FA2F}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pugixml", "Dependencies\pugixml\pugixml.vcxproj", "{07CF01C0-B887-499D-AD9C-799CB6A9FE64}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Sandbox", "Sandbox\Sandbox.vcxproj", "{158548D2-4259-48FA-B8B7-DE15F312DEF1}"
 EndProject
 Global

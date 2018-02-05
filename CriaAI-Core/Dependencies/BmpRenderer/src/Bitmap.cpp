@@ -122,6 +122,8 @@ namespace bmp_renderer {
 			bmp->Data[destIndex].B = bmpIn.rgb_data[srcIndex + 2];
 			bmp->Data[destIndex].A = bmpIn.rgb_data[srcIndex + 3]; //WTF
 		}
+
+		bmpread_free(&bmpIn);
 		
 		return bmp;
 	}

@@ -11,7 +11,7 @@ namespace cria_ai
 	}
 	void RandNewSeed()
 	{
-		RandSetSeed(time(0));
+		RandSetSeed((long)time(0));
 	}
 
 	float RandFloat()

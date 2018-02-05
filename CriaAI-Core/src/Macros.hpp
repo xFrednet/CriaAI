@@ -25,6 +25,8 @@ if (min <= max) {\
 	y = oldValue; \
 }
 
+#define CAN_UINT32_MUL(a, b)             ((b == 0) || a <= 0xffffffffui32 / b)
+
 #include <stdio.h>
 
 #ifdef CRIA_DEBUG_ENABLE_INFO

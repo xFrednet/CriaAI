@@ -1,5 +1,5 @@
 #pragma once
-#include "../Common.hpp"
+#include "../Types.hpp"
 
 namespace cria_ai
 {
@@ -30,6 +30,8 @@ namespace cria_ai
 	 */
 	bool       WriteMatrixf(CRMatrixf* mat, char const* fileName, uint decimals = 3);
 	bool       WriteMatrixfBmp(CRMatrixf* mat, char const* fileName);
+
+	bool       IsMatValid(CRMatrixf* mat);
 
 	void       FillMatrixRand(CRMatrixf* mat);
 

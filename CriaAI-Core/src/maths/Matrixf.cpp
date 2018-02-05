@@ -1,25 +1,22 @@
 #include "Matrixf.hpp"
 
+#include "../Common.hpp"
+
 #include "../../Dependencies/BmpRenderer/BmpRenderer.hpp"
 #include "../api/FileSystem.h"
 
-#include <fstream>
-
 #define VALID_MAT(mat)                 (mat && mat->Cols != 0 && mat->Rows != 0)
-#define CAN_UINT_MUL(a, b)             ((b == 0) || a <= UINT32_MAX / b)
 
 namespace cria_ai
 {
 	CRMatrixf* CreateMatrixf(uint cols, uint rows)
 	{
-		CRMatrixf* matrix;
-
 		CRIA_AUTO_ASSERT(cols != 0 && rows != 0, "A matrix with 0 columns or rows is dumm");
-		CRIA_AUTO_ASSERT(CAN_UINT_MUL(cols, rows), "The index would exceed UINT32_MAX in this case");
-		if (cols == 0 || rows == 0 || !CAN_UINT_MUL(cols, rows))
-			return 0;
+		CRIA_AUTO_ASSERT(CAN_UINT32_MUL(cols, rows), "The index would exceed UINT32_MAX in this case");
+		if (cols == 0 || rows == 0 || !CAN_UINT32_MUL(cols, rows))
+			return nullptr;
 
-		matrix = (CRMatrixf*)malloc(sizeof(CRMatrixf) + sizeof(float) * cols * rows);
+		CRMatrixf* matrix = (CRMatrixf*)malloc(sizeof(CRMatrixf) + sizeof(float) * cols * rows);
 		CRIA_AUTO_ASSERT(matrix, "");
 
 		matrix->Cols = cols;
@@ -30,7 +27,7 @@ namespace cria_ai
 
 		return matrix;
 	}
-	void FreeMatrixf(CRMatrixf* matrix)
+	void       FreeMatrixf(CRMatrixf* matrix)
 	{
 		if (matrix)
 			free(matrix);
@@ -57,8 +54,6 @@ namespace cria_ai
 	}
 	inline FILE* fileopen(const char* fileName, char const* mode)
 	{
-		FILE* file = nullptr;
-
 		/*
 		 * create directory
 		 */
@@ -71,6 +66,7 @@ namespace cria_ai
 		/*
 		 * open file
 		 */
+		FILE* file = nullptr;
 		errno_t err = fopen_s(&file, fileName, mode);
 		CRIA_AUTO_ASSERT(file, "fopen_s failed to open the file. fileName:\"%s\", mode:\"%s\", errno_t\"%i\"", fileName, mode, err);
 		if (!file)
@@ -94,7 +90,7 @@ namespace cria_ai
 		if (!ReadData(file, &header->DataStart, 4)) return 0;
 		return 1;
 	}
-	bool SaveMatrixf(CRMatrixf* mat, char const* fileName)
+	bool       SaveMatrixf(CRMatrixf* mat, char const* fileName)
 	{
 		CR_FILE_HEADER header;
 		FILE* file = nullptr;
@@ -185,7 +181,7 @@ namespace cria_ai
 		return 0;
 	}
 
-	bool WriteMatrixf(CRMatrixf* mat, char const* fileName, uint decimals)
+	bool       WriteMatrixf(CRMatrixf* mat, char const* fileName, uint decimals)
 	{
 		using namespace std;
 
@@ -226,7 +222,7 @@ namespace cria_ai
 		file.close();
 		return true;
 	}
-	bool WriteMatrixfBmp(CRMatrixf* mat, char const* fileName)
+	bool       WriteMatrixfBmp(CRMatrixf* mat, char const* fileName)
 	{
 		using namespace bmp_renderer;
 
@@ -246,7 +242,7 @@ namespace cria_ai
 		{
 			for (row = 0; row < mat->Rows; row++)
 			{
-				color = 255.0f * mat->Data[row + col * mat->Rows];
+				color = (uint8_t)(255.0f * mat->Data[row + col * mat->Rows]);
 				SetPixel(bmp, row, col, Color(color, color, color));
 			}
 		}
@@ -263,7 +259,12 @@ namespace cria_ai
 		return true;
 	}
 
-	void FillMatrixRand(CRMatrixf* mat)
+	bool       IsMatValid(CRMatrixf* mat)
+	{
+		return VALID_MAT(mat);
+	}
+
+	void       FillMatrixRand(CRMatrixf* mat)
 	{
 		uint index;
 
@@ -277,7 +278,7 @@ namespace cria_ai
 		}
 	}
 
-	float GetMaxValue(CRMatrixf const* mat)
+	float      GetMaxValue(CRMatrixf const* mat)
 	{
 		uint index;
 		float min;
@@ -298,7 +299,7 @@ namespace cria_ai
 		/* return */
 		return min;
 	}
-	float GetMinValue(CRMatrixf const* mat)
+	float      GetMinValue(CRMatrixf const* mat)
 	{
 		uint index;
 		float max;

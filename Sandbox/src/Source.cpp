@@ -1,8 +1,24 @@
 #include <Cria.hpp>
 #include <fstream>
+#include "Dependencies/BmpRenderer/src/Bitmap.hpp"
 
 using namespace std;
 using namespace cria_ai;
+using namespace bmp_renderer;
+
+Bitmap* pro1 (Bitmap* bmp)
+{
+	return bmp;
+}
+void test()
+{
+	Bitmap* (**decoder)(Bitmap* bitmap);
+
+	Bitmap* src;
+
+	decoder[0] = pro1;
+	Bitmap* bmp = decoder[0](src);
+}
 
 int main(int argc, char* argv)
 {
