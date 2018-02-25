@@ -6,24 +6,8 @@ using namespace std;
 using namespace cria_ai;
 using namespace bmp_renderer;
 
-Bitmap* pro1 (Bitmap* bmp)
+void MatrixTest()
 {
-	return bmp;
-}
-void test()
-{
-	Bitmap* (**decoder)(Bitmap* bitmap);
-
-	Bitmap* src;
-
-	decoder[0] = pro1;
-	Bitmap* bmp = decoder[0](src);
-}
-
-int main(int argc, char* argv)
-{
-	cout << "Hello world" << endl;
-
 	CRMatrixf* a = LoadMatrixf("mat/a.mat");
 	CRMatrixf* b = LoadMatrixf("mat/b.mat");
 	if (!a)
@@ -58,6 +42,27 @@ int main(int argc, char* argv)
 	FreeMatrixf(a);
 	FreeMatrixf(b);
 	FreeMatrixf(c);
+}
+
+int main(int argc, char* argv)
+{
+	cout << "Hello world" << endl;
+
+	CR_FLOAT_BITMAP* bmp = LoadFBmp("bmptest/test.bmp");
+
+	CR_FLOAT_BITMAP* poolBmp2 = PoolBitmap(bmp, 2);
+	CR_FLOAT_BITMAP* poolBmp3 = PoolBitmap(bmp, 3);
+	CR_FLOAT_BITMAP* poolBmp9 = PoolBitmap(bmp, 9);
+
+	SaveBitmap(bmp, "bmptest/test2.bmp");
+	SaveBitmap(poolBmp2, "bmptest/pool2.bmp");
+	SaveBitmap(poolBmp3, "bmptest/pool3.bmp");
+	SaveBitmap(poolBmp9, "bmptest/pool9.bmp");
+
+	DeleteFBmp(bmp);
+	DeleteFBmp(poolBmp2);
+	DeleteFBmp(poolBmp3);
+	DeleteFBmp(poolBmp9);
 
 	cin.get();
 	return 0;

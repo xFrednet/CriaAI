@@ -89,7 +89,7 @@ namespace bmp_renderer
 			memDcOldObject = SelectObject(memDC, winBmp);
 
 			BitBlt(dc, drawX, drawY, src->WIDTH, src->HEIGHT, memDC, 0, 0, SRCCOPY);
-		
+
 			SelectObject(memDC, memDcOldObject);
 			DeleteDC(memDC);
 			EndPaint(hwnd, &ps);

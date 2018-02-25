@@ -3,3 +3,5 @@
 #include "src/Common.hpp"
 
 #include "src/maths/Matrixf.hpp"
+
+#include "src/util/FloatBitmap.h"

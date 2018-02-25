@@ -255,7 +255,7 @@ typedef struct bmp_info
 /* This is the default alpha value that will be used if the loaded bitmap doesn't
  * supply a a value. (xFrednet was here ;P)
  */
-#define BMP_DEFAULT_ALPHA_VALUE        0xff
+#define BMP_DEFAULT_ALPHA_VALUE        255
 
 /* Reads bitmap metadata from fp into info.  Returns 0 on EOF or nonzero on
  * success.
