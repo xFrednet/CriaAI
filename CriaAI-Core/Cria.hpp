@@ -5,3 +5,5 @@
 #include "src/maths/Matrixf.hpp"
 
 #include "src/util/FloatBitmap.h"
+
+#include "src/api/ScreenCapturer.h"

@@ -430,9 +430,9 @@ namespace cria_ai
 		{
 			uint matAIndex = index / mat->Rows;
 			uint matBIndex = index % mat->Rows;
-			uint calNr;
+			uint calNo;
 
-			for (calNr = 0; calNr < calCount; calNr++)
+			for (calNo = 0; calNo < calCount; calNo++)
 			{
 				mat->Data[index] += a->Data[matAIndex] * b->Data[matBIndex];
 

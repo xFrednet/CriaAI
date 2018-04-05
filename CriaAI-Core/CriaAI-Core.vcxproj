@@ -1,14 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
-    <ProjectConfiguration Include="Debug|Win32">
-      <Configuration>Debug</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|Win32">
-      <Configuration>Release</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
       <Platform>x64</Platform>
@@ -19,48 +11,30 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{5A049547-F971-42A3-9001-95D1405E724D}</ProjectGuid>
-    <RootNamespace>CriaAICore</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
+    <ProjectGuid>{86C61DB5-6F97-4660-9FEF-7460EE56F899}</ProjectGuid>
+    <RootNamespace>CriaAI_Core</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>MultiByte</CharacterSet>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+    <CLRSupport>false</CLRSupport>
+    <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
-  </ImportGroup>
-  <ImportGroup Label="Shared">
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 9.1.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -69,58 +43,34 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>$(ProjectDir)Lib\$(Configuration)\$(PlatformTarget)\</OutDir>
-    <IntDir>$(ProjectDir)Lib\$(Configuration)\$(PlatformTarget)\Intermediates\</IntDir>
-    <LibraryPath>$(SolutionDir)BmpRenderer\Lib\$(Configuration)\$(PlatformTarget)\;$(LibraryPath)</LibraryPath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(ProjectDir)Lib\$(Configuration)\$(PlatformTarget)\</OutDir>
-    <IntDir>$(ProjectDir)Lib\$(Configuration)\$(PlatformTarget)\Intermediates\</IntDir>
-    <LibraryPath>$(SolutionDir)BmpRenderer\Lib\$(Configuration)\$(PlatformTarget)\;$(LibraryPath)</LibraryPath>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(ProjectDir)Lib\$(Configuration)\$(PlatformTarget)\</OutDir>
-    <IntDir>$(ProjectDir)Lib\$(Configuration)\$(PlatformTarget)\Intermediates\</IntDir>
-    <LibraryPath>$(SolutionDir)BmpRenderer\Lib\$(Configuration)\$(PlatformTarget)\;$(LibraryPath)</LibraryPath>
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)bin\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)bin\$(Configuration)\Intermediates\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(ProjectDir)Lib\$(Configuration)\$(PlatformTarget)\</OutDir>
-    <IntDir>$(ProjectDir)Lib\$(Configuration)\$(PlatformTarget)\Intermediates\</IntDir>
-    <LibraryPath>$(SolutionDir)BmpRenderer\Lib\$(Configuration)\$(PlatformTarget)\;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)bin\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)bin\$(Configuration)\Intermediates\$(ProjectName)\</IntDir>
   </PropertyGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <Optimization>Disabled</Optimization>
-      <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)BmpRenderer;$(SolutionDir)Dependencies\pugixml\src</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;CRIA_AUTO_TEST_RESULTS;CRIA_DEBUG_ENABLE_INFO;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
-  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)BmpRenderer;$(SolutionDir)Dependencies\pugixml\src</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;CRIA_AUTO_TEST_RESULTS;CRIA_DEBUG_ENABLE_INFO;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <Optimization>MaxSpeed</Optimization>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)BmpRenderer;$(SolutionDir)Dependencies\pugixml\src</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;CRIA_AUTO_TEST_RESULTS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>CRIA_DEBUG_ENABLE_INFO;_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Program Files %28x86%29\NVIDIA Corporation\NVIDIA Capture SDK\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>cudart.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>echo copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"
+copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
+    <CudaCompile>
+      <TargetMachinePlatform>64</TargetMachinePlatform>
+    </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -128,55 +78,72 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)BmpRenderer;$(SolutionDir)Dependencies\pugixml\src</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;CRIA_AUTO_TEST_RESULTS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Program Files %28x86%29\NVIDIA Corporation\NVIDIA Capture SDK\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>cudart.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>echo copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"
+copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
+    <CudaCompile>
+      <TargetMachinePlatform>64</TargetMachinePlatform>
+    </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Dependencies\pugixml\pugixml.vcxproj">
-      <Project>{07cf01c0-b887-499d-ad9c-799cb6a9fe64}</Project>
-    </ProjectReference>
+    <ClCompile Include="Dependencies\BmpRenderer\Dependencies\libbmpread\bmpread.c" />
+    <ClCompile Include="Dependencies\BmpRenderer\src\API\Window.cpp" />
+    <ClCompile Include="Dependencies\BmpRenderer\src\API\win\WinWindow.cpp" />
+    <ClCompile Include="Dependencies\BmpRenderer\src\Bitmap.cpp" />
+    <ClCompile Include="Dependencies\BmpRenderer\src\Renderer.cpp" />
+    <ClCompile Include="src\api\FileSystem.cpp" />
+    <ClCompile Include="src\api\ScreenCapturer.cpp" />
+    <ClCompile Include="src\api\win\WinScreenCapturer.cpp" />
+    <ClCompile Include="src\maths\Matrixf.cpp" />
+    <ClCompile Include="src\network\layers\BmpInLayer.cpp" />
+    <ClCompile Include="src\network\NeuronNetwork.cpp" />
+    <CudaCompile Include="src\util\FloatBitmap.cu">
+      <FileType>Document</FileType>
+    </CudaCompile>
+    <ClCompile Include="src\util\Random.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Cria.hpp" />
     <ClInclude Include="Dependencies\BmpRenderer\BmpRenderer.hpp" />
     <ClInclude Include="Dependencies\BmpRenderer\Dependencies\libbmpread\bmpread.h" />
     <ClInclude Include="Dependencies\BmpRenderer\src\API\Window.hpp" />
+    <ClInclude Include="Dependencies\BmpRenderer\src\API\win\WinWindow.hpp" />
     <ClInclude Include="Dependencies\BmpRenderer\src\Bitmap.hpp" />
     <ClInclude Include="Dependencies\BmpRenderer\src\Common.h" />
     <ClInclude Include="Dependencies\BmpRenderer\src\Renderer.hpp" />
+    <ClInclude Include="src\api\CudaContext.cuh" />
     <ClInclude Include="src\api\FileSystem.h" />
+    <ClInclude Include="src\api\ScreenCapturer.h" />
+    <ClInclude Include="src\api\win\WinScreenCapturer.h" />
     <ClInclude Include="src\Common.hpp" />
-    <ClInclude Include="Cria.hpp" />
     <ClInclude Include="src\Macros.hpp" />
+    <ClInclude Include="src\maths\Maths.h" />
     <ClInclude Include="src\maths\Matrixf.hpp" />
+    <ClInclude Include="src\maths\Rectangle2D.h" />
     <ClInclude Include="src\network\Layer.h" />
     <ClInclude Include="src\network\layers\BmpInLayer.h" />
     <ClInclude Include="src\network\NeuronNetwork.h" />
     <ClInclude Include="src\Types.hpp" />
+    <ClInclude Include="src\util\CRResult.h" />
     <ClInclude Include="src\util\FloatBitmap.h" />
     <ClInclude Include="src\util\Random.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Dependencies\BmpRenderer\Dependencies\libbmpread\bmpread.c" />
-    <ClCompile Include="Dependencies\BmpRenderer\src\API\Window.cpp" />
-    <ClCompile Include="Dependencies\BmpRenderer\src\Bitmap.cpp" />
-    <ClCompile Include="Dependencies\BmpRenderer\src\Renderer.cpp" />
-    <ClCompile Include="src\api\FileSystem.cpp" />
-    <ClCompile Include="src\maths\Matrixf.cpp" />
-    <ClCompile Include="src\network\layers\BmpInLayer.cpp" />
-    <ClCompile Include="src\network\NeuronNetwork.cpp" />
-    <ClCompile Include="src\util\FloatBitmap.cpp" />
-    <ClCompile Include="src\util\Random.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\conventions" />
+    <CudaCompile Include="src\api\CudaContext.cu" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 9.1.targets" />
   </ImportGroup>
 </Project>

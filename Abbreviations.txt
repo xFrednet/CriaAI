@@ -1,0 +1,23 @@
+Abbreviation:
+
+Word                    Abbreviation
+-------------------- - --------------------
+Bitmap               - bmp
+Client area          - cArea
+Column               - col
+Cuda                 - cu
+Destination          - dst
+Dimension            - dim
+Directory            - dir
+Error                - err
+Float Bitmap         - fBmp
+Floats per pixel     - fpp
+Integer              - int
+Matrix               - mat
+Number               - no
+Pixel                - px
+Rectangle            - rect
+Source               - src
+Windows              - win
+
+Footnote: Yes, I have been reading "CODE COMPLETE 2nd Edition" and I'm questioning my life choices.

@@ -26,13 +26,13 @@ namespace cria_ai
 		struct stat info;
 
 		if (SUCCEEDED(stat(directory.c_str(), &info)))
-			return (bool)(info.st_mode & S_IFDIR);
+			return ((info.st_mode & S_IFDIR) != 0);
 
 		return false;
 	}
 	bool CreateDir(const String& directory)
 	{
-		return CreateDirectory(directory.c_str(), nullptr);
+		return (CreateDirectory(directory.c_str(), nullptr) != 0);
 	}
 }
 #else

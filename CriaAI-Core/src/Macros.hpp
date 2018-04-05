@@ -1,7 +1,19 @@
 #pragma once
 
+/*
+ * Macros
+ */
 #define CRIA_API                       __declspec(dllexport)
 
+#if defined(_WIN32) || defined(_WIN64)
+#	define CRIA_OS_WIN
+#else
+#	error The targeted operating system is not supported, sorry!!!
+#endif
+
+/*
+ * Value helpers
+ */
 #define MAX(x, y)                      ((x > y) ? x : y)
 #define MIN(x, y)                      ((x < y) ? x : y)
 
@@ -27,6 +39,9 @@ if (min <= max) {\
 
 #define CAN_UINT32_MUL(a, b)             ((b == 0) || a <= 0xffffffffui32 / b)
 
+/*
+ * debugging help
+ */
 #include <stdio.h>
 
 #ifdef CRIA_DEBUG_ENABLE_INFO

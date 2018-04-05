@@ -9,8 +9,14 @@
 /*
  * Utilities
  */
+#include "util/CRResult.h"
 #include "util/Random.h"
 #include "util/FloatBitmap.h"
+
+/*
+ * Maths
+ */
+#include "maths/Maths.h"
 
 /*
  * Provided headers
@@ -19,6 +25,3 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
-
-#include <math.h>
-#include <stdlib.h>

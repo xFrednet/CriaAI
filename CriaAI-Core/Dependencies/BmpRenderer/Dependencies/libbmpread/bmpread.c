@@ -545,7 +545,7 @@ static int Validate(read_context * p_ctx)
             /* I believe C mandates that SIZE_MAX is at least 65535, so this
              * expression and the next are always safe.
              */
-            size_t colors = 1 << (size_t)p_ctx->info.bits;
+            size_t colors = ((size_t)1) << (size_t)p_ctx->info.bits;
             if(!(p_ctx->palette = (bmp_palette_entry *)
                  malloc(colors * BMP_PALETTE_ENTRY_SIZE))) break;
 
