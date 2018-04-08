@@ -6,52 +6,6 @@
 #	error The window screen capturer does not support a different channel count than 4.
 #endif
 
-namespace cria_ai { namespace api {
-	
-	CR_RECT CRScreenCapturer::GetClientArea(const String& windowTitle)
-	{
-		CR_RECT cArea;
-		/*
-		 * Finding the window
-		 */
-		HWND hwnd = FindWindow(nullptr, windowTitle.c_str());
-		if (!hwnd)
-			return CR_RECT{0, 0, 0, 0};
-
-		/*
-		 * Retrieving with and height
-		 */
-
-		/*if (!GetClientRect(hwnd, &winCArea))
-			return CR_RECT{0, 0, 0, 0};*/
-		WINDOWINFO winInfo;
-		if (!GetWindowInfo(hwnd, &winInfo))
-			return CR_RECT{0, 0, 0, 0};
-		RECT winCArea = winInfo.rcClient;
-
-
-		cArea.X      = (uint) winCArea.left;
-		cArea.Y      = (uint) winCArea.top;
-		cArea.Width  = (uint)(winCArea.right  - winCArea.left);
-		cArea.Height = (uint)(winCArea.bottom - winCArea.top);
-
-		return cArea;
-	}
-
-	uint8 CRScreenCapturer::GetDisplayNo(const String& windowTitle)
-	{
-		return 0;
-	}
-
-	uint8 CRScreenCapturer::GetDisplayCount()
-	{
-		return GetSystemMetrics(SM_CMONITORS);
-	}
-
-}}
-
-#endif // CRIA_OS_WIN
-
 namespace cria_ai { namespace api { namespace win {
 	
 	CRWinScreenCapturer::CRWinScreenCapturer()
@@ -221,3 +175,5 @@ namespace cria_ai { namespace api { namespace win {
 	}
 
 }}}
+
+#endif // CRIA_OS_WIN

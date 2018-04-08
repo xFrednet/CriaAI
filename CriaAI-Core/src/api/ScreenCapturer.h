@@ -9,10 +9,10 @@ namespace cria_ai { namespace api {
 	class CRScreenCapturer 
 	{
 	public:
-		static CRScreenCapturer* CreateInstance(const CR_RECT& cArea = {0, 0, 0, 0}, uint8 displayNo = 0, crresult* result = nullptr);
+		static CRScreenCapturer* CreateInstance(const CR_RECT& cArea = CR_RECT(0, 0, 0, 0), uint8 displayNo = 0, crresult* result = nullptr);
 		
 		/*
-		 * * These functions are defined inside API specific screen capturer .cpp file.
+		 * * These functions are API specific.
 	     */
 		static CR_RECT GetClientArea(const String& windowTitle);
 		static uint8 GetDisplayNo(const String& windowTitle);

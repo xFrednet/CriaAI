@@ -17,7 +17,7 @@ namespace cria_ai
 
 #if defined(_WIN32) || defined(_WIN64)
 
-#include <windows.h>
+#include "win/WinContext.h"
 
 namespace cria_ai
 {	

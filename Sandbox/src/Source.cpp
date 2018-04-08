@@ -2,10 +2,13 @@
 
 #include <ctime>
 
-#include <windows.h>
 #include <thread>
 
+#include "tests/MathTests.h"
+#include <windows.h>
+
 #define BOI_TITLE "Binding of Isaac: Afterbirth+"
+#define CON_TITLE "C:\\Users\\xFrednet\\My Projects\\VS Projects\\CriaAI\\bin\\Debug\\Sandbox.exe"
 
 using namespace std;
 using namespace cria_ai;
@@ -85,114 +88,99 @@ void sleep(uint time)
 	}
 }
 
-bmp_renderer::Bitmap* getScreenDC(HWND srcHwnd)
-{
 
-	/*
-	* Getting the client size
-	*/
-	RECT clientFrame;
-	GetClientRect(srcHwnd, &clientFrame);
-	int width = clientFrame.right - clientFrame.left;
-	int height = clientFrame.bottom - clientFrame.top;
-
-	/*
-	* Create output
-	*/
-	bmp_renderer::Bitmap* bmp = bmp_renderer::CreateBmp(width, height);
-
-	/*
-	* Windows stuff :/
-	*/
-	HDC srcDC = GetDC(srcHwnd);
-	HDC memDC = CreateCompatibleDC(srcDC);
-	HBITMAP winBmp = CreateCompatibleBitmap(srcDC, width, height);
-	HGDIOBJ oldMemDcObj = SelectObject(memDC, winBmp);
-
-	BitBlt(memDC, 0, 0, width, height, srcDC, 0, 0, SRCCOPY);
-
-	/*
-	* Getting the data
-	*/
-	{
-		BITMAPINFO bmpOutInfo;
-		memset(&bmpOutInfo, 0, sizeof(bmpOutInfo));
-		bmpOutInfo.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-		bmpOutInfo.bmiHeader.biWidth = width;
-		bmpOutInfo.bmiHeader.biHeight = -height;
-		bmpOutInfo.bmiHeader.biPlanes = 1;
-		bmpOutInfo.bmiHeader.biBitCount = 32;
-
-		GetDIBits(memDC, winBmp, 0, height, bmp->Data, &bmpOutInfo, DIB_RGB_COLORS);
-	}
-
-	/*
-	* Finishing windows stuff :)
-	*/
-	SelectObject(memDC, oldMemDcObj);
-	DeleteDC(memDC);
-	DeleteObject(winBmp);
-
-	/*
-	* Returning de la output
-	*/
-	return bmp;
-}
 void screenCap10Sec()
 {
-	crresult res;
+	sleep(10);
 
-	HWND target = GetDesktopWindow();
-	if (!target) {
-		std::cout << "The window could not be found :/" << std::endl;
-	}
+	CR_RECT cArea = api::CRScreenCapturer::GetClientArea(BOI_TITLE);
+	std::cout << "window area: " << cArea.X << " " << cArea.Y << " " << cArea.Width << " " << cArea.Height << std::endl;
 
-	uint loop = 0;
+	crresult res = CRRES_SUCCESS;
+	api::CRScreenCapturer* capturer = api::CRScreenCapturer::CreateInstance(cArea, 0, &res);
+
+	uint capNo = 0;
 	while (true) {
+		capturer->grabFrame();
+		CR_FLOAT_BITMAP* frame = capturer->getLastFrame();
+		String capName = String("cap/Capturer") + std::to_string(capNo++) + String(".bmp");
+		SaveBitmap(frame, capName.c_str());
+		std::cout << "Frame: " << capName.c_str() << std::endl;
+
 		sleep(10);
-
-		std::string name = string("caps/Cap_") + std::to_string(loop) + std::string(".bmp");
-
-		bmp_renderer::Bitmap* bmp = getScreenDC(target);
-		bmp_renderer::SaveBitmap(bmp, name.c_str());
-		bmp_renderer::DeleteBmp(bmp);
-
-		std::cout << "Screen Cap: " << name.c_str() << std::endl;
-
-		loop++;
 	}
 
-
-	std::cout << cria_ai::GetCRResultName(res) << std::endl;
+	delete capturer;
 }
 
 int main(int argc, char* argv)
 {
 	cout << "Hello world" << endl;
 
-	sleep(5);
+	cout << "CR_VEC2 Test result " << TestVec2() << std::endl;
+	cout << "########################################################" << std::endl;
 
-	CR_RECT cArea = api::CRScreenCapturer::GetClientArea(BOI_TITLE);
-	std::cout << "window area: " << cArea.X << " " << cArea.Y << " " << cArea.Width << " " << cArea.Height << std::endl;
-	
-	sleep(5);
-	
-	crresult res = CRRES_SUCCESS;
-	api::CRScreenCapturer* capturer = api::CRScreenCapturer::CreateInstance(cArea, 0, &res);
-	
-	uint capNo = 0;
-	while (true)
+	sleep(3);
+
+	crresult result;
+	api::CRInputSimulator* inputSim = api::CRInputSimulator::GetInstance("", &result);
+
+	//const char* abc = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	//for (uint no = 0; no < 26; no++)
+	//{
+	//	inputSim->clickKey(abc[no]); // 'A'
+	//}
+
+	//const char* keys = "WASD ";
+	//
+	//for (uint keyNo = 0; keyNo < strlen(keys); keyNo++)
+	//{
+	//	inputSim->setKeyState(keys[keyNo], true);
+	//	sleep(3);
+	//	inputSim->setKeyState(keys[keyNo], false);
+	//	sleep(2);
+	//}
+
+	/*for (int loopNo = 0; loopNo < 10; loopNo++)
 	{
-		capturer->grabFrame();
-		CR_FLOAT_BITMAP* frame = capturer->getLastFrame();
-		String capName = String("cap/Capturer") + std::to_string(capNo++) + String(".bmp");
-		SaveBitmap(frame, capName.c_str());
-		std::cout << "Frame: " << capName.c_str() << std::endl;
+		inputSim->setButtonState(CR_MOUSE_LEFT, true);
+		sleep(2);
+		inputSim->setButtonState(CR_MOUSE_LEFT, false);
+		sleep(3);
+	}*/
+	POINT p;
+	CR_VEC2I vec;
+	CR_VEC2I move;
+
+	sleep(2);
+
+	std::cout << "vvv" << std::endl;
+	inputSim->scrollMouse(-1);
+
+	sleep(10);
+
+	std::cout << "^^^" << std::endl;
+	inputSim->scrollMouse(1);
+
+	for (int i = 0 ; i < 10; i++)
+	{
+		GetCursorPos(&p);
+		vec = inputSim->getMousePos();
+		printf("ClientArea: X: %3i, Y: %3i | [WindowsArea: X: %3i, Y: %3i ] \n", vec.X, vec.Y, p.x, p.y);
+
+		move.X = (rand() % 1000) - 500;
+		move.Y = (rand() % 1000) - 500;
+		printf("move: X: %i, Y: %i \n", move.X, move.Y);
+		inputSim->moveMouse(move);
 		
-		sleep(10);
+		GetCursorPos(&p);
+		vec = inputSim->getMousePos();
+		printf("ClientArea: X: %3i, Y: %3i | [WindowsArea: X: %3i, Y: %3i ] \n", vec.X, vec.Y, p.x, p.y);
+
+		sleep(5);
 	}
 
-	delete capturer;
+	delete inputSim;
 	cin.get();
 	return 0;
 }

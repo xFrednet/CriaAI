@@ -12,12 +12,18 @@ Directory            - dir
 Error                - err
 Float Bitmap         - fBmp
 Floats per pixel     - fpp
+Input Simulator      - inputSim
 Integer              - int
 Matrix               - mat
 Number               - no
 Pixel                - px
 Rectangle            - rect
+Screen capturer      - screencap
 Source               - src
+Squared              - sq
+Square root          - sqrt
+Utility              - util
+Vector               - vec
 Windows              - win
 
 Footnote: Yes, I have been reading "CODE COMPLETE 2nd Edition" and I'm questioning my life choices.

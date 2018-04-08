@@ -1,12 +1,16 @@
 #pragma once
 
-#include "../../Common.hpp"
 #include "../ScreenCapturer.h"
 
-#include <windows.h>
+#include "../../Common.hpp"
+
+#ifdef CRIA_OS_WIN
+
+#include "WinContext.h"
 
 namespace cria_ai { namespace api { namespace win {
 	
+
 	/*
 	 * This capturer is currently only able to capture areas on the primary monitor.
 	 */
@@ -30,3 +34,4 @@ namespace cria_ai { namespace api { namespace win {
 	};
 
 }}}
+#endif //CRIA_OS_WIN

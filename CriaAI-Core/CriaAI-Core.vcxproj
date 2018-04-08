@@ -104,7 +104,9 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClCompile Include="Dependencies\BmpRenderer\src\Renderer.cpp" />
     <ClCompile Include="src\api\FileSystem.cpp" />
     <ClCompile Include="src\api\ScreenCapturer.cpp" />
+    <ClCompile Include="src\api\win\WinInputSimulator.cpp" />
     <ClCompile Include="src\api\win\WinScreenCapturer.cpp" />
+    <ClCompile Include="src\api\InputSimulator.cpp" />
     <ClCompile Include="src\maths\Matrixf.cpp" />
     <ClCompile Include="src\network\layers\BmpInLayer.cpp" />
     <ClCompile Include="src\network\NeuronNetwork.cpp" />
@@ -122,15 +124,19 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="Dependencies\BmpRenderer\src\Bitmap.hpp" />
     <ClInclude Include="Dependencies\BmpRenderer\src\Common.h" />
     <ClInclude Include="Dependencies\BmpRenderer\src\Renderer.hpp" />
-    <ClInclude Include="src\api\CudaContext.cuh" />
+    <ClInclude Include="src\api\cuda\CudaContext.cuh" />
     <ClInclude Include="src\api\FileSystem.h" />
+    <ClInclude Include="src\api\InputSimulator.h" />
     <ClInclude Include="src\api\ScreenCapturer.h" />
+    <ClInclude Include="src\api\win\WinContext.h" />
+    <ClInclude Include="src\api\win\WinInputSimulator.h" />
     <ClInclude Include="src\api\win\WinScreenCapturer.h" />
     <ClInclude Include="src\Common.hpp" />
     <ClInclude Include="src\Macros.hpp" />
     <ClInclude Include="src\maths\Maths.h" />
     <ClInclude Include="src\maths\Matrixf.hpp" />
     <ClInclude Include="src\maths\Rectangle2D.h" />
+    <ClInclude Include="src\maths\Vec2.h" />
     <ClInclude Include="src\network\Layer.h" />
     <ClInclude Include="src\network\layers\BmpInLayer.h" />
     <ClInclude Include="src\network\NeuronNetwork.h" />
@@ -140,7 +146,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="src\util\Random.h" />
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="src\api\CudaContext.cu" />
+    <CudaCompile Include="src\api\cuda\CudaContext.cu" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

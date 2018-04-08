@@ -4,7 +4,7 @@
 #include "../../Dependencies/BmpRenderer/Dependencies/libbmpread/bmpread.h"
 #include "../api/FileSystem.h"
 
-#include "../api/CudaContext.cuh"
+#include "../api/cuda/CudaContext.cuh"
 
 #define FBMP_PX_INDEX(x, y, bmp)            (((x) + (y) * bmp->Width) * bmp->FloatsPerPixel)
 
@@ -85,9 +85,9 @@ namespace cria_ai
 		{
 			for (uint32_t index = 0; index < bmpIn->Width * bmpIn->Height; index++)
 			{
-				total  = bmpIn->Data[inIndex++]; /* Blue  */
+				total  = bmpIn->Data[inIndex++]; /* Red   */
 				total += bmpIn->Data[inIndex++]; /* Green */
-				total += bmpIn->Data[inIndex++]; /* Red   */
+				total += bmpIn->Data[inIndex++]; /* Blue  */
 				total *= bmpIn->Data[inIndex++]; /* Alpha */
 				total /= 3;
 
@@ -217,8 +217,8 @@ namespace cria_ai
 		/*
 		 * converting the data
 		 */
-		uint dstIndex;
-		uint srcIndex = 0;
+		int dstIndex;
+		int srcIndex = 0;
 		switch (bmp->FloatsPerPixel)
 		{
 		case 4:

@@ -18,11 +18,11 @@
 #define MIN(x, y)                      ((x < y) ? x : y)
 
 #define CLAMP_VALUE(x, min, max) \
-if (min <= max) {\
-		if (x < min)\
-			x = min; \
-		else if (x > max)\
-			x = max; \
+if ((min) <= (max)) { \
+		if ((x) < (min)) \
+			(x) = (min); \
+		else if ((x) > (max)) \
+			(x) = (max); \
 }
 #define SWAP_INTS(x, y) \
 {\
@@ -66,3 +66,8 @@ if (min <= max) {\
 #else
 #	define CRIA_AUTO_ASSERT(x, ...)
 #endif
+
+/*
+ * Other helper
+ */
+namespace cria_ai {}

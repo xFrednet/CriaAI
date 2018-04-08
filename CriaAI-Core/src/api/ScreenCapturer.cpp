@@ -53,3 +53,31 @@ namespace cria_ai { namespace api {
 	}
 
 }}
+
+#ifdef CRIA_OS_WIN
+
+#include "win/WinContext.h"
+
+namespace cria_ai { namespace api {
+	
+	CR_RECT CRScreenCapturer::GetClientArea(const String& windowTitle)
+	{
+		return win::GetClientArea(windowTitle);
+	}
+
+	uint8 CRScreenCapturer::GetDisplayNo(const String& windowTitle)
+	{
+		return 0;
+	}
+
+	uint8 CRScreenCapturer::GetDisplayCount()
+	{
+		return GetSystemMetrics(SM_CMONITORS);
+	}
+
+}}
+#else
+#	error The function "GetClientArea" is not defined for the targeted operations system.
+#	error The function "GetDisplayNo" is not defined for the targeted operations system.
+#	error The function "GetDisplayCount" is not defined for the targeted operations system.
+#endif //CRIA_OS_WIN
