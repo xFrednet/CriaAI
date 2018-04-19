@@ -32,8 +32,8 @@ namespace cria_ai
 		}
 		inline void  clamp(const VecT& min, const VecT& max)
 		{
-			CLAMP_VALUE(X, min, max);
-			CLAMP_VALUE(Y, min, max);
+			CR_CLAMP_VALUE(X, min, max);
+			CR_CLAMP_VALUE(Y, min, max);
 		}
 		inline VecT getLengthSq() const
 		{

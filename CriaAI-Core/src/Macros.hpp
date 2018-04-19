@@ -17,32 +17,34 @@
 #define MAX(x, y)                      ((x > y) ? x : y)
 #define MIN(x, y)                      ((x < y) ? x : y)
 
-#define CLAMP_VALUE(x, min, max) \
+#define CR_CLAMP_VALUE(x, min, max) \
 if ((min) <= (max)) { \
 		if ((x) < (min)) \
 			(x) = (min); \
 		else if ((x) > (max)) \
 			(x) = (max); \
 }
-#define SWAP_INTS(x, y) \
+#define CR_SWAP_INTS(x, y) \
 {\
 	int oldValue = x;\
 	x = y;\
 	y = oldValue; \
 }
-#define SWAP_FLOATS(x, y) \
+#define CR_SWAP_FLOATS(x, y) \
 {\
 	float oldValue = x;\
 	x = y;\
 	y = oldValue; \
 }
 
-#define CAN_UINT32_MUL(a, b)             ((b == 0) || a <= 0xffffffffui32 / b)
+#define CR_CAN_UINT32_MUL(a, b)             ((b == 0) || a <= 0xffffffffui32 / (b))
+
+#define CR_IS_FLAG_SET(value, flag)         (((value) & (flag)) != 0)
 
 /*
  * debugging help
  */
-#include <stdio.h>
+#include <cstdio>
 
 #ifdef CRIA_DEBUG_ENABLE_INFO
 #	define CRIA_INFO_PRINTF(...)            printf("CRIA [INFO ]: "); printf(__VA_ARGS__); printf("\n");

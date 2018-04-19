@@ -11,9 +11,9 @@ namespace cria_ai
 {
 	CRMatrixf* CreateMatrixf(uint cols, uint rows)
 	{
-		CRIA_AUTO_ASSERT(cols != 0 && rows != 0, "A matrix with 0 columns or rows is dumm");
-		CRIA_AUTO_ASSERT(CAN_UINT32_MUL(cols, rows), "The index would exceed UINT32_MAX in this case");
-		if (cols == 0 || rows == 0 || !CAN_UINT32_MUL(cols, rows))
+		CRIA_AUTO_ASSERT(cols != 0 && rows != 0, "A matrix with 0 columns or rows is dumdum");
+		CRIA_AUTO_ASSERT(CR_CAN_UINT32_MUL(cols, rows), "The index would exceed UINT32_MAX in this case");
+		if (cols == 0 || rows == 0 || !CR_CAN_UINT32_MUL(cols, rows))
 			return nullptr;
 
 		CRMatrixf* matrix = (CRMatrixf*)malloc(sizeof(CRMatrixf) + sizeof(float) * cols * rows);

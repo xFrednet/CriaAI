@@ -28,7 +28,7 @@
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CLRSupport>false</CLRSupport>
     <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
@@ -103,7 +103,9 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClCompile Include="Dependencies\BmpRenderer\src\Bitmap.cpp" />
     <ClCompile Include="Dependencies\BmpRenderer\src\Renderer.cpp" />
     <ClCompile Include="src\api\FileSystem.cpp" />
+    <ClCompile Include="src\api\InputLogger.cpp" />
     <ClCompile Include="src\api\ScreenCapturer.cpp" />
+    <ClCompile Include="src\api\win\WinInputLogger.cpp" />
     <ClCompile Include="src\api\win\WinInputSimulator.cpp" />
     <ClCompile Include="src\api\win\WinScreenCapturer.cpp" />
     <ClCompile Include="src\api\InputSimulator.cpp" />
@@ -126,9 +128,12 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="Dependencies\BmpRenderer\src\Renderer.hpp" />
     <ClInclude Include="src\api\cuda\CudaContext.cuh" />
     <ClInclude Include="src\api\FileSystem.h" />
+    <ClInclude Include="src\api\InputLogger.h" />
     <ClInclude Include="src\api\InputSimulator.h" />
+    <ClInclude Include="src\api\InputUtil.h" />
     <ClInclude Include="src\api\ScreenCapturer.h" />
     <ClInclude Include="src\api\win\WinContext.h" />
+    <ClInclude Include="src\api\win\WinInputLogger.h" />
     <ClInclude Include="src\api\win\WinInputSimulator.h" />
     <ClInclude Include="src\api\win\WinScreenCapturer.h" />
     <ClInclude Include="src\Common.hpp" />

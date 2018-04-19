@@ -3,6 +3,8 @@
 #include "../../Common.hpp"
 #include "../InputSimulator.h"
 
+#ifdef CRIA_OS_WIN
+
 #include "WinContext.h"
 
 namespace cria_ai { namespace api { namespace win {
@@ -43,3 +45,5 @@ namespace cria_ai { namespace api { namespace win {
 	};
 
 }}}
+
+#endif

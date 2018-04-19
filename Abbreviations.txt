@@ -3,6 +3,7 @@ Abbreviation:
 Word                    Abbreviation
 -------------------- - --------------------
 Bitmap               - bmp
+Callback             - cb
 Client area          - cArea
 Column               - col
 Cuda                 - cu
@@ -15,6 +16,8 @@ Floats per pixel     - fpp
 Input Simulator      - inputSim
 Integer              - int
 Matrix               - mat
+Mouse button         - mButton
+Mouse movement       - mMove
 Number               - no
 Pixel                - px
 Rectangle            - rect

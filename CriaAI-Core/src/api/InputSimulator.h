@@ -95,11 +95,3 @@ namespace cria_ai { namespace api {
 	};
 
 }}
-
-#define CR_MOUSE_BUTTON_1    0
-#define CR_MOUSE_BUTTON_2    1
-#define CR_MOUSE_BUTTON_3    2
-
-#define CR_MOUSE_LEFT        CR_MOUSE_BUTTON_1
-#define CR_MOUSE_MIDDLE      CR_MOUSE_BUTTON_2
-#define CR_MOUSE_RIGHT       CR_MOUSE_BUTTON_3

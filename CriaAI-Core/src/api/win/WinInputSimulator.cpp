@@ -1,5 +1,7 @@
 #include "WinInputSimulator.h"
+#include "../InputUtil.h"
 
+#ifdef CRIA_OS_WIN
 /*
  * The windows screen has a virtual size of 65536 x 65536 to support diagonal 
  * movement better etc. at least that is how I've understood it. Anyways it does
@@ -149,13 +151,13 @@ namespace cria_ai { namespace api { namespace win {
 		
 		switch (button)
 		{
-			case CR_MOUSE_LEFT:
+			case CR_MOUSE_BUTTON_LEFT:
 				input.mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
 				break;
-			case CR_MOUSE_MIDDLE:
+			case CR_MOUSE_BUTTON_MIDDLE:
 				input.mi.dwFlags = MOUSEEVENTF_MIDDLEDOWN;
 				break;
-			case CR_MOUSE_RIGHT:
+			case CR_MOUSE_BUTTON_RIGHT:
 				input.mi.dwFlags = MOUSEEVENTF_RIGHTDOWN;
 				break;
 			default:
@@ -171,13 +173,13 @@ namespace cria_ai { namespace api { namespace win {
 		input.type = INPUT_MOUSE;
 
 		switch (button) {
-			case CR_MOUSE_LEFT:
+			case CR_MOUSE_BUTTON_LEFT:
 				input.mi.dwFlags = MOUSEEVENTF_LEFTUP;
 				break;
-			case CR_MOUSE_MIDDLE:
+			case CR_MOUSE_BUTTON_MIDDLE:
 				input.mi.dwFlags = MOUSEEVENTF_MIDDLEUP;
 				break;
-			case CR_MOUSE_RIGHT:
+			case CR_MOUSE_BUTTON_RIGHT:
 				input.mi.dwFlags = MOUSEEVENTF_RIGHTUP;
 				break;
 			default:
@@ -235,3 +237,5 @@ namespace cria_ai { namespace api { namespace win {
 		return (CR_VEC2I(pos.x, pos.y) - m_MouseBounderies.Pos);
 	}
 }}}
+
+#endif

@@ -87,7 +87,20 @@ void sleep(uint time)
 		std::this_thread::sleep_for(1s);
 	}
 }
-
+void sleepSec(uint time)
+{
+	for (uint timer = 0; timer < time; timer++) {
+		printf("SleepSec: %i/%i \n", timer, time);
+		std::this_thread::sleep_for(1s);
+	}
+}
+void sleepMs(uint time)
+{
+	for (uint timer = 0; timer < time; timer += 10) {
+		//printf("SleepMs: %i/%i \n", timer, time);
+		std::this_thread::sleep_for(10ms);
+	}
+}
 
 void screenCap10Sec()
 {
@@ -113,41 +126,12 @@ void screenCap10Sec()
 	delete capturer;
 }
 
-int main(int argc, char* argv)
+
+bool TestInputSim()
 {
-	cout << "Hello world" << endl;
-
-	cout << "CR_VEC2 Test result " << TestVec2() << std::endl;
-	cout << "########################################################" << std::endl;
-
-	sleep(3);
-
 	crresult result;
 	api::CRInputSimulator* inputSim = api::CRInputSimulator::GetInstance("", &result);
 
-	//const char* abc = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-	//for (uint no = 0; no < 26; no++)
-	//{
-	//	inputSim->clickKey(abc[no]); // 'A'
-	//}
-
-	//const char* keys = "WASD ";
-	//
-	//for (uint keyNo = 0; keyNo < strlen(keys); keyNo++)
-	//{
-	//	inputSim->setKeyState(keys[keyNo], true);
-	//	sleep(3);
-	//	inputSim->setKeyState(keys[keyNo], false);
-	//	sleep(2);
-	//}
-
-	/*for (int loopNo = 0; loopNo < 10; loopNo++)
-	{
-		inputSim->setButtonState(CR_MOUSE_LEFT, true);
-		sleep(2);
-		inputSim->setButtonState(CR_MOUSE_LEFT, false);
-		sleep(3);
-	}*/
 	POINT p;
 	CR_VEC2I vec;
 	CR_VEC2I move;
@@ -157,13 +141,12 @@ int main(int argc, char* argv)
 	std::cout << "vvv" << std::endl;
 	inputSim->scrollMouse(-1);
 
-	sleep(10);
+	sleep(2);
 
 	std::cout << "^^^" << std::endl;
 	inputSim->scrollMouse(1);
 
-	for (int i = 0 ; i < 10; i++)
-	{
+	for (int i = 0; i < 10; i++) {
 		GetCursorPos(&p);
 		vec = inputSim->getMousePos();
 		printf("ClientArea: X: %3i, Y: %3i | [WindowsArea: X: %3i, Y: %3i ] \n", vec.X, vec.Y, p.x, p.y);
@@ -172,7 +155,7 @@ int main(int argc, char* argv)
 		move.Y = (rand() % 1000) - 500;
 		printf("move: X: %i, Y: %i \n", move.X, move.Y);
 		inputSim->moveMouse(move);
-		
+
 		GetCursorPos(&p);
 		vec = inputSim->getMousePos();
 		printf("ClientArea: X: %3i, Y: %3i | [WindowsArea: X: %3i, Y: %3i ] \n", vec.X, vec.Y, p.x, p.y);
@@ -181,6 +164,32 @@ int main(int argc, char* argv)
 	}
 
 	delete inputSim;
+	return true;
+}
+
+void loggerCallback(CR_KEY_ID keyID, bool down)
+{
+	printf("loggerCallback: keyID %10s, state: %s\n", CRGetKeyIDName(keyID).c_str(), ((down) ? "down" : "up"));
+}
+
+int main(int argc, char* argv)
+{
+	cout << "Hello world" << endl;
+
+	cout << "CR_VEC2 Test result " << TestVec2() << std::endl;
+	cout << "########################################################" << std::endl;
+
+	sleep(3);
+	
+	crresult r = api::CRInputLogger::InitInstance();
+	api::CRInputLogger::AddKeyCallback(loggerCallback);
+
+	for (int timer = 0; timer < 100000; timer++)
+	{
+		api::CRInputLogger::Update();
+		sleepMs(10);
+	}
+
 	cin.get();
 	return 0;
 }

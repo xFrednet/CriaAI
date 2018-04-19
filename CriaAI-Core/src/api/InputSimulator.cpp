@@ -170,15 +170,15 @@ namespace cria_ai { namespace api {
 	void CRInputSimulator::moveMouse(CR_VEC2I motion)
 	{
 		CR_VEC2I mousePos = getMousePos();
-		CLAMP_VALUE(motion.X, -mousePos.X, (int)m_MouseBounderies.Width - mousePos.X - 1);
-		CLAMP_VALUE(motion.Y, -mousePos.Y, (int)m_MouseBounderies.Height - mousePos.Y - 1);
+		CR_CLAMP_VALUE(motion.X, -mousePos.X, (int)m_MouseBounderies.Width - mousePos.X - 1);
+		CR_CLAMP_VALUE(motion.Y, -mousePos.Y, (int)m_MouseBounderies.Height - mousePos.Y - 1);
 
 		simulateMouseMove(motion);
 	}
 	void CRInputSimulator::setMouse(CR_VEC2I pos)
 	{
-		CLAMP_VALUE(pos.X, 0, (int)m_MouseBounderies.Width - 1);
-		CLAMP_VALUE(pos.Y, 0, (int)m_MouseBounderies.Height - 1);
+		CR_CLAMP_VALUE(pos.X, 0, (int)m_MouseBounderies.Width - 1);
+		CR_CLAMP_VALUE(pos.Y, 0, (int)m_MouseBounderies.Height - 1);
 
 		simulateMouseSet(pos);
 	}

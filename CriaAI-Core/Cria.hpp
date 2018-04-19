@@ -8,3 +8,4 @@
 
 #include "src/api/ScreenCapturer.h"
 #include "src/api/InputSimulator.h"
+#include "src/api/InputLogger.h"
