@@ -151,13 +151,13 @@ namespace cria_ai { namespace api { namespace win {
 		
 		switch (button)
 		{
-			case CR_MOUSE_BUTTON_LEFT:
+			case CR_MBUTTON_LEFT:
 				input.mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
 				break;
-			case CR_MOUSE_BUTTON_MIDDLE:
+			case CR_MBUTTON_MIDDLE:
 				input.mi.dwFlags = MOUSEEVENTF_MIDDLEDOWN;
 				break;
-			case CR_MOUSE_BUTTON_RIGHT:
+			case CR_MBUTTON_RIGHT:
 				input.mi.dwFlags = MOUSEEVENTF_RIGHTDOWN;
 				break;
 			default:
@@ -173,13 +173,13 @@ namespace cria_ai { namespace api { namespace win {
 		input.type = INPUT_MOUSE;
 
 		switch (button) {
-			case CR_MOUSE_BUTTON_LEFT:
+			case CR_MBUTTON_LEFT:
 				input.mi.dwFlags = MOUSEEVENTF_LEFTUP;
 				break;
-			case CR_MOUSE_BUTTON_MIDDLE:
+			case CR_MBUTTON_MIDDLE:
 				input.mi.dwFlags = MOUSEEVENTF_MIDDLEUP;
 				break;
-			case CR_MOUSE_BUTTON_RIGHT:
+			case CR_MBUTTON_RIGHT:
 				input.mi.dwFlags = MOUSEEVENTF_RIGHTUP;
 				break;
 			default:

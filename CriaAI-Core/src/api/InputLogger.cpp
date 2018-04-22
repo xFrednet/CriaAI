@@ -69,7 +69,10 @@ namespace cria_ai { namespace api {
 	* Class content
 	*/
 	CRInputLogger::CRInputLogger()
+		: m_MouseWheelPos(0)
 	{
+		memset(m_KeyStates, false, sizeof(bool) * (CR_KEY_ID_LAST + 1));
+		memset(m_MButtonStates, false, sizeof(bool) * (CR_MBUTTON_ID_LAST + 1));
 	}
 	CRInputLogger::~CRInputLogger()
 	{
@@ -78,26 +81,42 @@ namespace cria_ai { namespace api {
 	/*
 	 * Calling callbacks
 	 */
-	void CRInputLogger::callKeyCBs(CR_KEY_ID keyID, bool down)
+	void CRInputLogger::processKey(CR_KEY_ID keyID, bool pressed)
 	{
+		if (keyID < CR_KEY_ID_LAST)
+			m_KeyStates[keyID] = pressed;
+
 		for (cr_logger_key_cb callback : m_KeyCallbacks)
 		{
-			(*callback)(keyID, down);
+			(*callback)(keyID, pressed);
 		}
 	}
-	void CRInputLogger::callMButtonsCBs(CR_MOUSE_BUTTON_ID buttonID, bool down)
+	void CRInputLogger::processMButton(CR_MBUTTON_ID buttonID, bool pressed)
 	{
+		if (buttonID <= CR_MBUTTON_ID_LAST)
+			m_MButtonStates[buttonID] = pressed;
+
 		for (cr_logger_mbutton_cb callback : m_MButtonCallbacks)
 		{
-			(*callback)(buttonID, down);
+			(*callback)(buttonID, pressed);
 		}
 	}
-	void CRInputLogger::callMMoveCBs(int x, int y)
+	void CRInputLogger::processMMove(CR_VEC2I position, int xMotion, int yMotion)
 	{
+		m_MousePos = position;
+
 		for (cr_logger_mmove_cb callback : m_MMoveCallbacks)
 		{
-			(*callback)(x, y);
+			(*callback)(position, xMotion, yMotion);
 		}
 	}
+	void CRInputLogger::processMWheel(int change)
+	{
+		m_MouseWheelPos += change;
 
+		for (cr_logger_mwheel_cb callback : m_MWheelCallbacks)
+		{
+			(*callback)(change);
+		}
+	}
 }}

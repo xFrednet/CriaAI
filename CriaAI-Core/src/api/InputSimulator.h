@@ -2,12 +2,11 @@
 
 #include "../Common.hpp"
 
+#include "InputUtil.h"
+
 #ifndef CR_INPUTSIM_CLICK_TIME
 #	define CR_INPUTSIM_CLICK_TIME_MS             0
 #endif
-
-#define CR_KEYBOARD_MAX_KEY_COUNT      254
-#define CR_MOUSE_MAX_BUTTON_COUNT      3
 
 namespace cria_ai { namespace api {
 	

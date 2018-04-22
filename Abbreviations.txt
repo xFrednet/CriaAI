@@ -18,6 +18,7 @@ Integer              - int
 Matrix               - mat
 Mouse button         - mButton
 Mouse movement       - mMove
+Mouse Wheel          - mWheel
 Number               - no
 Pixel                - px
 Rectangle            - rect

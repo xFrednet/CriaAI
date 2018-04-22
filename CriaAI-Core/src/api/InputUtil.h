@@ -4,6 +4,9 @@
 
 //TODO conversion functions from os to cr_key_id's
 
+#define CR_KEYBOARD_MAX_KEY_COUNT      254
+#define CR_MOUSE_MAX_BUTTON_COUNT      3
+
 /*
  * Keyboard util
  */
@@ -148,18 +151,8 @@ namespace cria_ai {
 		CR_KEY_ID_LAST                 = 0x87
 	};
 
-	enum CR_KEY_FLAG
-	{
-		CR_KEY_FLAG_SHIFT              = 0x01,
-		CR_KEY_FLAG_CONTROL            = 0x02,
-		CR_KEY_FLAG_ALT                = 0x04,
-		CR_KEY_FLAG_CAPS               = 0x08,
-		CR_KEY_FLAG_WIN                = 0x10
-	};
-
 	inline String CRGetKeyIDName(const CR_KEY_ID& keyID)
 	{
-		//TODO
 		switch (keyID) {
 			case CR_KEY_BACK:
 				return "[BACK]";
@@ -347,20 +340,20 @@ namespace cria_ai {
  */
 namespace cria_ai
 {
-	enum CR_MOUSE_BUTTON_ID {
+	enum CR_MBUTTON_ID {
 
-		CR_MOUSE_BUTTON_ID_FIRST  = 0,
+		CR_MBUTTON_ID_FIRST  = 0,
 
-		CR_MOUSE_BUTTON_LEFT      = 0,
-		CR_MOUSE_BUTTON_1         = 0,
+		CR_MBUTTON_LEFT      = 0,
+		CR_MBUTTON_1         = 0,
 
-		CR_MOUSE_BUTTON_MIDDLE    = 1,
-		CR_MOUSE_BUTTON_2         = 1,
+		CR_MBUTTON_MIDDLE    = 1,
+		CR_MBUTTON_2         = 1,
 
-		CR_MOUSE_BUTTON_RIGHT     = 2,
-		CR_MOUSE_BUTTON_3         = 2,
+		CR_MBUTTON_RIGHT     = 2,
+		CR_MBUTTON_3         = 2,
 
-		CR_MOUSE_BUTTON_ID_LAST   = 2
+		CR_MBUTTON_ID_LAST   = 2
 
 	};
 }

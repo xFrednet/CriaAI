@@ -39,8 +39,9 @@
 namespace cria_ai { namespace api {
 
 	typedef void (*cr_logger_key_cb)     (CR_KEY_ID keyID, bool down);
-	typedef void (*cr_logger_mbutton_cb) (CR_MOUSE_BUTTON_ID buttonID, bool down);
-	typedef void (*cr_logger_mmove_cb)   (int x, int y);
+	typedef void (*cr_logger_mbutton_cb) (CR_MBUTTON_ID buttonID, bool down);
+	typedef void (*cr_logger_mmove_cb)   (CR_VEC2I position, int xMotion, int yMotion);
+	typedef void (*cr_logger_mwheel_cb)  (int change);
 
 	class CRInputLogger
 	{
@@ -59,6 +60,13 @@ namespace cria_ai { namespace api {
 		std::list<cr_logger_key_cb>     m_KeyCallbacks;
 		std::list<cr_logger_mbutton_cb> m_MButtonCallbacks;
 		std::list<cr_logger_mmove_cb>   m_MMoveCallbacks;
+		std::list<cr_logger_mwheel_cb>  m_MWheelCallbacks;
+
+		bool m_KeyStates[CR_KEY_ID_LAST + 1];
+		bool m_MButtonStates[CR_MBUTTON_ID_LAST + 1];
+		CR_VEC2I m_MousePos;
+		CR_RECT m_ClientArea;
+		int m_MouseWheelPos;
 
 		CRInputLogger();
 		virtual crresult init() = 0;
@@ -69,11 +77,14 @@ namespace cria_ai { namespace api {
 		* Calling callbacks
 		*/
 	protected:
-		void callKeyCBs(CR_KEY_ID keyID, bool down);
-		void callMButtonsCBs(CR_MOUSE_BUTTON_ID buttonID, bool down);
-		void callMMoveCBs(int x, int y);
+		void processKey(CR_KEY_ID keyID, bool pressed);
+		void processMButton(CR_MBUTTON_ID buttonID, bool pressed);
+		void processMMove(CR_VEC2I position, int xMotion, int yMotion);
+		void processMWheel(int change);
 
 		virtual void update() = 0;
+
+		virtual void newTargetWindow(const String& title) = 0;
 
 		/*
 		 * static functions
@@ -85,35 +96,92 @@ namespace cria_ai { namespace api {
 				s_Instance->update();
 		}
 
-		static void AddKeyCallback(cr_logger_key_cb cb)
+		inline static void AddKeyCallback(cr_logger_key_cb cb)
 		{
 			if (s_Instance)
 				s_Instance->m_KeyCallbacks.push_front(cb);
 		}
-		static void RemoveKeyCallback(cr_logger_key_cb cb)
+		inline static void RemoveKeyCallback(cr_logger_key_cb cb)
 		{
 			if (s_Instance)
 				s_Instance->m_KeyCallbacks.remove(cb);
 		}
-		static void AddMButtonCallback(cr_logger_mbutton_cb cb)
+		inline static void AddMButtonCallback(cr_logger_mbutton_cb cb)
 		{
 			if (s_Instance)
 				s_Instance->m_MButtonCallbacks.push_front(cb);
 		}
-		static void RemoveMButtonCallback(cr_logger_mbutton_cb cb)
+		inline static void RemoveMButtonCallback(cr_logger_mbutton_cb cb)
 		{
 			if (s_Instance)
 				s_Instance->m_MButtonCallbacks.remove(cb);
 		}
-		static void AddMMoveCallback(cr_logger_mmove_cb cb)
+		inline static void AddMMoveCallback(cr_logger_mmove_cb cb)
 		{
 			if (s_Instance)
 				s_Instance->m_MMoveCallbacks.push_front(cb);
 		}
-		static void RemoveMMoveCallback(cr_logger_mmove_cb cb)
+		inline static void RemoveMMoveCallback(cr_logger_mmove_cb cb)
 		{
 			if (s_Instance)
 				s_Instance->m_MMoveCallbacks.remove(cb);
+		}
+		inline static void AddMWheelCallback(cr_logger_mwheel_cb cb)
+		{
+			if (s_Instance)
+				s_Instance->m_MWheelCallbacks.push_front(cb);
+		}
+		inline static void RemoveMWheelCallback(cr_logger_mwheel_cb cb)
+		{
+			if (s_Instance)
+				s_Instance->m_MWheelCallbacks.remove(cb);
+		}
+
+		inline static bool GetKeyState(CR_KEY_ID keyID)
+		{
+			if (!s_Instance)
+				return false;
+			if (keyID > CR_KEY_ID_LAST)
+				return false;
+
+			return s_Instance->m_KeyStates[keyID];
+		}
+		inline static bool GetMButtonState(CR_MBUTTON_ID buttonID)
+		{
+			if (!s_Instance)
+				return false;
+			if (buttonID > CR_MBUTTON_ID_LAST)
+				return false;
+
+			return s_Instance->m_MButtonStates[buttonID];
+			
+		}
+		inline static CR_VEC2I GetMouseScreenPos()
+		{
+			if (s_Instance)
+				return s_Instance->m_MousePos;
+
+			return CR_VEC2I(0, 0);
+		}
+		inline static CR_VEC2I GetMouseClientPos()
+		{
+			if (s_Instance)
+				return s_Instance->m_MousePos - s_Instance->m_ClientArea.Pos;
+
+			return CR_VEC2I(0, 0);
+		}
+		inline static int  GetMWheelState()
+		{
+			if (s_Instance)
+				return s_Instance->m_MouseWheelPos;
+
+			return 0;
+		}
+
+		inline static void SetTargetWindow(const String& title = "")
+		{
+			if (s_Instance)
+				s_Instance->newTargetWindow(title);
 		}
 	};
 

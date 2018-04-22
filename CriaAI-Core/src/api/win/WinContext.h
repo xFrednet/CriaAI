@@ -11,6 +11,14 @@ namespace cria_ai { namespace api { namespace win {
 		return FindWindow(nullptr, title.c_str());
 	}
 
+	inline CR_VEC2I GetMousePos()
+	{
+		POINT p;
+		GetCursorPos(&p);
+
+		return CR_VEC2I(p.x, p.y);
+	}
+
 	inline CR_RECT GetClientArea(HWND hwnd)
 	{
 		/*
@@ -31,9 +39,9 @@ namespace cria_ai { namespace api { namespace win {
 		 * Translating the area
 		 */
 		CR_RECT cArea;
-		cArea.X = (uint)winCArea.left;
-		cArea.Y = (uint)winCArea.top;
-		cArea.Width = (uint)(winCArea.right - winCArea.left);
+		cArea.X      = (int)winCArea.left;
+		cArea.Y      = (int)winCArea.top;
+		cArea.Width  = (uint)(winCArea.right - winCArea.left);
 		cArea.Height = (uint)(winCArea.bottom - winCArea.top);
 
 		return cArea;

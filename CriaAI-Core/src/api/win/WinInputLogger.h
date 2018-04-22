@@ -48,18 +48,22 @@ namespace cria_ai { namespace api { namespace win {
 		
 		HHOOK m_MouseHook;
 
+		CR_VEC2I m_OldMousePos;
+
 	public:
 		CRWinInputLogger();
 		~CRWinInputLogger();
 	private:
 		static LRESULT CALLBACK HandleKeyboardHook(UINT message, WPARAM wp, LPARAM lp);
 		static LRESULT CALLBACK HandleMouseHook(UINT message, WPARAM wp, LPARAM lp);
-
-		void keyEvent(uint32 keyID, bool isDown);
 	protected:
 		crresult init() override;
 
 		void update() override;
+		
+		void processNewMousePos(CR_VEC2I newPos);
+
+		void newTargetWindow(const String& title) override;
 	};
 
 }}}

@@ -167,9 +167,9 @@ bool TestInputSim()
 	return true;
 }
 
-void loggerCallback(CR_KEY_ID keyID, bool down)
+void keyInput(CR_KEY_ID keyID, bool down)
 {
-	printf("loggerCallback: keyID %10s, state: %s\n", CRGetKeyIDName(keyID).c_str(), ((down) ? "down" : "up"));
+	std::cout << CRGetKeyIDName(keyID) << ((down) ? " [X]" : " [ ]") << std::endl;
 }
 
 int main(int argc, char* argv)
@@ -178,16 +178,21 @@ int main(int argc, char* argv)
 
 	cout << "CR_VEC2 Test result " << TestVec2() << std::endl;
 	cout << "########################################################" << std::endl;
-
-	sleep(3);
 	
 	crresult r = api::CRInputLogger::InitInstance();
-	api::CRInputLogger::AddKeyCallback(loggerCallback);
+	api::CRInputLogger::AddKeyCallback(keyInput);
 
 	for (int timer = 0; timer < 100000; timer++)
 	{
 		api::CRInputLogger::Update();
 		sleepMs(10);
+
+		if (timer % 100 == 0)
+		{
+			printf("[%s] ", (api::CRInputLogger::GetMButtonState(CR_MBUTTON_LEFT) ? "X" : " "));
+			printf("[%s] ", (api::CRInputLogger::GetMButtonState(CR_MBUTTON_MIDDLE) ? "X" : " "));
+			printf("[%s]\n", (api::CRInputLogger::GetMButtonState(CR_MBUTTON_RIGHT) ? "X" : " "));
+		}
 	}
 
 	cin.get();

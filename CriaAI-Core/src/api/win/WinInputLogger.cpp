@@ -46,11 +46,11 @@ namespace cria_ai { namespace api { namespace win {
 			switch (wp) {
 				case WM_KEYUP:
 				case WM_SYSKEYUP:
-					getInstance()->keyEvent(st_hook.vkCode, false);
+					getInstance()->processKey((CR_KEY_ID)st_hook.vkCode, false);
 					break;
 				case WM_KEYDOWN:
 				case WM_SYSKEYDOWN:
-					getInstance()->keyEvent(st_hook.vkCode, true);
+					getInstance()->processKey((CR_KEY_ID)st_hook.vkCode, true);
 					break;
 				default:
 					break;
@@ -61,18 +61,63 @@ namespace cria_ai { namespace api { namespace win {
 
 	LRESULT CRWinInputLogger::HandleMouseHook(UINT message, WPARAM wp, LPARAM lp)
 	{
-		return CallNextHookEx(nullptr, message, wp, lp);
-	}
+		if (s_Instance && message == HC_ACTION) 
+		{
+			MSLLHOOKSTRUCT hook = *((MSLLHOOKSTRUCT*)lp);
 
-	void CRWinInputLogger::keyEvent(uint32 keyID, bool isDown)
-	{
-		callKeyCBs((CR_KEY_ID)keyID, isDown);
+			switch (wp)
+			{
+				case WM_MOUSEWHEEL:
+					getInstance()->processMWheel(((short)HIWORD(hook.mouseData)) / WHEEL_DELTA);
+					break;
+
+				/*
+				 * Mouse movement
+				 */
+				case WM_MOUSEMOVE:
+					getInstance()->processNewMousePos(CR_VEC2I(hook.pt.x, hook.pt.y));
+					break;
+				
+				/*
+				 * Mouse button events
+				 */
+				//left
+				case WM_LBUTTONDOWN:
+				case WM_LBUTTONUP:
+					getInstance()->processMButton(CR_MBUTTON_LEFT, (wp == WM_LBUTTONDOWN));
+					break;
+				//middle
+				case WM_MBUTTONDOWN:
+				case WM_MBUTTONUP:
+					getInstance()->processMButton(CR_MBUTTON_MIDDLE, (wp == WM_MBUTTONDOWN));
+					break;
+				//right
+				case WM_RBUTTONDOWN:
+				case WM_RBUTTONUP:
+					getInstance()->processMButton(CR_MBUTTON_RIGHT, (wp == WM_RBUTTONDOWN));
+					break;
+
+				//other buttons
+				case WM_XBUTTONDOWN:
+					getInstance()->processMButton((CR_MBUTTON_ID)(short)HIWORD(hook.mouseData), true);
+					break;
+				case WM_XBUTTONUP:
+					getInstance()->processMButton((CR_MBUTTON_ID)(short)HIWORD(hook.mouseData), false);
+					break;
+				default:
+					std::cout << wp << std::endl;
+					break;
+			}
+		}
+
+		return CallNextHookEx(nullptr, message, wp, lp);
 	}
 
 	CRWinInputLogger::CRWinInputLogger()
 		: m_KeyboardHook(nullptr),
 		m_KeyLayout(nullptr),
-		m_MouseHook(nullptr)
+		m_MouseHook(nullptr),
+		m_OldMousePos(win::GetMousePos())
 	{
 	}
 	CRWinInputLogger::~CRWinInputLogger()
@@ -105,11 +150,24 @@ namespace cria_ai { namespace api { namespace win {
 	void CRWinInputLogger::update()
 	{
 		MSG msg;
-		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+		while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
 	}
+
+	void CRWinInputLogger::processNewMousePos(CR_VEC2I newPos)
+	{
+		processMMove(newPos, newPos.X - m_OldMousePos.X, newPos.Y - m_OldMousePos.Y);
+
+		m_OldMousePos = newPos;
+	}
+
+	void CRWinInputLogger::newTargetWindow(const String& title)
+	{
+		m_ClientArea = win::GetClientArea(title);
+	}
+
 }}}
 
 #endif //CRIA_OS_WIN
