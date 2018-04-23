@@ -63,7 +63,6 @@ namespace cria_ai { namespace api { namespace win {
 		
 		void processNewMousePos(CR_VEC2I newPos);
 
-		void newTargetWindow(const String& title) override;
 	};
 
 }}}

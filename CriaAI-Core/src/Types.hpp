@@ -3,6 +3,11 @@
 #include <string>
 typedef std::string                    String;
 
+#include <memory>
+template<typename T>
+using cr_ptr                           = std::shared_ptr<T>;
+
+
 typedef char                           int8;
 typedef short                          int16;
 typedef int                            int32;

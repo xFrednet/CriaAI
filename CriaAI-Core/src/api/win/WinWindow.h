@@ -1,18 +1,18 @@
 /******************************************************************************
-* BmpRenderer - A library that can render and display bitmaps.                *
-*               <https://github.com/xFrednet/BmpRenderer>                     *
+* Cria  - The worst artificial intelligence on the market.                    *
+*         <https://github.com/xFrednet/CriaAI>                                *
 *                                                                             *
 * =========================================================================== *
-* Copyright (C) 2017, xFrednet <xFrednet@gmail.com>                           *
+* Copyright (C) 2017, 2018, xFrednet <xFrednet@gmail.com>                     *
 *                                                                             *
 * This software is provided 'as-is', without any express or implied warranty. *
 * In no event will the authors be held liable for any damages arising from    *
 * the use of this software.                                                   *
 *                                                                             *
 * Permission is hereby granted, free of charge, to anyone to use this         *
-* software for any purpose(including commercial applications), including the  *
-* rights to use, copy, modify, merge, publish, distribute, sublicense, and/or *
-* sell copies of this software, subject to the following conditions:          *
+* software for any purpose, including the rights to use, copy, modify,        *
+* merge, publish, distribute, sublicense, and/or sell copies of this          *
+* software, subject to the following conditions:                              *
 *                                                                             *
 *   1.  The origin of this software must not be misrepresented; you           *
 *       must not claim that you wrote the original software. If you           *
@@ -30,12 +30,30 @@
 *       distribution.                                                         *
 *                                                                             *
 ******************************************************************************/
-
 #pragma once
+#include "../Window.h"
 
-#include "src/API/ScreenDrawer.hpp"
+#include "../../Common.hpp"
 
-#include "src/Bitmap.hpp"
+#ifdef CRIA_OS_WIN
 
-#include "src/Renderer.hpp"
+#include "WinContext.h"
 
+namespace cria_ai { namespace api { namespace win {
+	
+	class CRWinWindow : public CRWindow
+	{
+	private:
+		HWND m_Hwnd;
+	public:
+		CRWinWindow(const String& title);
+	protected:
+		crresult init(const String& title) override;
+	public:
+		CR_RECT getClientArea() const override;
+		bool isFocussed() const override;
+	};
+
+}}}
+
+#endif // CRIA_OS_WIN

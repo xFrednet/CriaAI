@@ -31,7 +31,7 @@
 *                                                                             *
 ******************************************************************************/
 
-#include "Window.hpp"
+#include "ScreenDrawer.hpp"
 
 #if defined(_WIN32) || defined(_WIN64)
 

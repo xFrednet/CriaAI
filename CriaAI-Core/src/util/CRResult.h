@@ -5,24 +5,6 @@
 #define CR_SUCCESS(crresult)           ((crresult).Value >= 0)
 #define CR_FAILED(crresult)            ((crresult).Value < 0 )
 
-// <Name>
-//      ZA_RESULT
-//  
-// <Structure>
-//       1 1 1 1 1 1 1
-//       6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1
-//      +-+-------------+---------------+
-//      |R|---Source----|-----Code------|
-//      +-+-------------+---------------+
-//    
-//      R      - Result: 
-//                 0: success
-//                 1: error
-//      
-//      Source - Indicates the source (128 possible sources)
-//      
-//      Code   - The error code (256 possible codes)
-//
 /**
  * \brief 
  * 
@@ -47,7 +29,7 @@ namespace cria_ai
 {
 	
 	typedef struct crresult_ {
-		int32_t Value;
+		int16_t Value;
 
 		inline bool operator==(const crresult_& other) const
 		{
@@ -64,7 +46,7 @@ namespace cria_ai
 /* //////////////////////////////////////////////////////////////////////////////// */
 // // Operators //
 /* //////////////////////////////////////////////////////////////////////////////// */
-#define CRIA_RES_TYPEDEF(value)                  (cria_ai::crresult{value})
+#define CRIA_RES_TYPEDEF(value)                  (cria_ai::crresult{(int16_t)value})
 
 /* //////////////////////////////////////////////////////////////////////////////// */
 // // General //
@@ -102,6 +84,7 @@ namespace cria_ai
 #define CRRES_ERR_TIMING_THREADED_YAY_MULTI      CRIA_RES_TYPEDEF(0x8005)
 #define CRRES_ERR_MALLOC_FAILED                  CRIA_RES_TYPEDEF(0x8006)
 #define CRRES_ERR_NEW_FAILED                     CRIA_RES_TYPEDEF(0x8007)
+#define CRRES_ERR_MAKE_SHARED_FAILED             CRIA_RES_TYPEDEF(0x8008)
 
 /* //////////////////////////////////////////////////////////////////////////////// */
 // // CRRES_SOURCE_API //
@@ -112,10 +95,12 @@ namespace cria_ai
 #define CRRES_OK_API_INPUTSIM_TARGET_NOT_FOCUSED CRIA_RES_TYPEDEF(0x0A01)
 #define CRRES_OK_API_INPUTSIM_CURSOR_OUTSIDE     CRIA_RES_TYPEDEF(0x0A02)
 
-#define CRRES_ERR_API_KEY_OUT_OF_BOUNDS          CRIA_RES_TYPEDEF(0x8A01)
-#define CRRES_ERR_API_BUTTON_OUT_OF_BOUNDS       CRIA_RES_TYPEDEF(0x8A02)
-#define CRRES_ERR_API_INPUTSIM_INIT_FAILED       CRIA_RES_TYPEDEF(0x8A03)
-#define CRRES_ERR_API_OS_UNSUPPORTED             CRIA_RES_TYPEDEF(0x8A04)
+#define CRRES_ERR_API_OS_UNSUPPORTED             CRIA_RES_TYPEDEF(0x8A01)
+#define CRRES_ERR_API_KEY_OUT_OF_BOUNDS          CRIA_RES_TYPEDEF(0x8A02)
+#define CRRES_ERR_API_BUTTON_OUT_OF_BOUNDS       CRIA_RES_TYPEDEF(0x8A03)
+#define CRRES_ERR_API_INPUTSIM_INIT_FAILED       CRIA_RES_TYPEDEF(0x8A04)
+#define CRRES_ERR_API_WINDOW_INIT_FAILED         CRIA_RES_TYPEDEF(0x8A05)
+#define CRRES_ERR_API_WINDOW_TITLE_NOT_FOUND     CRIA_RES_TYPEDEF(0x8A06)
 
 /* //////////////////////////////////////////////////////////////////////////////// */
 // // CRRES_SOURCE_UTILS //
@@ -168,6 +153,7 @@ namespace cria_ai {
 					CRIA_SWITCH_CRRESULT(CRRES_ERR_TIMING_THREADED_YAY_MULTI);
 					CRIA_SWITCH_CRRESULT(CRRES_ERR_MALLOC_FAILED);
 					CRIA_SWITCH_CRRESULT(CRRES_ERR_NEW_FAILED);
+					CRIA_SWITCH_CRRESULT(CRRES_ERR_MAKE_SHARED_FAILED);
 
 					default:
 						return String("CRRESULT_UNNAMED_RESULT");
@@ -190,10 +176,12 @@ namespace cria_ai {
 					CRIA_SWITCH_CRRESULT(CRRES_OK_API_INPUTSIM_TARGET_NOT_FOCUSED); 
 					CRIA_SWITCH_CRRESULT(CRRES_OK_API_INPUTSIM_CURSOR_OUTSIDE);
 
+					CRIA_SWITCH_CRRESULT(CRRES_ERR_API_OS_UNSUPPORTED);
 					CRIA_SWITCH_CRRESULT(CRRES_ERR_API_KEY_OUT_OF_BOUNDS);
 					CRIA_SWITCH_CRRESULT(CRRES_ERR_API_BUTTON_OUT_OF_BOUNDS);
 					CRIA_SWITCH_CRRESULT(CRRES_ERR_API_INPUTSIM_INIT_FAILED);
-					CRIA_SWITCH_CRRESULT(CRRES_ERR_API_OS_UNSUPPORTED);
+					CRIA_SWITCH_CRRESULT(CRRES_ERR_API_WINDOW_INIT_FAILED);
+					CRIA_SWITCH_CRRESULT(CRRES_ERR_API_WINDOW_TITLE_NOT_FOUND);
 
 					default:
 						return String("CRRESULT_UNNAMED_RESULT");

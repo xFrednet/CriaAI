@@ -163,11 +163,6 @@ namespace cria_ai { namespace api { namespace win {
 		m_OldMousePos = newPos;
 	}
 
-	void CRWinInputLogger::newTargetWindow(const String& title)
-	{
-		m_ClientArea = win::GetClientArea(title);
-	}
-
 }}}
 
 #endif //CRIA_OS_WIN

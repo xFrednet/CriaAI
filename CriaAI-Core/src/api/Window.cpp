@@ -1,18 +1,18 @@
 /******************************************************************************
-* BmpRenderer - A library that can render and display bitmaps.                *
-*               <https://github.com/xFrednet/BmpRenderer>                     *
+* Cria  - The worst artificial intelligence on the market.                    *
+*         <https://github.com/xFrednet/CriaAI>                                *
 *                                                                             *
 * =========================================================================== *
-* Copyright (C) 2017, xFrednet <xFrednet@gmail.com>                           *
+* Copyright (C) 2017, 2018, xFrednet <xFrednet@gmail.com>                     *
 *                                                                             *
 * This software is provided 'as-is', without any express or implied warranty. *
 * In no event will the authors be held liable for any damages arising from    *
 * the use of this software.                                                   *
 *                                                                             *
 * Permission is hereby granted, free of charge, to anyone to use this         *
-* software for any purpose(including commercial applications), including the  *
-* rights to use, copy, modify, merge, publish, distribute, sublicense, and/or *
-* sell copies of this software, subject to the following conditions:          *
+* software for any purpose, including the rights to use, copy, modify,        *
+* merge, publish, distribute, sublicense, and/or sell copies of this          *
+* software, subject to the following conditions:                              *
 *                                                                             *
 *   1.  The origin of this software must not be misrepresented; you           *
 *       must not claim that you wrote the original software. If you           *
@@ -30,47 +30,35 @@
 *       distribution.                                                         *
 *                                                                             *
 ******************************************************************************/
+#include "Window.h"
+#include "win/WinWindow.h"
 
-#pragma once
+namespace cria_ai { namespace api {
 
-#include "../Window.hpp"
-
-#if 0
-
-#include <windows.h>
-
-namespace bmp_renderer { namespace api {
-	
-	LRESULT CALLBACK WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
-
-	class WinWindow : public Window
+	CRWindowPtr CRWindow::CreateInstance(const String& title, crresult* result)
 	{
-	private:
-		friend LRESULT CALLBACK WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+		CRWindowPtr window = std::make_shared<win::CRWinWindow>(title);
+		if (!window.get())
+		{
+			if (result) 
+				*result = CRRES_ERR_MAKE_SHARED_FAILED;
+			return window;
+		}
 
-		HWND m_Hwnd;
+		crresult res = window.get()->init(title);
+		if (CR_FAILED(res))
+			window.reset();
+		if (result)
+			*result = res;
 
-		BITMAPINFO m_BmpInfo;
-		HBITMAP m_HBitmap;
-		unsigned m_BmpWidth;
-		unsigned m_BmpHeight;
+		return window;
+	}
 
-	public:
-		WinWindow(const char* name, unsigned width, unsigned height, WINDOW_ON_EXIT_ACTION onExit);
-		~WinWindow();
+	CRWindow::CRWindow(const String& title)
+		: m_Title(title)
+	{
+	}
 
-		bool update() override;
-		void loadBitmap(const Bitmap* bitmap) override;
-
-		void setVisibility(bool visible) override;
-		bool getVisibility() const override;
-
-		void destroy() override;
-		bool isValid() const override;
-
-		inline HWND getHandle() { return m_Hwnd; }
-		inline HBITMAP getBitmapHandle() { return m_HBitmap; }
-	};
-
+	CRWindow::~CRWindow()
+	{}
 }}
-#endif

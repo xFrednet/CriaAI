@@ -35,6 +35,7 @@
 #include "../Common.hpp"
 
 #include "InputUtil.h"
+#include "Window.h"
 
 namespace cria_ai { namespace api {
 
@@ -65,8 +66,9 @@ namespace cria_ai { namespace api {
 		bool m_KeyStates[CR_KEY_ID_LAST + 1];
 		bool m_MButtonStates[CR_MBUTTON_ID_LAST + 1];
 		CR_VEC2I m_MousePos;
-		CR_RECT m_ClientArea;
 		int m_MouseWheelPos;
+
+		CRWindowPtr m_TargetWindow;
 
 		CRInputLogger();
 		virtual crresult init() = 0;
@@ -83,8 +85,6 @@ namespace cria_ai { namespace api {
 		void processMWheel(int change);
 
 		virtual void update() = 0;
-
-		virtual void newTargetWindow(const String& title) = 0;
 
 		/*
 		 * static functions
@@ -166,7 +166,12 @@ namespace cria_ai { namespace api {
 		inline static CR_VEC2I GetMouseClientPos()
 		{
 			if (s_Instance)
-				return s_Instance->m_MousePos - s_Instance->m_ClientArea.Pos;
+			{
+				if (s_Instance->m_TargetWindow.get())
+					return s_Instance->m_MousePos - s_Instance->m_TargetWindow->getClientArea().Pos;
+				
+				return s_Instance->m_MousePos;
+			}
 
 			return CR_VEC2I(0, 0);
 		}
@@ -178,10 +183,10 @@ namespace cria_ai { namespace api {
 			return 0;
 		}
 
-		inline static void SetTargetWindow(const String& title = "")
+		inline static void SetTargetWindow(const CRWindowPtr& window)
 		{
 			if (s_Instance)
-				s_Instance->newTargetWindow(title);
+				s_Instance->m_TargetWindow = window;
 		}
 	};
 

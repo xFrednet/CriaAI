@@ -182,6 +182,13 @@ int main(int argc, char* argv)
 	crresult r = api::CRInputLogger::InitInstance();
 	api::CRInputLogger::AddKeyCallback(keyInput);
 
+	api::CRWindowPtr targetWin = api::CRWindow::CreateInstance(BOI_TITLE, &r);
+	printf("api::CRWindow::CreateInstance: %s \n", GetCRResultName(r).c_str());
+	api::CRInputLogger::SetTargetWindow(targetWin);
+	CR_RECT rect = (targetWin.get() ? targetWin->getClientArea() : CR_RECT(0, 0, 0, 0));
+	std::cout << "Target Win: " << targetWin.get() << " " << rect.X << " " << rect.Y << " " << rect.Width << " " << rect.Height << std::endl;
+
+
 	for (int timer = 0; timer < 100000; timer++)
 	{
 		api::CRInputLogger::Update();
@@ -191,7 +198,8 @@ int main(int argc, char* argv)
 		{
 			printf("[%s] ", (api::CRInputLogger::GetMButtonState(CR_MBUTTON_LEFT) ? "X" : " "));
 			printf("[%s] ", (api::CRInputLogger::GetMButtonState(CR_MBUTTON_MIDDLE) ? "X" : " "));
-			printf("[%s]\n", (api::CRInputLogger::GetMButtonState(CR_MBUTTON_RIGHT) ? "X" : " "));
+			printf("[%s] ", (api::CRInputLogger::GetMButtonState(CR_MBUTTON_RIGHT) ? "X" : " "));
+			printf("POS(%4i, %4i) \n", api::CRInputLogger::GetMouseClientPos().X, api::CRInputLogger::GetMouseClientPos().Y);
 		}
 	}
 
