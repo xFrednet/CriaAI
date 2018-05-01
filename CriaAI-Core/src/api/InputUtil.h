@@ -100,8 +100,7 @@ namespace cria_ai {
 		CR_KEY_Y                       = 0x59,
 		CR_KEY_Z                       = 0x5A,
 
-		CR_KEY_LWIN                    = 0x5B,
-		CR_KEY_RWIN                    = 0x5C,
+		CR_KEY_WIN                     = 0x5B,
 		CR_KEY_APPS                    = 0x5D,
 
 		/*
@@ -150,6 +149,8 @@ namespace cria_ai {
 
 		CR_KEY_ID_LAST                 = 0x87
 	};
+
+	CR_KEY_ID CRGetCRKeyIDFromWinAsciiKeyID(const uint8 winKeyID);
 
 	inline String CRGetKeyIDName(const CR_KEY_ID& keyID)
 	{
@@ -267,10 +268,8 @@ namespace cria_ai {
 				return "[DIVIDE]";
 
 
-			case CR_KEY_LWIN:
-				return "[LWIN]";
-			case CR_KEY_RWIN:
-				return "[RWIN]";
+			case CR_KEY_WIN:
+				return "[WIN]";
 			case CR_KEY_APPS:
 				return "[APPS]";
 

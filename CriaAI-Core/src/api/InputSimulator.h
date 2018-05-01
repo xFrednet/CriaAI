@@ -3,6 +3,7 @@
 #include "../Common.hpp"
 
 #include "InputUtil.h"
+#include "Window.h"
 
 #ifndef CR_INPUTSIM_CLICK_TIME
 #	define CR_INPUTSIM_CLICK_TIME_MS             0
@@ -13,9 +14,8 @@ namespace cria_ai { namespace api {
 	class CRInputSimulator
 	{
 	public:
-		static CRInputSimulator* GetInstance(const String& target = "", crresult* result = nullptr);
+		static CRInputSimulator* GetInstance(const CRWindowPtr& targetWindow = nullptr, crresult* result = nullptr);
 	protected:
-		String m_TargetWindowTitle;
 		/**
 		 * \brief This arrays are maintained by the api specific sub class.
 		 */
@@ -24,11 +24,8 @@ namespace cria_ai { namespace api {
 		* \brief This arrays are maintained by the api specific sub class. (at least they should be ;P)
 		*/
 		bool m_MouseButtonState[CR_MOUSE_MAX_BUTTON_COUNT]{};
-		/**
-		 * \brief These client position is relative to the client window. 
-		 * The offset are the X and Y coordinates of the m_MouseBounderies.
-		 */
-		CR_RECT m_MouseBounderies;
+
+		CRWindowPtr m_TargetWindow;
 
 		/*
 		 * Init
@@ -50,7 +47,7 @@ namespace cria_ai { namespace api {
 		virtual crresult simulateMouseMove(CR_VEC2I motion) = 0;
 		virtual crresult simulateMouseSet(CR_VEC2I pos) = 0;
 
-		virtual void newTargetWindowTitle(const String& oldTitle) = 0;
+		virtual crresult newTargetWindow();
 
 	public:
 		virtual ~CRInputSimulator();
@@ -60,13 +57,7 @@ namespace cria_ai { namespace api {
 		/*
 		* Window target
 		*/
-		/**
-		 * \brief 
-		 * 
-		 * \param newWindowTarget 
-		 * 
-		 */
-		void setNewWindowTarget(const String& newWindowTarget);
+		crresult setWindowTarget(CRWindowPtr targetWindow);
 
 		/*
 		 * keyboard interaction
@@ -79,10 +70,10 @@ namespace cria_ai { namespace api {
 		/*
 		 * Mouse button interaction
 		 */
-		void toggleButton(uint key);
-		void clickButton(uint key);
-		void setButtonState(uint button, bool state);
-		bool getButtonState(uint key);
+		void toggleButton(uint buttonID);
+		void clickButton(uint buttonID);
+		void setButtonState(uint buttonID, bool state);
+		bool getButtonState(uint buttonID);
 		void scrollMouse(int amount);
 
 		/*

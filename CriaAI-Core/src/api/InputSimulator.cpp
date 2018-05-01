@@ -3,7 +3,7 @@
 #include "win/WinInputSimulator.h"
 
 namespace cria_ai { namespace api {
-	CRInputSimulator* CRInputSimulator::GetInstance(const String& target, crresult* result)
+	CRInputSimulator* CRInputSimulator::GetInstance(const CRWindowPtr& targetWindow, crresult* result)
 	{
 		CRInputSimulator* inputSim = nullptr;
 
@@ -25,27 +25,38 @@ namespace cria_ai { namespace api {
 		 * init and error check
 		 */
 		crresult res = inputSim->init();
-		if (result)
-			*result = res;
 		if (CR_FAILED(res))
 		{
+			*result = res;
+			
 			delete inputSim;
-			inputSim = nullptr;
+			return inputSim;
 		}
 		/*
 		 * target the selected window
 		 */
-		//inputSim->m_TargetWindowTitle.clear();
-		inputSim->setNewWindowTarget(target);
+		res = inputSim->setWindowTarget(targetWindow);
+		if (CR_FAILED(res))
+		{
+			*result = res;
+
+			delete inputSim;
+			return inputSim;
+		}
 
 		/*
 		 * return
 		 */
+		if (result)
+			*result = CRRES_OK;
 		return inputSim;
 	}
 
+	crresult CRInputSimulator::newTargetWindow()
+	{
+		return CRRES_OK;
+	}
 	CRInputSimulator::CRInputSimulator()
-		: m_TargetWindowTitle("")
 	{
 		memset(m_KeyBoardKeyStates, (int)false, sizeof(bool) * CR_KEYBOARD_MAX_KEY_COUNT);
 		memset(m_MouseButtonState, (int)false, sizeof(bool) * CR_MOUSE_MAX_BUTTON_COUNT);
@@ -63,20 +74,22 @@ namespace cria_ai { namespace api {
 	/*
 	* Window target
 	*/
-	void CRInputSimulator::setNewWindowTarget(const String& newWindowTarget)
+	crresult CRInputSimulator::setWindowTarget(CRWindowPtr targetWindow)
 	{
-		if (!m_TargetWindowTitle.empty() && m_TargetWindowTitle == newWindowTarget)
-			return; /* the window title is the same */
+		crresult result;
 
-		String oldTitle = m_TargetWindowTitle;
-		m_TargetWindowTitle = newWindowTarget;
-
-		newTargetWindowTitle(oldTitle);
+		if (!targetWindow.get())
+		{
+			targetWindow = CRWindow::CreateDestopWindowInstance(&result);
 		
-		CRIA_INFO_PRINTF("The new target window hat the boundaries: X: %i, Y: %i, Width: %i, Height: %i (Title %s)",
-			m_MouseBounderies.X, m_MouseBounderies.Y, m_MouseBounderies.Width, m_MouseBounderies.Height, m_TargetWindowTitle.c_str());
+			if (CR_FAILED(result))
+				return result;
+		}
 
-		setMouse(CR_VEC2I(m_MouseBounderies.Width / 2, m_MouseBounderies.Height / 2));
+		CR_RECT size = targetWindow->getClientArea();
+		setMouse(CR_VEC2I(size.Width / 2, size.Height / 2));
+
+		return CRRES_OK;
 	}
 
 	/*
@@ -120,43 +133,43 @@ namespace cria_ai { namespace api {
 	}
 
 	/*
-	* Mouse button interaction
+	* Mouse buttonID interaction
 	*/
-	void CRInputSimulator::toggleButton(uint button)
+	void CRInputSimulator::toggleButton(uint buttonID)
 	{
-		if (button >= CR_MOUSE_MAX_BUTTON_COUNT)
+		if (buttonID >= CR_MOUSE_MAX_BUTTON_COUNT)
 			return;
 
-		if (m_MouseButtonState[button])
-			simulateButtonRelease(button);
+		if (m_MouseButtonState[buttonID])
+			simulateButtonRelease(buttonID);
 		else
-			simulateButtonPress(button);
+			simulateButtonPress(buttonID);
 	}
-	void CRInputSimulator::clickButton(uint button)
+	void CRInputSimulator::clickButton(uint buttonID)
 	{
-		if (button >= CR_MOUSE_MAX_BUTTON_COUNT)
+		if (buttonID >= CR_MOUSE_MAX_BUTTON_COUNT)
 			return;
 
-		simulateButtonPress(button);
+		simulateButtonPress(buttonID);
 		if (CR_INPUTSIM_CLICK_TIME_MS == 0)
-			simulateButtonRelease(button);
+			simulateButtonRelease(buttonID);
 	}
-	void CRInputSimulator::setButtonState(uint button, bool state)
+	void CRInputSimulator::setButtonState(uint buttonID, bool state)
 	{
-		if (button >= CR_MOUSE_MAX_BUTTON_COUNT)
+		if (buttonID >= CR_MOUSE_MAX_BUTTON_COUNT)
 			return;
 
 		if (state)
-			simulateButtonPress(button);
+			simulateButtonPress(buttonID);
 		else
-			simulateButtonRelease(button);
+			simulateButtonRelease(buttonID);
 	}
-	bool CRInputSimulator::getButtonState(uint button)
+	bool CRInputSimulator::getButtonState(uint buttonID)
 	{
-		if (button >= CR_MOUSE_MAX_BUTTON_COUNT)
+		if (buttonID >= CR_MOUSE_MAX_BUTTON_COUNT)
 			return false;
 
-		return m_KeyBoardKeyStates[button];
+		return m_KeyBoardKeyStates[buttonID];
 	}
 
 	void CRInputSimulator::scrollMouse(int amount)
@@ -170,15 +183,18 @@ namespace cria_ai { namespace api {
 	void CRInputSimulator::moveMouse(CR_VEC2I motion)
 	{
 		CR_VEC2I mousePos = getMousePos();
-		CR_CLAMP_VALUE(motion.X, -mousePos.X, (int)m_MouseBounderies.Width - mousePos.X - 1);
-		CR_CLAMP_VALUE(motion.Y, -mousePos.Y, (int)m_MouseBounderies.Height - mousePos.Y - 1);
+		CR_RECT bounderies = ((m_TargetWindow.get()) ? m_TargetWindow->getClientArea() : CR_RECT(0, 0, 0, 0));
+		
+		CR_CLAMP_VALUE(motion.X, -mousePos.X, (int)bounderies.Width - mousePos.X - 1);
+		CR_CLAMP_VALUE(motion.Y, -mousePos.Y, (int)bounderies.Height - mousePos.Y - 1);
 
 		simulateMouseMove(motion);
 	}
 	void CRInputSimulator::setMouse(CR_VEC2I pos)
 	{
-		CR_CLAMP_VALUE(pos.X, 0, (int)m_MouseBounderies.Width - 1);
-		CR_CLAMP_VALUE(pos.Y, 0, (int)m_MouseBounderies.Height - 1);
+		CR_RECT bounderies = ((m_TargetWindow.get()) ? m_TargetWindow->getClientArea() : CR_RECT(0, 0, 0, 0));
+		CR_CLAMP_VALUE(pos.X, 0, (int)bounderies.Width - 1);
+		CR_CLAMP_VALUE(pos.Y, 0, (int)bounderies.Height - 1);
 
 		simulateMouseSet(pos);
 	}

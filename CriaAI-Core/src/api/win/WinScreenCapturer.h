@@ -6,11 +6,11 @@
 
 #ifdef CRIA_OS_WIN
 
-#include "WinContext.h"
+#include "WinOSContext.h"
+#include "WinWindow.h"
 
 namespace cria_ai { namespace api { namespace win {
 	
-
 	/*
 	 * This capturer is currently only able to capture areas on the primary monitor.
 	 */
@@ -25,11 +25,11 @@ namespace cria_ai { namespace api { namespace win {
 
 	public:
 		CRWinScreenCapturer();
-		crresult init(const CR_RECT& cArea, uint8 displayNo) override;
+		crresult init(CRWindowPtr target) override;
 		
 		~CRWinScreenCapturer();
 
-		crresult updateRectangle(CR_RECT area) override;
+		crresult newTarget(CRWindowPtr target) override;
 		crresult grabFrame() override;
 	};
 

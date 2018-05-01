@@ -30,43 +30,45 @@
 *       distribution.                                                         *
 *                                                                             *
 ******************************************************************************/
-#include "Window.h"
-#include "win/WinWindow.h"
+#include "WinOSContext.h"
+#include <thread>
 
-namespace cria_ai { namespace api {
-	CRWindowPtr CRWindow::CreateDestopWindowInstance(crresult* result)
-	{
-		return CreateInstance(CR_DESTOP_WINDOW_TITLE, result);
-	}
-	CRWindowPtr CRWindow::CreateInstance(const String& title, crresult* result)
-	{
-#ifdef CRIA_OS_WIN
-		CRWindowPtr window = std::make_shared<win::CRWinWindow>(title);
-#else
-		CRWindowPtr window = nullptr;
-#endif
-		
-		if (!window.get())
-		{
-			if (result) 
-				*result = CRRES_ERR_MAKE_SHARED_FAILED;
-			return window;
-		}
-
-		crresult res = window.get()->init(title);
-		if (CR_FAILED(res))
-			window.reset();
-		if (result)
-			*result = res;
-
-		return window;
-	}
-
-	CRWindow::CRWindow(const String& title)
-		: m_Title(title)
+namespace cria_ai { namespace api { namespace win {
+	CRWinOSContext::CRWinOSContext()
 	{
 	}
 
-	CRWindow::~CRWindow()
-	{}
-}}
+	CRWinOSContext::~CRWinOSContext()
+	{
+	}
+
+	crresult CRWinOSContext::init()
+	{
+		return CRRES_OK;
+	}
+
+	void CRWinOSContext::sleep(uint sec, uint ms)
+	{
+		std::this_thread::sleep_for(std::chrono::seconds(sec) + std::chrono::milliseconds(ms));
+	}
+
+	CR_VEC2I CRWinOSContext::getMousePos()
+	{
+		POINT p;
+		GetCursorPos(&p);
+
+		return CR_VEC2I(p.x, p.y);
+	}
+
+	CR_RECT CRWinOSContext::getVirtualScreenClientArea()
+	{
+		CR_RECT vArea;
+
+		vArea.X = GetSystemMetrics(SM_XVIRTUALSCREEN);
+		vArea.Y = GetSystemMetrics(SM_YVIRTUALSCREEN);
+		vArea.Width = GetSystemMetrics(SM_CXVIRTUALSCREEN);
+		vArea.Height = GetSystemMetrics(SM_CYVIRTUALSCREEN);
+
+		return vArea;
+	}
+}}}

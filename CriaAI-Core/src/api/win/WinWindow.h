@@ -37,7 +37,7 @@
 
 #ifdef CRIA_OS_WIN
 
-#include "WinContext.h"
+#include "WinOSContext.h"
 
 namespace cria_ai { namespace api { namespace win {
 	
@@ -52,6 +52,8 @@ namespace cria_ai { namespace api { namespace win {
 	public:
 		CR_RECT getClientArea() const override;
 		bool isFocussed() const override;
+
+		HWND getHWND();
 	};
 
 }}}

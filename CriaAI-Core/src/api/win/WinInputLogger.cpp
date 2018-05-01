@@ -117,7 +117,7 @@ namespace cria_ai { namespace api { namespace win {
 		: m_KeyboardHook(nullptr),
 		m_KeyLayout(nullptr),
 		m_MouseHook(nullptr),
-		m_OldMousePos(win::GetMousePos())
+		m_OldMousePos(CROSContext::GetMousePos())
 	{
 	}
 	CRWinInputLogger::~CRWinInputLogger()

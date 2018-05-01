@@ -34,6 +34,9 @@
 
 #include "../Common.hpp"
 
+
+#define CR_DESTOP_WINDOW_TITLE         ""
+
 namespace cria_ai { namespace api {
 	
 	class CRWindow;
@@ -43,6 +46,7 @@ namespace cria_ai { namespace api {
 	class CRWindow
 	{
 	public:
+		static CRWindowPtr CreateDestopWindowInstance(crresult* result = nullptr); //TODO
 		static CRWindowPtr CreateInstance(const String& title, crresult* result = nullptr);
 	protected:
 		String  m_Title;

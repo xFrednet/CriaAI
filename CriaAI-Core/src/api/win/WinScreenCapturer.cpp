@@ -16,21 +16,16 @@ namespace cria_ai { namespace api { namespace win {
 		m_BmpIntBuffer(nullptr)
 	{
 	}
-	crresult CRWinScreenCapturer::init(const CR_RECT& cArea, uint8 displayNo)
+	crresult CRWinScreenCapturer::init(CRWindowPtr target)
 	{
 		m_SrcHwnd = GetDesktopWindow();
 		if (!m_SrcHwnd)
 			return CRRES_ERR_WIN_UNKNOWN;
 
 		/*
-		 * update rectangle -> i.e. creating the bitmaps with all necessary information
-		 */
-		updateRectangle(cArea);
-
-		/*
 		 * Return
 		 */
-		return CRRES_ERR_FUNCTION_NOT_IMPLEMENTED;
+		return CRRES_OK;
 	}
 
 	CRWinScreenCapturer::~CRWinScreenCapturer()
@@ -42,7 +37,7 @@ namespace cria_ai { namespace api { namespace win {
 			free(m_BmpIntBuffer);
 	}
 
-	crresult CRWinScreenCapturer::updateRectangle(CR_RECT area)
+	crresult CRWinScreenCapturer::newTarget(CRWindowPtr target)
 	{
 		if (!m_SrcHwnd)
 			return CRRES_ERR_MISSING_INFORMATION;
@@ -57,19 +52,9 @@ namespace cria_ai { namespace api { namespace win {
 		}
 
 		/*
-		* Verification of the client area
+		* retrieving the client area
 		*/
-		if (area.Width == 0 || area.Height == 0) {
-			if (area.X != 0 || area.Y != 0 ||
-				area.Width != 0 || area.Height != 0)
-				return CRRES_ERR_INVALID_DIMENSIONS;
-
-			RECT destopRect;
-			GetWindowRect(GetDesktopWindow(), &destopRect);
-			area.Width  = destopRect.right - destopRect.left;
-			area.Height = destopRect.bottom - destopRect.top;
-		}
-		m_Area = area;
+		CR_RECT area = m_Target->getClientArea();
 
 		/*
 		 * creating a new windows bitmap
@@ -114,10 +99,10 @@ namespace cria_ai { namespace api { namespace win {
 		/*
 		 * Recreating the last frame bitmap
 		 */
-		CR_FLOAT_BITMAP* newFrameBmp = CreateFBmp(area.Width, area.Height, CR_SCREENCAP_CHANNEL_COUNT);
+		CR_FLOAT_BITMAP* newFrameBmp = CRCreateFBmp(area.Width, area.Height, CR_SCREENCAP_CHANNEL_COUNT);
 		CR_FLOAT_BITMAP* oldFrameBmp = m_LastFrame;
 		m_LastFrame = newFrameBmp;
-		DeleteFBmp(oldFrameBmp);
+		CRDeleteFBmp(oldFrameBmp);
 		if (!newFrameBmp)
 			return CRRES_ERR_UTILS_FAILED_TO_CREATE_FBMP;
 
@@ -147,13 +132,15 @@ namespace cria_ai { namespace api { namespace win {
 			return CRRES_ERR_WIN_FAILED_TO_CREATE_DC;
 		}
 
+
 		/*
 		 * Getting the Data
 		 */
-		if (!BitBlt(dstDC, 0, 0, m_Area.Width, m_Area.Height, srcDC, m_Area.X, m_Area.Y, SRCCOPY) || /* copy data to the win bmp */
-			GetDIBits(dstDC, m_WinBmp, 0, m_Area.Height, m_BmpIntBuffer, &m_WinBmpInfo, DIB_RGB_COLORS) != (int)m_Area.Height) /* copy from win bmp to the int buffer*/
+		CR_RECT area = m_Target->getClientArea();
+		if (!BitBlt(dstDC, 0, 0, area.Width, area.Height, srcDC, area.X, area.Y, SRCCOPY) || /* copy data to the win bmp */
+			GetDIBits(dstDC, m_WinBmp, 0, area.Height, m_BmpIntBuffer, &m_WinBmpInfo, DIB_RGB_COLORS) != (int)area.Height) /* copy from win bmp to the int buffer*/
 			return CRRES_ERR_WIN_UNKNOWN;
-		for (uint pxNo = 0; pxNo < m_Area.Width * m_Area.Height * CR_SCREENCAP_CHANNEL_COUNT; pxNo += 4)
+		for (uint pxNo = 0; pxNo < area.Width * area.Height * CR_SCREENCAP_CHANNEL_COUNT; pxNo += 4)
 		{
 			m_LastFrame->Data[pxNo + 0] = ((float)m_BmpIntBuffer[pxNo + 2]) / 255.0f; /* R */
 			m_LastFrame->Data[pxNo + 1] = ((float)m_BmpIntBuffer[pxNo + 1]) / 255.0f; /* G */

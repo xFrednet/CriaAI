@@ -103,10 +103,13 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClCompile Include="Dependencies\BmpRenderer\src\Renderer.cpp" />
     <ClCompile Include="src\api\FileSystem.cpp" />
     <ClCompile Include="src\api\InputLogger.cpp" />
+    <ClCompile Include="src\api\InputUtil.cpp" />
+    <ClCompile Include="src\api\OSContext.cpp" />
     <ClCompile Include="src\api\ScreenCapturer.cpp" />
     <ClCompile Include="src\api\Window.cpp" />
     <ClCompile Include="src\api\win\WinInputLogger.cpp" />
     <ClCompile Include="src\api\win\WinInputSimulator.cpp" />
+    <ClCompile Include="src\api\win\WinOSContext.cpp" />
     <ClCompile Include="src\api\win\WinScreenCapturer.cpp" />
     <ClCompile Include="src\api\InputSimulator.cpp" />
     <ClCompile Include="src\api\win\WinWindow.cpp" />
@@ -131,9 +134,10 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="src\api\InputLogger.h" />
     <ClInclude Include="src\api\InputSimulator.h" />
     <ClInclude Include="src\api\InputUtil.h" />
+    <ClInclude Include="src\api\OSContext.h" />
     <ClInclude Include="src\api\ScreenCapturer.h" />
     <ClInclude Include="src\api\Window.h" />
-    <ClInclude Include="src\api\win\WinContext.h" />
+    <ClInclude Include="src\api\win\WinOSContext.h" />
     <ClInclude Include="src\api\win\WinInputLogger.h" />
     <ClInclude Include="src\api\win\WinInputSimulator.h" />
     <ClInclude Include="src\api\win\WinScreenCapturer.h" />

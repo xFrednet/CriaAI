@@ -53,30 +53,30 @@ void MatrixTest()
 void BmpTest()
 {
 
-	CR_FLOAT_BITMAP* bmp = LoadFBmp("bmptest/test.bmp");
+	CR_FLOAT_BITMAP* bmp = CRLoadFBmp("bmptest/test.bmp");
 
 	for (int loop = 0; loop < 10; loop++) {
 		clock_t timer = clock();
 
-		DeleteFBmp(PoolBitmap(bmp, 2));
-		DeleteFBmp(PoolBitmap(bmp, 3));
-		DeleteFBmp(PoolBitmap(bmp, 9));
+		CRDeleteFBmp(CRPoolBitmap(bmp, 2));
+		CRDeleteFBmp(CRPoolBitmap(bmp, 3));
+		CRDeleteFBmp(CRPoolBitmap(bmp, 9));
 
 		std::cout << "Total: " << ((clock() - timer)) << std::endl;
 	}
-	CR_FLOAT_BITMAP* poolBmp2 = PoolBitmap(bmp, 2);
-	CR_FLOAT_BITMAP* poolBmp3 = PoolBitmap(bmp, 3);
-	CR_FLOAT_BITMAP* poolBmp9 = PoolBitmap(bmp, 9);
+	CR_FLOAT_BITMAP* poolBmp2 = CRPoolBitmap(bmp, 2);
+	CR_FLOAT_BITMAP* poolBmp3 = CRPoolBitmap(bmp, 3);
+	CR_FLOAT_BITMAP* poolBmp9 = CRPoolBitmap(bmp, 9);
 
-	SaveBitmap(bmp, "bmptest/test2.bmp");
-	SaveBitmap(poolBmp2, "bmptest/pool2.bmp");
-	SaveBitmap(poolBmp3, "bmptest/pool3.bmp");
-	SaveBitmap(poolBmp9, "bmptest/pool9.bmp");
+	CRSaveBitmap(bmp, "bmptest/test2.bmp");
+	CRSaveBitmap(poolBmp2, "bmptest/pool2.bmp");
+	CRSaveBitmap(poolBmp3, "bmptest/pool3.bmp");
+	CRSaveBitmap(poolBmp9, "bmptest/pool9.bmp");
 
-	DeleteFBmp(bmp);
-	DeleteFBmp(poolBmp2);
-	DeleteFBmp(poolBmp3);
-	DeleteFBmp(poolBmp9);
+	CRDeleteFBmp(bmp);
+	CRDeleteFBmp(poolBmp2);
+	CRDeleteFBmp(poolBmp3);
+	CRDeleteFBmp(poolBmp9);
 
 }
 
@@ -106,18 +106,22 @@ void screenCap10Sec()
 {
 	sleep(10);
 
-	CR_RECT cArea = api::CRScreenCapturer::GetClientArea(BOI_TITLE);
-	std::cout << "window area: " << cArea.X << " " << cArea.Y << " " << cArea.Width << " " << cArea.Height << std::endl;
 
 	crresult res = CRRES_SUCCESS;
-	api::CRScreenCapturer* capturer = api::CRScreenCapturer::CreateInstance(cArea, 0, &res);
+	api::CRWindowPtr window = api::CRWindow::CreateInstance(BOI_TITLE, &res);
+	if (CR_FAILED(res))
+		return;
+	api::CRScreenCapturer* capturer = api::CRScreenCapturer::CreateInstance(window, &res);
 
+	CR_RECT cArea = window->getClientArea();
+	std::cout << "window area: " << cArea.X << " " << cArea.Y << " " << cArea.Width << " " << cArea.Height << std::endl;
+	
 	uint capNo = 0;
 	while (true) {
 		capturer->grabFrame();
 		CR_FLOAT_BITMAP* frame = capturer->getLastFrame();
 		String capName = String("cap/Capturer") + std::to_string(capNo++) + String(".bmp");
-		SaveBitmap(frame, capName.c_str());
+		CRSaveBitmap(frame, capName.c_str());
 		std::cout << "Frame: " << capName.c_str() << std::endl;
 
 		sleep(10);
@@ -130,7 +134,10 @@ void screenCap10Sec()
 bool TestInputSim()
 {
 	crresult result;
-	api::CRInputSimulator* inputSim = api::CRInputSimulator::GetInstance("", &result);
+	api::CRWindowPtr window = api::CRWindow::CreateInstance(BOI_TITLE, &result);
+	if (CR_FAILED(result))
+		return false;
+	api::CRInputSimulator* inputSim = api::CRInputSimulator::GetInstance(window, &result);
 
 	POINT p;
 	CR_VEC2I vec;
@@ -196,9 +203,9 @@ int main(int argc, char* argv)
 
 		if (timer % 100 == 0)
 		{
-			printf("[%s] ", (api::CRInputLogger::GetMButtonState(CR_MBUTTON_LEFT) ? "X" : " "));
+			printf("[%s] ", (api::CRInputLogger::GetMButtonState(CR_MBUTTON_LEFT)   ? "X" : " "));
 			printf("[%s] ", (api::CRInputLogger::GetMButtonState(CR_MBUTTON_MIDDLE) ? "X" : " "));
-			printf("[%s] ", (api::CRInputLogger::GetMButtonState(CR_MBUTTON_RIGHT) ? "X" : " "));
+			printf("[%s] ", (api::CRInputLogger::GetMButtonState(CR_MBUTTON_RIGHT)  ? "X" : " "));
 			printf("POS(%4i, %4i) \n", api::CRInputLogger::GetMouseClientPos().X, api::CRInputLogger::GetMouseClientPos().Y);
 		}
 	}

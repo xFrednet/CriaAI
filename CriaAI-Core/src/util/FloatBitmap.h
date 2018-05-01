@@ -26,12 +26,12 @@ namespace cria_ai
 		float* Data; /* r, g, b, a*/
 	} CR_FLOAT_BITMAP;
 
-	CR_FLOAT_BITMAP* CreateFBmp(uint32_t width, uint32_t height, uint8_t floatsPerPixel);
-	CR_FLOAT_BITMAP* LoadFBmp(const char* file);
-	CR_FLOAT_BITMAP* CreateFBmpCopy(CR_FLOAT_BITMAP* bmp);
-	void             DeleteFBmp(CR_FLOAT_BITMAP* bmp);
+	CR_FLOAT_BITMAP* CRCreateFBmp(uint32_t width, uint32_t height, uint8_t floatsPerPixel);
+	CR_FLOAT_BITMAP* CRLoadFBmp(const char* file);
+	CR_FLOAT_BITMAP* CRCreateFBmpCopy(CR_FLOAT_BITMAP* bmp);
+	void             CRDeleteFBmp(CR_FLOAT_BITMAP* bmp);
 
-	CR_FLOAT_BITMAP* ConvertToFloatsPerPixel(CR_FLOAT_BITMAP const* bmp, uint8_t floatsPerPixel);
+	CR_FLOAT_BITMAP* CRConvertToFloatsPerPixel(CR_FLOAT_BITMAP const* bmp, uint8_t floatsPerPixel);
 
 	/**
 	 * \brief This function converts the content of this bitmap to a bitmap that uses
@@ -41,7 +41,7 @@ namespace cria_ai
 	 * 
 	 * \return 
 	 */
-	bmp_renderer::Bitmap* ConvertToIntBmp(CR_FLOAT_BITMAP const* bmp);
+	bmp_renderer::Bitmap* CRConvertToIntBmp(CR_FLOAT_BITMAP const* bmp);
 
 	/**
 	 * \brief This function tries to save the given bitmap to the provided file.
@@ -54,7 +54,7 @@ namespace cria_ai
 	 * 
 	 * \return This returns true if everything works out (prepare for a false).
 	 */
-	bool             SaveBitmap(CR_FLOAT_BITMAP const* bmp, char const* fileName);
+	bool             CRSaveBitmap(CR_FLOAT_BITMAP const* bmp, char const* fileName);
 
 	/*
 	 * The following functions are used in Convolutional Neural Network.
@@ -75,7 +75,7 @@ namespace cria_ai
 	 * 
 	 * \return This returns a new bitmap with the result of the calculation.
 	 */
-	CR_FLOAT_BITMAP* CalculateFeatureMap(CR_FLOAT_BITMAP const* bitmap, CR_FLOAT_BITMAP const* feature);
+	CR_FLOAT_BITMAP* CRCalculateFeatureMap(CR_FLOAT_BITMAP const* bitmap, CR_FLOAT_BITMAP const* feature);
 	/**
 	 * \brief This scales down the bitmap by creating a pool with the size given by poolSize
 	 * the highest number from this pool is than copied into the resulting bitmap.
@@ -88,7 +88,7 @@ namespace cria_ai
 	 * 
 	 * \return This returns a new bitmap with the result of the pooling.
 	 */
-	CR_FLOAT_BITMAP* PoolBitmap(CR_FLOAT_BITMAP const* bitmap, uint32_t poolSize);
+	CR_FLOAT_BITMAP* CRPoolBitmap(CR_FLOAT_BITMAP const* bitmap, uint32_t poolSize);
 	/**
 	 * \brief  This sets every negative value to zero.
 	 * 
@@ -96,5 +96,5 @@ namespace cria_ai
 	 * 
 	 * \return This returns a new normalized bitmap.
 	 */
-	CR_FLOAT_BITMAP* NormalizeBitmap(CR_FLOAT_BITMAP const* bitmap);
+	CR_FLOAT_BITMAP* CRNormalizeBitmap(CR_FLOAT_BITMAP const* bitmap);
 }

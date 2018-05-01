@@ -5,7 +5,7 @@
 
 #ifdef CRIA_OS_WIN
 
-#include "WinContext.h"
+#include "WinOSContext.h"
 
 namespace cria_ai { namespace api { namespace win {
 	
@@ -13,7 +13,6 @@ namespace cria_ai { namespace api { namespace win {
 	{
 		friend class CRInputSimulator;
 	private:
-		HWND m_TargetWindow;
 		bool m_OriginalMouseAccellState;
 		CR_VEC2F m_MouseSetMultiplayer;
 
@@ -26,8 +25,6 @@ namespace cria_ai { namespace api { namespace win {
 
 	protected:
 		crresult init() override;
-
-		void newTargetWindowTitle(const String& oldTitle) override;
 		
 		crresult simulateKeyPress(uint key) override;
 		crresult simulateKeyRelease(uint key) override;

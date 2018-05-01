@@ -10,7 +10,7 @@
 
 namespace cria_ai
 {
-	CR_FLOAT_BITMAP* CreateFBmp(uint32_t width, uint32_t height, uint8_t floatsPerPixel)
+	CR_FLOAT_BITMAP* CRCreateFBmp(uint32_t width, uint32_t height, uint8_t floatsPerPixel)
 	{
 		CRIA_AUTO_ASSERT(width != 0 && height != 0 && floatsPerPixel != 0,
 			"CreateFloatBmp failed to create a bmp: width %u, height %u, floats per pixel %i",
@@ -34,7 +34,7 @@ namespace cria_ai
 
 		return bmp;
 	}
-	CR_FLOAT_BITMAP* LoadFBmp(const char* file)
+	CR_FLOAT_BITMAP* CRLoadFBmp(const char* file)
 	{
 		CRIA_AUTO_ASSERT(file, "LoadFloatBmp the source file is undefined")
 			if (!file)
@@ -45,7 +45,7 @@ namespace cria_ai
 			return nullptr;
 		}
 
-		CR_FLOAT_BITMAP* bmp = CreateFBmp(bmpIn.width, bmpIn.height, 4);
+		CR_FLOAT_BITMAP* bmp = CRCreateFBmp(bmpIn.width, bmpIn.height, 4);
 
 		for (uint32_t index = 0; index < bmp->Width * bmp->Height * 4; index++) {
 			bmp->Data[index] = (float)bmpIn.rgb_data[index] / 255.0f;
@@ -53,14 +53,14 @@ namespace cria_ai
 
 		return bmp;
 	}
-	CR_FLOAT_BITMAP* CreateFBmpCopy(CR_FLOAT_BITMAP* bmp)
+	CR_FLOAT_BITMAP* CRCreateFBmpCopy(CR_FLOAT_BITMAP* bmp)
 	{
-		CRIA_AUTO_ASSERT(bmp, "CreateFBmpCopy: the source bmp should be existence");
+		CRIA_AUTO_ASSERT(bmp, "CRCreateFBmpCopy: the source bmp should be existence");
 		if (!bmp)
 			return nullptr;
 
-		CR_FLOAT_BITMAP* copy = CreateFBmp(bmp->Width, bmp->Height, bmp->FloatsPerPixel);
-		CRIA_AUTO_ASSERT(copy, "CreateFBmpCopy: The copy bmp could not be created");
+		CR_FLOAT_BITMAP* copy = CRCreateFBmp(bmp->Width, bmp->Height, bmp->FloatsPerPixel);
+		CRIA_AUTO_ASSERT(copy, "CRCreateFBmpCopy: The copy bmp could not be created");
 		if (!copy)
 			return nullptr;
 		
@@ -70,13 +70,13 @@ namespace cria_ai
 		
 		return copy;
 	}
-	void DeleteFBmp(CR_FLOAT_BITMAP* bmp)
+	void CRDeleteFBmp(CR_FLOAT_BITMAP* bmp)
 	{
 		if (bmp)
 			cudaFree(bmp); /* this should free both the struct and the data since they are created by one malloc */
 	}
 
-	void ConvertTo1fpp(CR_FLOAT_BITMAP const* bmpIn, CR_FLOAT_BITMAP* bmpOut)
+	void CRConvertTo1fpp(CR_FLOAT_BITMAP const* bmpIn, CR_FLOAT_BITMAP* bmpOut)
 	{
 		float total;
 		uint32_t inIndex = 0;
@@ -105,7 +105,7 @@ namespace cria_ai
 			}
 		}
 	}
-	void ConvertTo3fpp(CR_FLOAT_BITMAP const* bmpIn, CR_FLOAT_BITMAP* bmpOut)
+	void CRConvertTo3fpp(CR_FLOAT_BITMAP const* bmpIn, CR_FLOAT_BITMAP* bmpOut)
 	{
 		if (bmpIn->FloatsPerPixel == 4) 
 		{
@@ -130,7 +130,7 @@ namespace cria_ai
 			}
 		}
 	}
-	void ConvertTo4fpp(CR_FLOAT_BITMAP const* bmpIn, CR_FLOAT_BITMAP* bmpOut)
+	void CRConvertTo4fpp(CR_FLOAT_BITMAP const* bmpIn, CR_FLOAT_BITMAP* bmpOut)
 	{
 		if (bmpIn->FloatsPerPixel == 3) 
 		{
@@ -155,18 +155,18 @@ namespace cria_ai
 			}
 		}
 	}
-	CR_FLOAT_BITMAP* ConvertToFloatsPerPixel(CR_FLOAT_BITMAP const* bmpIn, uint8_t floatsPerPixel)
+	CR_FLOAT_BITMAP* CRConvertToFloatsPerPixel(CR_FLOAT_BITMAP const* bmpIn, uint8_t floatsPerPixel)
 	{
 		/* validation */
-		CRIA_AUTO_ASSERT(bmpIn, "ConvertToFloatsPerPixel: the submitted bmp is null.");
+		CRIA_AUTO_ASSERT(bmpIn, "CRConvertToFloatsPerPixel: the submitted bmp is null.");
 		CRIA_AUTO_ASSERT(floatsPerPixel == 1 || floatsPerPixel == 3 || floatsPerPixel == 4,
-			"ConvertToFloatsPerPixel: The selected value for floats per pixel (%u) is unsupported.", floatsPerPixel);
+			"CRConvertToFloatsPerPixel: The selected value for floats per pixel (%u) is unsupported.", floatsPerPixel);
 		if (!bmpIn && !(floatsPerPixel == 1 || floatsPerPixel == 3 || floatsPerPixel != 4))
 			return nullptr;
 
 		/* creating the output bmp */
-		CR_FLOAT_BITMAP* bmpOut = CreateFBmp(bmpIn->Width, bmpIn->Height, floatsPerPixel);
-		CRIA_AUTO_ASSERT(bmpOut, "ConvertToFloatsPerPixel failed to create a bmp.");
+		CR_FLOAT_BITMAP* bmpOut = CRCreateFBmp(bmpIn->Width, bmpIn->Height, floatsPerPixel);
+		CRIA_AUTO_ASSERT(bmpOut, "CRConvertToFloatsPerPixel failed to create a bmp.");
 		if (!bmpOut)
 			return nullptr;
 
@@ -181,13 +181,13 @@ namespace cria_ai
 		switch (floatsPerPixel)
 		{
 			case 1:
-				ConvertTo1fpp(bmpIn, bmpOut);
+				CRConvertTo1fpp(bmpIn, bmpOut);
 				break;
 			case 3:
-				ConvertTo3fpp(bmpIn, bmpOut);
+				CRConvertTo3fpp(bmpIn, bmpOut);
 				break;
 			case 4:
-				ConvertTo4fpp(bmpIn, bmpOut);
+				CRConvertTo4fpp(bmpIn, bmpOut);
 				break;
 			default:
 				break;
@@ -197,12 +197,12 @@ namespace cria_ai
 	}
 
 #define CR_DEFAULT_ALPHA_VALUE         255
-	bmp_renderer::Bitmap* ConvertToIntBmp(CR_FLOAT_BITMAP const* bmp)
+	bmp_renderer::Bitmap* CRConvertToIntBmp(CR_FLOAT_BITMAP const* bmp)
 	{
 		/*
 		 * Validation
 		 */
-		CRIA_AUTO_ASSERT(bmp, "ConvertToIntBmp: The provided float bitmap is false.");
+		CRIA_AUTO_ASSERT(bmp, "CRConvertToIntBmp: The provided float bitmap is false.");
 		if (!bmp)
 			return nullptr;
 
@@ -210,7 +210,7 @@ namespace cria_ai
 		 * creating the int bitmap
 		 */
 		bmp_renderer::Bitmap* intBmp = bmp_renderer::CreateBmp(bmp->Width, bmp->Height);
-		CRIA_AUTO_ASSERT(intBmp, "ConvertToIntBmp: The creating of the int bitmap failed. FBitmap: %p", bmp);
+		CRIA_AUTO_ASSERT(intBmp, "CRConvertToIntBmp: The creating of the int bitmap failed. FBitmap: %p", bmp);
 		if (!intBmp)
 			return nullptr;
 
@@ -252,7 +252,7 @@ namespace cria_ai
 
 			return intBmp;
 		default:
-			CRIA_AUTO_ASSERT(false, "ConvertToIntBmp: the float bitmap(%p) has a unsupported float per pixel count: %u",
+			CRIA_AUTO_ASSERT(false, "CRConvertToIntBmp: the float bitmap(%p) has a unsupported float per pixel count: %u",
 				bmp, bmp->FloatsPerPixel);
 
 			bmp_renderer::DeleteBmp(intBmp);
@@ -260,13 +260,13 @@ namespace cria_ai
 		}
 	}
 
-	bool SaveBitmap(CR_FLOAT_BITMAP const* bmp, char const* fileName)
+	bool CRSaveBitmap(CR_FLOAT_BITMAP const* bmp, char const* fileName)
 	{
 		/*
 		 * validation
 		 */
-		CRIA_AUTO_ASSERT(fileName, "SaveBitmap: The file name is invalid. The bitmap address is: %p", (bmp) ? bmp : 0);
-		CRIA_AUTO_ASSERT(bmp, "SaveBitmap: The bitmap is invalid. The file Name is: %s", fileName);
+		CRIA_AUTO_ASSERT(fileName, "CRSaveBitmap: The file name is invalid. The bitmap address is: %p", (bmp) ? bmp : 0);
+		CRIA_AUTO_ASSERT(bmp, "CRSaveBitmap: The bitmap is invalid. The file Name is: %s", fileName);
 		if (!bmp || !fileName)
 			return false; /* you broke it */
 
@@ -283,8 +283,8 @@ namespace cria_ai
 		 * 
 		 * Kids cover your eyes this should not be done.
 		 */
-		bmp_renderer::Bitmap* intBmp = ConvertToIntBmp(bmp);
-		CRIA_AUTO_ASSERT(intBmp, "SaveBitmap: the conversion to the int bitmap failed.");
+		bmp_renderer::Bitmap* intBmp = CRConvertToIntBmp(bmp);
+		CRIA_AUTO_ASSERT(intBmp, "CRSaveBitmap: the conversion to the int bitmap failed.");
 		if (!intBmp)
 			return false;
 
@@ -293,7 +293,7 @@ namespace cria_ai
 		 */
 		if (!bmp_renderer::SaveBitmap(intBmp, fileName))
 		{
-			CRIA_AUTO_ASSERT(false, "SaveBitmap: The saving of the int bitmap failed");
+			CRIA_AUTO_ASSERT(false, "CRSaveBitmap: The saving of the int bitmap failed");
 			bmp_renderer::DeleteBmp(intBmp);
 			return false;
 		}
@@ -303,9 +303,9 @@ namespace cria_ai
 
 	}
 
-	CR_FLOAT_BITMAP* CalculateFeatureMap(CR_FLOAT_BITMAP const* bitmap, CR_FLOAT_BITMAP const* feature)
+	CR_FLOAT_BITMAP* CRCalculateFeatureMap(CR_FLOAT_BITMAP const* bitmap, CR_FLOAT_BITMAP const* feature)
 	{
-		//TODO CalculateFeatureMap
+		//TODO CRCalculateFeatureMap
 		return nullptr;
 	}
 	
@@ -390,21 +390,21 @@ namespace cria_ai
 				outBmp->Data[FBMP_PX_INDEX(poolX, poolY, outBmp) + channel] = maxValues[channel];
 		}
 	}
-	CR_FLOAT_BITMAP* PoolBitmap(CR_FLOAT_BITMAP const* bmp, uint32_t poolSize)
+	CR_FLOAT_BITMAP* CRPoolBitmap(CR_FLOAT_BITMAP const* bmp, uint32_t poolSize)
 	{
 		/* input validation */
-		CRIA_AUTO_ASSERT(bmp, "PoolBitmap the bitmap that should be pooled should also be valid.");
-		CRIA_AUTO_ASSERT(poolSize != 0, "PoolBitmap: A pool size of 0 is invalid");
+		CRIA_AUTO_ASSERT(bmp, "CRPoolBitmap the bitmap that should be pooled should also be valid.");
+		CRIA_AUTO_ASSERT(poolSize != 0, "CRPoolBitmap: A pool size of 0 is invalid");
 		if (!bmp || poolSize == 0)
 			return nullptr;
 
 		/* creating the output bitmap */
-		CR_FLOAT_BITMAP* outBmp = CreateFBmp(
+		CR_FLOAT_BITMAP* outBmp = CRCreateFBmp(
 			((bmp->Width  / poolSize) + ((bmp->Width  % poolSize == 0) ? 0 : 1)),
 			((bmp->Height / poolSize) + ((bmp->Height % poolSize == 0) ? 0 : 1)),
 			bmp->FloatsPerPixel
 		);
-		CRIA_AUTO_ASSERT(outBmp, "PoolBitmap: Failed to create the output bitmap");
+		CRIA_AUTO_ASSERT(outBmp, "CRPoolBitmap: Failed to create the output bitmap");
 		if (!outBmp)
 			return nullptr;
 
@@ -418,16 +418,16 @@ namespace cria_ai
 		
 		return outBmp;
 	}
-	CR_FLOAT_BITMAP* NormalizeBitmap(CR_FLOAT_BITMAP const* bmp)
+	CR_FLOAT_BITMAP* CRNormalizeBitmap(CR_FLOAT_BITMAP const* bmp)
 	{
 		/* input validation */
-		CRIA_AUTO_ASSERT(bmp, "NormalizeBitmap: the given bitmap is invalid.");
+		CRIA_AUTO_ASSERT(bmp, "CRNormalizeBitmap: the given bitmap is invalid.");
 		if (!bmp)
 			return nullptr;
 
 		/* creating the result bitmap */
-		CR_FLOAT_BITMAP* result = CreateFBmp(bmp->Width, bmp->Height, bmp->FloatsPerPixel);
-		CRIA_AUTO_ASSERT(result, "NormalizeBitmap: failed to create the result bitmap :/.");
+		CR_FLOAT_BITMAP* result = CRCreateFBmp(bmp->Width, bmp->Height, bmp->FloatsPerPixel);
+		CRIA_AUTO_ASSERT(result, "CRNormalizeBitmap: failed to create the result bitmap :/.");
 		if (!result)
 			return nullptr;
 

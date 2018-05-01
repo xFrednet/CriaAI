@@ -30,43 +30,34 @@
 *       distribution.                                                         *
 *                                                                             *
 ******************************************************************************/
-#include "Window.h"
-#include "win/WinWindow.h"
+#pragma once
 
-namespace cria_ai { namespace api {
-	CRWindowPtr CRWindow::CreateDestopWindowInstance(crresult* result)
+#include "../OSContext.h"
+
+#include "../../Common.hpp"
+
+#include <windows.h>
+
+namespace cria_ai { namespace api { namespace win {
+	
+	class CRWinOSContext : public CROSContext
 	{
-		return CreateInstance(CR_DESTOP_WINDOW_TITLE, result);
-	}
-	CRWindowPtr CRWindow::CreateInstance(const String& title, crresult* result)
+	protected:
+		CRWinOSContext();
+	public:
+		~CRWinOSContext();
+
+	protected:
+		crresult init() override;
+
+		void sleep(uint sec, uint ms) override;
+		CR_VEC2I getMousePos() override;
+		CR_RECT getVirtualScreenClientArea() override;
+	};
+
+	inline HWND FindHWND(const String& title)
 	{
-#ifdef CRIA_OS_WIN
-		CRWindowPtr window = std::make_shared<win::CRWinWindow>(title);
-#else
-		CRWindowPtr window = nullptr;
-#endif
-		
-		if (!window.get())
-		{
-			if (result) 
-				*result = CRRES_ERR_MAKE_SHARED_FAILED;
-			return window;
-		}
-
-		crresult res = window.get()->init(title);
-		if (CR_FAILED(res))
-			window.reset();
-		if (result)
-			*result = res;
-
-		return window;
+		return FindWindow(nullptr, title.c_str());
 	}
 
-	CRWindow::CRWindow(const String& title)
-		: m_Title(title)
-	{
-	}
-
-	CRWindow::~CRWindow()
-	{}
-}}
+}}}

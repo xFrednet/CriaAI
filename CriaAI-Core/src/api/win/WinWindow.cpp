@@ -41,10 +41,23 @@ namespace cria_ai { namespace api { namespace win {
 
 	crresult CRWinWindow::init(const String& title)
 	{
-		m_Hwnd = FindWindow(nullptr, title.c_str());
+		/*
+		 * Getting the HWND
+		 */
+		if (title.empty()) 
+			m_Hwnd = GetDesktopWindow(); 
+		else 
+			m_Hwnd = FindWindow(nullptr, title.c_str());
+		
+		/*
+		 * Error check
+		 */
 		if (!m_Hwnd)
 			return CRRES_ERR_API_WINDOW_TITLE_NOT_FOUND;
 
+		/*
+		 * Return
+		 */
 		return CRRES_OK_API;
 	}
 
@@ -70,5 +83,10 @@ namespace cria_ai { namespace api { namespace win {
 	bool CRWinWindow::isFocussed() const
 	{
 		return (GetForegroundWindow() == m_Hwnd);
+	}
+
+	HWND CRWinWindow::getHWND()
+	{
+		return m_Hwnd;
 	}
 }}}

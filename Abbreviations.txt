@@ -3,6 +3,7 @@ Abbreviation:
 Word                    Abbreviation
 -------------------- - --------------------
 Bitmap               - bmp
+Bounderies           - bounds
 Callback             - cb
 Client area          - cArea
 Column               - col
@@ -20,6 +21,7 @@ Mouse button         - mButton
 Mouse movement       - mMove
 Mouse Wheel          - mWheel
 Number               - no
+Operating system     - os
 Pixel                - px
 Rectangle            - rect
 Screen capturer      - screencap

@@ -45,12 +45,13 @@ namespace cria_ai { namespace api { namespace win {
 	//TODO the "source engine", "arma" and probably some other engines do not work with this virtual input method 
 	crresult CRWinInputSimulator::sendInputMessage(INPUT* message) const
 	{
-		if (m_TargetWindow && GetForegroundWindow() != m_TargetWindow)
+		if (m_TargetWindow->isFocussed())
 			return CRRES_OK_API_INPUTSIM_TARGET_NOT_FOCUSED;
 
+		CR_RECT mBounds = m_TargetWindow->getClientArea();
 		CR_VEC2I pos = getMousePos();
-		if (pos.X < 0 || pos.X >= (int)m_MouseBounderies.Width ||
-			pos.Y < 0 || pos.Y >= (int)m_MouseBounderies.Height)
+		if (pos.X < 0 || pos.X >= (int)mBounds.Width ||
+			pos.Y < 0 || pos.Y >= (int)mBounds.Height)
 			return CRRES_OK_API_INPUTSIM_CURSOR_OUTSIDE;
 
 		if (!SendInput(1, message, sizeof(INPUT)))
@@ -60,8 +61,7 @@ namespace cria_ai { namespace api { namespace win {
 	}
 
 	CRWinInputSimulator::CRWinInputSimulator()
-		: m_TargetWindow(nullptr),
-		m_OriginalMouseAccellState(true),
+		: m_OriginalMouseAccellState(true),
 		m_MouseSetMultiplayer(0.0f, 0.0f)
 	{
 	}
@@ -93,25 +93,6 @@ namespace cria_ai { namespace api { namespace win {
 		 * return
 		 */
 		return CRRES_OK;
-	}
-
-	void CRWinInputSimulator::newTargetWindowTitle(const String& oldTitle)
-	{
-		/*
-		 * Target window
-		 */
-		if (m_TargetWindowTitle.length() == 0)
-			m_TargetWindow    = nullptr;
-		else
-			m_TargetWindow    = FindHWND(m_TargetWindowTitle);
-			
-		/*
-		 * Client area
-		 */
-		if (m_TargetWindow)
-			m_MouseBounderies = GetClientArea(m_TargetWindow);
-		else
-			m_MouseBounderies = GetVirtualScreenClientArea();
 	}
 
 	/*
@@ -210,8 +191,9 @@ namespace cria_ai { namespace api { namespace win {
 		memset(&input, 0, sizeof(INPUT));
 		input.type = INPUT_MOUSE;
 
-		input.mi.dx = (int)((float)(pos.X + m_MouseBounderies.X) * m_MouseSetMultiplayer.X);
-		input.mi.dy = (int)((float)(pos.Y + m_MouseBounderies.Y) * m_MouseSetMultiplayer.Y);
+		CR_VEC2I windowPos = m_TargetWindow->getClientArea().Pos;
+		input.mi.dx = (int)((float)(pos.X + windowPos.X) * m_MouseSetMultiplayer.X);
+		input.mi.dy = (int)((float)(pos.Y + windowPos.Y) * m_MouseSetMultiplayer.Y);
 		input.mi.dwFlags = MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE;
 
 		return sendInputMessage(&input);
@@ -234,7 +216,7 @@ namespace cria_ai { namespace api { namespace win {
 		POINT pos;
 		GetCursorPos(&pos);
 
-		return (CR_VEC2I(pos.x, pos.y) - m_MouseBounderies.Pos);
+		return (CR_VEC2I(pos.x, pos.y) - m_TargetWindow->getClientArea().Pos);
 	}
 }}}
 

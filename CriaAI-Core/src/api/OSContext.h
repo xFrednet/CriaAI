@@ -1,4 +1,4 @@
-/******************************************************************************
+﻿/******************************************************************************
 * Cria  - The worst artificial intelligence on the market.                    *
 *         <https://github.com/xFrednet/CriaAI>                                *
 *                                                                             *
@@ -30,43 +30,49 @@
 *       distribution.                                                         *
 *                                                                             *
 ******************************************************************************/
-#include "Window.h"
-#include "win/WinWindow.h"
+#pragma once
+
+#include "../Common.hpp"
 
 namespace cria_ai { namespace api {
-	CRWindowPtr CRWindow::CreateDestopWindowInstance(crresult* result)
+	
+	class CROSContext
 	{
-		return CreateInstance(CR_DESTOP_WINDOW_TITLE, result);
-	}
-	CRWindowPtr CRWindow::CreateInstance(const String& title, crresult* result)
-	{
-#ifdef CRIA_OS_WIN
-		CRWindowPtr window = std::make_shared<win::CRWinWindow>(title);
-#else
-		CRWindowPtr window = nullptr;
-#endif
-		
-		if (!window.get())
+	protected:
+		static CROSContext* s_Instance;
+
+		virtual crresult init() = 0;
+
+		virtual void sleep(uint sec, uint ms) = 0;
+		virtual CR_VEC2I getMousePos() = 0;
+		virtual CR_RECT getVirtualScreenClientArea() = 0;
+
+		CROSContext();
+	public:
+		virtual ~CROSContext();
+
+		static crresult InitInstance();
+		static crresult ShutDownInstance();
+
+		inline static void Sleep(uint sec, uint ms)
 		{
-			if (result) 
-				*result = CRRES_ERR_MAKE_SHARED_FAILED;
-			return window;
+			if (s_Instance) 
+				s_Instance->sleep(sec, ms);
 		}
+		inline static CR_VEC2I GetMousePos()
+		{
+			if (s_Instance)
+				return s_Instance->getMousePos();
 
-		crresult res = window.get()->init(title);
-		if (CR_FAILED(res))
-			window.reset();
-		if (result)
-			*result = res;
+			return CR_VEC2I(0, 0);
+		}
+		inline static CR_RECT GetVirtualScreenClientArea()
+		{
+			if (s_Instance)
+				return s_Instance->getVirtualScreenClientArea();
 
-		return window;
-	}
+			return CR_RECT(0, 0, 0, 0);
+		}
+	};
 
-	CRWindow::CRWindow(const String& title)
-		: m_Title(title)
-	{
-	}
-
-	CRWindow::~CRWindow()
-	{}
 }}
