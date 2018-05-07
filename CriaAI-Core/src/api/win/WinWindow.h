@@ -45,13 +45,19 @@ namespace cria_ai { namespace api { namespace win {
 	{
 	private:
 		HWND m_Hwnd;
+
+		CR_VEC2I getCorrectResizeSize(uint width, uint height) const;
 	public:
 		CRWinWindow(const String& title);
 	protected:
 		crresult init(const String& title) override;
 	public:
-		CR_RECT getClientArea() const override;
 		bool isFocussed() const override;
+
+		CR_RECT getClientArea() const override;
+		crresult setPos(int x, int y) override;
+		crresult setSize(uint width, uint height) override;
+		crresult setClientArea(const CR_RECT& bounds) override;
 
 		HWND getHWND();
 	};

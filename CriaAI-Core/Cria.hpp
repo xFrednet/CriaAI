@@ -6,6 +6,7 @@
 
 #include "src/util/FloatBitmap.h"
 
+#include "src/api/OSContext.h"
 #include "src/api/ScreenCapturer.h"
 #include "src/api/InputSimulator.h"
 #include "src/api/InputLogger.h"

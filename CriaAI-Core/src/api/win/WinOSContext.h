@@ -42,9 +42,8 @@ namespace cria_ai { namespace api { namespace win {
 	
 	class CRWinOSContext : public CROSContext
 	{
-	protected:
-		CRWinOSContext();
 	public:
+		CRWinOSContext();
 		~CRWinOSContext();
 
 	protected:

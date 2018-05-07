@@ -52,9 +52,9 @@ namespace cria_ai { namespace api {
 		virtual ~CROSContext();
 
 		static crresult InitInstance();
-		static crresult ShutDownInstance();
+		static crresult TerminateInstance();
 
-		inline static void Sleep(uint sec, uint ms)
+		inline static void Sleep(uint sec, uint ms = 0)
 		{
 			if (s_Instance) 
 				s_Instance->sleep(sec, ms);

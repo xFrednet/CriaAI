@@ -65,6 +65,21 @@ namespace cria_ai { namespace api {
 		return s_Instance->init();
 	}
 
+	crresult CRInputLogger::TerminateInstance()
+	{
+		/*
+		 * singleton check
+		 */
+		if (!s_Instance)
+			return CRRES_ERR_API_STATIC_INSTANCE_IS_NULL;
+
+		CRInputLogger* logger = s_Instance;
+		s_Instance = nullptr;
+		delete logger;
+
+		return CRRES_OK;
+	}
+
 	/*
 	* Class content
 	*/

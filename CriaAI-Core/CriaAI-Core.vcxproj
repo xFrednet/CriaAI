@@ -148,6 +148,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="src\maths\Matrixf.hpp" />
     <ClInclude Include="src\maths\Rectangle2D.h" />
     <ClInclude Include="src\maths\Vec2.h" />
+    <ClInclude Include="src\maths\Vec3.h" />
     <ClInclude Include="src\network\Layer.h" />
     <ClInclude Include="src\network\layers\BmpInLayer.h" />
     <ClInclude Include="src\network\NeuronNetwork.h" />

@@ -53,7 +53,7 @@ namespace cria_ai { namespace api {
 		static CRInputLogger* s_Instance;
 	public:
 		static crresult InitInstance();
-
+		static crresult TerminateInstance();
 		/*
 		 * Class content
 		 */

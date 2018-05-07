@@ -1,121 +1,126 @@
 #pragma once
+
 #include "../Macros.hpp"
+#include "../Types.hpp"
+
 #include <math.h>
 
 namespace cria_ai
 {
-	template <typename VecT>
+	template <typename _VecT>
 	struct CR_VEC2_ {
 
-		VecT X;
-		VecT Y;
+		typedef CR_VEC2_<_VecT> CR_VEC2;
 
-		CR_VEC2_(const VecT& x, const VecT& y)
+		_VecT X;
+		_VecT Y;
+
+		CR_VEC2_(const _VecT& x, const _VecT& y)
 			: X(x), Y(y)
 		{}
 		CR_VEC2_()
-			: CR_VEC2_((VecT)0, (VecT)0)
+			: CR_VEC2_((_VecT)0, (_VecT)0)
 		{}
 
-		inline CR_VEC2_<VecT>* getThis()
+		inline CR_VEC2* getThis()
 		{
-			return ((CR_VEC2_<VecT>*)this);
+			return ((CR_VEC2*)this);
 		}
 
 		/*
 		 * Utils
 		 */
-		inline void  scale(const VecT& scale)
+		inline void  scale(const _VecT& scale)
 		{
 			X *= scale;
 			Y *= scale;
 		}
-		inline void  clamp(const VecT& min, const VecT& max)
+		inline void  clamp(const _VecT& min, const _VecT& max)
 		{
 			CR_CLAMP_VALUE(X, min, max);
 			CR_CLAMP_VALUE(Y, min, max);
 		}
-		inline VecT getLengthSq() const
+		inline _VecT getLengthSq() const
 		{
 			return X * X + Y * Y;
 		}
-		inline VecT getLength() const
+		inline float getLength() const
 		{
-			return std::sqrt(getLengthSq());
+			return std::sqrtf(getLengthSq());
 		}
 
 		/*
 		 * Operators
 		 */
-		inline bool operator==(const CR_VEC2_<VecT>& other) const
+		inline bool operator==(const CR_VEC2& other) const
 		{
 			return (X == other.X) &&
 				(Y == other.Y);
 		}
-		inline bool operator!=(const CR_VEC2_<VecT>& other) const
+		inline bool operator!=(const CR_VEC2& other) const
 		{
 			return (X != other.X) &&
 				(Y != other.Y);
 		}
 
-		inline CR_VEC2_<VecT> operator+(const CR_VEC2_<VecT>& other) const
+		inline CR_VEC2 operator+(const CR_VEC2& other) const
 		{
-			return CR_VEC2_<VecT>(X + other.X, Y + other.Y);
+			return CR_VEC2(X + other.X, Y + other.Y);
 		}
-		inline CR_VEC2_<VecT> operator-(const CR_VEC2_<VecT>& other) const
+		inline CR_VEC2 operator-(const CR_VEC2& other) const
 		{
-			return CR_VEC2_<VecT>(X - other.X, Y - other.Y);
+			return CR_VEC2(X - other.X, Y - other.Y);
 		}
-		inline CR_VEC2_<VecT> operator*(const CR_VEC2_<VecT>& other) const
+		inline CR_VEC2 operator*(const CR_VEC2& other) const
 		{
-			return CR_VEC2_<VecT>(X * other.X, Y * other.Y);
+			return CR_VEC2(X * other.X, Y * other.Y);
 		}
-		inline CR_VEC2_<VecT> operator/(const CR_VEC2_<VecT>& other) const
+		inline CR_VEC2 operator/(const CR_VEC2& other) const
 		{
-			return CR_VEC2_<VecT>(
+			return CR_VEC2(
 				((other.X != 0) ? (X / other.X) : 0),
 				((other.Y != 0) ? (Y / other.Y) : 0));
 		}
 
-		inline CR_VEC2_<VecT> operator*(const VecT& value) const
+		inline CR_VEC2 operator*(float value) const
 		{
-			return CR_VEC2_<VecT>(X * value, Y * value);
+			return CR_VEC2((_VecT)(X * value), (_VecT)(Y * value));
 		}
-		inline CR_VEC2_<VecT> operator/(const VecT& value) const
+		inline CR_VEC2 operator/(float value) const
 		{
 			if (value == 0)
-				return CR_VEC2_<VecT>(0, 0);
+				return CR_VEC2(0, 0);
 
-			return CR_VEC2_<VecT>(X / value, Y / value);
+			return CR_VEC2((_VecT)(X / value), (_VecT)(Y / value));
 		}
 
-		CR_VEC2_<VecT>& operator+=(const CR_VEC2_<VecT>& other)
+		inline CR_VEC2& operator+=(const CR_VEC2& other)
 		{
 			*getThis() = *getThis() + other;
 			return *getThis();
 		}
-		CR_VEC2_<VecT>& operator-=(const CR_VEC2_<VecT>& other)
+		inline CR_VEC2& operator-=(const CR_VEC2& other)
 		{
 			*getThis() = *getThis() - other;
 			return *getThis();
 		}
-		CR_VEC2_<VecT>& operator*=(const CR_VEC2_<VecT>& other)
+		inline CR_VEC2& operator*=(const CR_VEC2& other)
 		{
 			*getThis() = *getThis() * other;
 			return *getThis();
 		}
-		CR_VEC2_<VecT>& operator/=(const CR_VEC2_<VecT>& other)
+		inline CR_VEC2& operator/=(const CR_VEC2& other)
 		{
 			*getThis() = *getThis() / other;
 			return *getThis();
 		}
-
-		CR_VEC2_<VecT>& operator*=(const VecT& value)
+		
+		inline CR_VEC2& operator*=(float value)
 		{
 			*getThis() = *getThis() * value;
 			return *getThis();
 		}
-		CR_VEC2_<VecT>& operator/=(const VecT& value)
+		inline CR_VEC2& operator/=(float value)
 		{
 			*getThis() = *getThis() / value;
 			return *getThis();

@@ -94,6 +94,7 @@ namespace cria_ai
 
 #define CRRES_OK_API_INPUTSIM_TARGET_NOT_FOCUSED CRIA_RES_TYPEDEF(0x0A01)
 #define CRRES_OK_API_INPUTSIM_CURSOR_OUTSIDE     CRIA_RES_TYPEDEF(0x0A02)
+#define CRRES_OK_API_STATIC_INSTANCE_IS_NULL     CRIA_RES_TYPEDEF(0x0A03)
 
 #define CRRES_ERR_API_OS_UNSUPPORTED             CRIA_RES_TYPEDEF(0x8A01)
 #define CRRES_ERR_API_STATIC_INSTANCE_IS_NULL    CRIA_RES_TYPEDEF(0x8A02)
@@ -103,6 +104,7 @@ namespace cria_ai
 #define CRRES_ERR_API_WINDOW_INIT_FAILED         CRIA_RES_TYPEDEF(0x8A06)
 #define CRRES_ERR_API_WINDOW_TITLE_NOT_FOUND     CRIA_RES_TYPEDEF(0x8A07)
 #define CRRES_ERR_API_TARGET_IS_NULL             CRIA_RES_TYPEDEF(0x8A08)
+#define CRRES_ERR_API_WINDOW_RESIZE_FAILED       CRIA_RES_TYPEDEF(0x8A09)
 
 /* //////////////////////////////////////////////////////////////////////////////// */
 // // CRRES_SOURCE_UTILS //
@@ -131,12 +133,12 @@ namespace cria_ai
 #define CRRES_ERR_WIN_COULD_NOT_GET_KEY_LAYOUT   CRIA_RES_TYPEDEF(0x8C07)
 
 /* //////////////////////////////////////////////////////////////////////////////// */
-// // GetCRResultName //
+// // CRGetCRResultName //
 /* //////////////////////////////////////////////////////////////////////////////// */
 #define CRIA_SWITCH_CRRESULT(macro)              case macro.Value: return String(#macro);
 namespace cria_ai {
 
-	inline String GetCRResultName(const crresult& result)
+	inline String CRGetCRResultName(const crresult& result)
 	{
 		switch (result.Value & CRRES_MASK_SOURCE)
 		{
@@ -177,6 +179,7 @@ namespace cria_ai {
 
 					CRIA_SWITCH_CRRESULT(CRRES_OK_API_INPUTSIM_TARGET_NOT_FOCUSED); 
 					CRIA_SWITCH_CRRESULT(CRRES_OK_API_INPUTSIM_CURSOR_OUTSIDE);
+					CRIA_SWITCH_CRRESULT(CRRES_OK_API_STATIC_INSTANCE_IS_NULL);
 
 					CRIA_SWITCH_CRRESULT(CRRES_ERR_API_OS_UNSUPPORTED);
 					CRIA_SWITCH_CRRESULT(CRRES_ERR_API_STATIC_INSTANCE_IS_NULL);
@@ -186,6 +189,7 @@ namespace cria_ai {
 					CRIA_SWITCH_CRRESULT(CRRES_ERR_API_WINDOW_INIT_FAILED);
 					CRIA_SWITCH_CRRESULT(CRRES_ERR_API_WINDOW_TITLE_NOT_FOUND);
 					CRIA_SWITCH_CRRESULT(CRRES_ERR_API_TARGET_IS_NULL);
+					CRIA_SWITCH_CRRESULT(CRRES_ERR_API_WINDOW_RESIZE_FAILED);
 
 					default:
 						return String("CRRESULT_UNNAMED_RESULT");

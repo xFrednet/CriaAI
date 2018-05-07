@@ -46,7 +46,7 @@ namespace cria_ai { namespace api {
 	class CRWindow
 	{
 	public:
-		static CRWindowPtr CreateDestopWindowInstance(crresult* result = nullptr); //TODO
+		static CRWindowPtr CreateDestopWindowInstance(crresult* result = nullptr);
 		static CRWindowPtr CreateInstance(const String& title, crresult* result = nullptr);
 	protected:
 		String  m_Title;
@@ -64,9 +64,13 @@ namespace cria_ai { namespace api {
 			return m_Title;
 		}
 
-		virtual CR_RECT getClientArea() const = 0;
 		virtual bool isFocussed() const = 0;
 
+		virtual crresult setPos(int x, int y) = 0;
+		virtual crresult setSize(uint width, uint height) = 0;
+		virtual crresult setClientArea(const CR_RECT& bounds) = 0;
+
+		virtual CR_RECT getClientArea() const = 0;
 	};
 
 

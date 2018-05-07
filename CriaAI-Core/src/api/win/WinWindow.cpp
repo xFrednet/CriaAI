@@ -61,6 +61,11 @@ namespace cria_ai { namespace api { namespace win {
 		return CRRES_OK_API;
 	}
 
+	bool CRWinWindow::isFocussed() const
+	{
+		return (GetForegroundWindow() == m_Hwnd);
+	}
+
 	CR_RECT CRWinWindow::getClientArea() const
 	{
 		WINDOWINFO winInfo;
@@ -80,10 +85,44 @@ namespace cria_ai { namespace api { namespace win {
 		return cArea;
 	}
 
-	bool CRWinWindow::isFocussed() const
+	CR_VEC2I CRWinWindow::getCorrectResizeSize(uint width, uint height) const
 	{
-		return (GetForegroundWindow() == m_Hwnd);
+		LONG hwndStyle = GetWindowLong(m_Hwnd, GWL_STYLE);
+
+		RECT size = {0, 0, (LONG)width, (LONG)height};
+		AdjustWindowRect(&size, hwndStyle, false);
+
+		return CR_VEC2I(size.right - size.left, size.bottom - size.top);
 	}
+	crresult CRWinWindow::setPos(int x, int y)
+	{
+		if (!SetWindowPos(m_Hwnd, nullptr, (int)x, (int)y, 0, 0, 
+			SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOZORDER))
+			return CRRES_ERR_API_WINDOW_RESIZE_FAILED;
+
+		return CRRES_OK;
+	}
+	crresult CRWinWindow::setSize(uint width, uint height)
+	{
+		CR_VEC2I size = getCorrectResizeSize(width, height);
+
+		if (!SetWindowPos(m_Hwnd, nullptr, 0, 0, size.X, size.Y,
+			SWP_NOMOVE | SWP_NOACTIVATE | SWP_NOZORDER))
+			return CRRES_ERR_API_WINDOW_RESIZE_FAILED;
+
+		return CRRES_OK;
+	}
+	crresult CRWinWindow::setClientArea(const CR_RECT& bounds)
+	{
+		CR_VEC2I size = getCorrectResizeSize(bounds.Width, bounds.Height);
+
+		if (!SetWindowPos(m_Hwnd, nullptr, bounds.X, bounds.Y, size.X, size.Y,
+			SWP_NOACTIVATE | SWP_NOZORDER))
+			return CRRES_ERR_API_WINDOW_RESIZE_FAILED;
+
+		return CRRES_OK;
+	}
+
 
 	HWND CRWinWindow::getHWND()
 	{
