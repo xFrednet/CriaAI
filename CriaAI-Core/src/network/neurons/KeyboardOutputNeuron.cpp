@@ -30,70 +30,72 @@
 *       distribution.                                                         *
 *                                                                             *
 ******************************************************************************/
-#include "OSContext.h"
-#include "win/WinOSContext.h"
+#include "KeyboardOutputNeuron.h"
 
-namespace cria_ai { namespace api {
-	
-	CROSContext* CROSContext::s_Instance = nullptr;
+namespace cria_ai { namespace network {
 
-	CROSContext::CROSContext()
+	CRKeyboardOutputNeuron::CRKeyboardOutputNeuron(uint neuronCount, CR_KEY_ID* keyIDs)
+		: CRNeuronGroup(neuronCount)
 	{
-	}
-	CROSContext::~CROSContext()
-	{
-	}
-
-	crresult CROSContext::InitInstance()
-	{
-		CROSContext* instance = nullptr;
+		m_KeyIDs = new CR_KEY_ID[m_NeuronCount];
+		m_LastStates = new bool[m_NeuronCount];
 		
-		/*
-		 * Create instance
-		 */
-#ifdef CRIA_OS_WIN
-		instance = new win::CRWinOSContext();
-#endif
-		if (!instance)
-		{
-			return CRRES_ERR_NEW_FAILED;
-		}
-
-		/*
-		 * init
-		 */
-		crresult result = instance->init();
-		if (CR_FAILED(result))
-		{
-			delete instance;
-			return result;
-		}
-
-		/*
-		 * finishing
-		 */
-		s_Instance = instance;
-		return CRRES_OK;
+		memcpy(m_KeyIDs    , keyIDs, sizeof(CR_KEY_ID) * m_NeuronCount);
+		memset(m_LastStates, false , sizeof(bool)      * m_NeuronCount);
+	}
+	CRKeyboardOutputNeuron::CRKeyboardOutputNeuron(CR_KEY_ID keyID)
+		: CRKeyboardOutputNeuron(1, &keyID)
+	{
+	}
+	CRKeyboardOutputNeuron::~CRKeyboardOutputNeuron()
+	{
+		delete[] m_KeyIDs;
+		delete[] m_LastStates;
 	}
 
-	crresult CROSContext::TerminateInstance()
+	void CRKeyboardOutputNeuron::processData(crnwdec const* inData, crnwdec* outData)
 	{
-		/*
-		 * validation check
-		 */
-		if (!s_Instance)
-			return CRRES_OK_STATIC_INSTANCE_IS_NULL;
+		if (!s_InputSim)
+		{
+			memset(outData, 0, sizeof(crnwdec) * m_NeuronCount);
+			return;
+		}
 
-		/*
-		 * Deleting the instance
-		 */
-		CROSContext* instance = s_Instance;
-		s_Instance = nullptr;
-		delete instance;
+		for (uint index = 0; index < m_NeuronCount; index++)
+		{
+			if (inData[index] >= CR_NEURON_OUTPUT_ACTIVATION_LIMIT)
+			{
+				if (!m_LastStates[index])
+				{
+					m_LastStates[index] = true;
+					s_InputSim->setKeyState(m_KeyIDs[index], true);
+				}
+				outData[index] = (crnwdec)1;
+			} 
+			else //inData[index] < CR_NEURON_OUTPUT_ACTIVATION_LIMIT
+			{
+				if (m_LastStates[index])
+				{
+					m_LastStates[index] = false;
+					s_InputSim->setKeyState(m_KeyIDs[index], false);
+				}
+				outData[index] = (crnwdec)0;
+			}
+		}
+	}
+	void CRKeyboardOutputNeuron::processDataInverse(crnwdec const* inData, crnwdec* outData)
+	{
+		for (uint index = 0; index < m_NeuronCount; index++)
+		{
+			outData[index] = (crnwdec)(inData[index] >= CR_NEURON_OUTPUT_ACTIVATION_LIMIT);
+		}
+	}
+	void CRKeyboardOutputNeuron::randInit()
+	{
+	}
 
-		/*
-		 * Yay return "okay"
-		 */
-		return CRRES_OK;
+	CR_NEURON_TYPE CRKeyboardOutputNeuron::getType()
+	{
+		return CR_NEURON_KEYBOARD_OUTPUT;
 	}
 }}

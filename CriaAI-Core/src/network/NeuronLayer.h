@@ -1,4 +1,4 @@
-﻿/******************************************************************************
+/******************************************************************************
 * Cria  - The worst artificial intelligence on the market.                    *
 *         <https://github.com/xFrednet/CriaAI>                                *
 *                                                                             *
@@ -30,70 +30,39 @@
 *       distribution.                                                         *
 *                                                                             *
 ******************************************************************************/
-#include "OSContext.h"
-#include "win/WinOSContext.h"
+#pragma once
 
-namespace cria_ai { namespace api {
-	
-	CROSContext* CROSContext::s_Instance = nullptr;
+#include "NetworkUtil.h"
+#include "../maths/Matrixf.hpp"
 
-	CROSContext::CROSContext()
-	{
-	}
-	CROSContext::~CROSContext()
-	{
-	}
+namespace cria_ai {
 
-	crresult CROSContext::InitInstance()
+	class CRNeuronLayer
 	{
-		CROSContext* instance = nullptr;
+	protected:
+		CRNWMat* m_Output;
 		
+		CRNWMat* m_Conections;
+		CRNWMat* m_Bias;
+
+		//TODO function / invFunction
+
+		uint m_NeuronCount;
+		uint m_NeuronGroupCount;
+	public:
+
+
 		/*
-		 * Create instance
+		 * getters
 		 */
-#ifdef CRIA_OS_WIN
-		instance = new win::CRWinOSContext();
-#endif
-		if (!instance)
+		CRMatrixf* getOutput()
 		{
-			return CRRES_ERR_NEW_FAILED;
+			return m_Output;
 		}
-
-		/*
-		 * init
-		 */
-		crresult result = instance->init();
-		if (CR_FAILED(result))
+		CRMatrixf const* getOutput() const
 		{
-			delete instance;
-			return result;
+			return m_Output;
 		}
+	};
 
-		/*
-		 * finishing
-		 */
-		s_Instance = instance;
-		return CRRES_OK;
-	}
-
-	crresult CROSContext::TerminateInstance()
-	{
-		/*
-		 * validation check
-		 */
-		if (!s_Instance)
-			return CRRES_OK_STATIC_INSTANCE_IS_NULL;
-
-		/*
-		 * Deleting the instance
-		 */
-		CROSContext* instance = s_Instance;
-		s_Instance = nullptr;
-		delete instance;
-
-		/*
-		 * Yay return "okay"
-		 */
-		return CRRES_OK;
-	}
-}}
+}

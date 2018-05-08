@@ -8,10 +8,10 @@
  */
 namespace cria_ai
 {
-	void RandSetSeed(long seed);
-	void RandNewSeed();
+	void CRRandSetSeed(long seed);
+	void CRRandNewSeed();
 
-	float RandFloat();
-	int32 RandInt(int32 cap = INT32_MAX);
+	float CRRandFloat();
+	int32 CRRandInt(int32 cap = INT32_MAX);
 
 }

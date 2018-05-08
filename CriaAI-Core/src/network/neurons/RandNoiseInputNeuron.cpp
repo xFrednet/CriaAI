@@ -1,4 +1,4 @@
-﻿/******************************************************************************
+/******************************************************************************
 * Cria  - The worst artificial intelligence on the market.                    *
 *         <https://github.com/xFrednet/CriaAI>                                *
 *                                                                             *
@@ -30,70 +30,32 @@
 *       distribution.                                                         *
 *                                                                             *
 ******************************************************************************/
-#include "OSContext.h"
-#include "win/WinOSContext.h"
+#include "RandNoiseInputNeuron.h"
 
-namespace cria_ai { namespace api {
-	
-	CROSContext* CROSContext::s_Instance = nullptr;
-
-	CROSContext::CROSContext()
-	{
-	}
-	CROSContext::~CROSContext()
+namespace cria_ai { namespace network {
+	CRRandNoiseInputNeuron::CRRandNoiseInputNeuron(uint neuronCount)
+		: CRNeuronGroup(neuronCount)
 	{
 	}
 
-	crresult CROSContext::InitInstance()
+	void CRRandNoiseInputNeuron::processData(crnwdec const* inData, crnwdec* outData)
 	{
-		CROSContext* instance = nullptr;
-		
-		/*
-		 * Create instance
-		 */
-#ifdef CRIA_OS_WIN
-		instance = new win::CRWinOSContext();
-#endif
-		if (!instance)
+		for (uint index = 0; index < m_NeuronCount; index++)
 		{
-			return CRRES_ERR_NEW_FAILED;
+			outData[index] = CRRandFloat();
 		}
-
-		/*
-		 * init
-		 */
-		crresult result = instance->init();
-		if (CR_FAILED(result))
-		{
-			delete instance;
-			return result;
-		}
-
-		/*
-		 * finishing
-		 */
-		s_Instance = instance;
-		return CRRES_OK;
+	}
+	void CRRandNoiseInputNeuron::processDataInverse(crnwdec const* inData, crnwdec* outData)
+	{
+		memset(outData, 0, sizeof(crnwdec) * m_NeuronCount);
 	}
 
-	crresult CROSContext::TerminateInstance()
+	void CRRandNoiseInputNeuron::randInit()
 	{
-		/*
-		 * validation check
-		 */
-		if (!s_Instance)
-			return CRRES_OK_STATIC_INSTANCE_IS_NULL;
+	}
 
-		/*
-		 * Deleting the instance
-		 */
-		CROSContext* instance = s_Instance;
-		s_Instance = nullptr;
-		delete instance;
-
-		/*
-		 * Yay return "okay"
-		 */
-		return CRRES_OK;
+	CR_NEURON_TYPE CRRandNoiseInputNeuron::getType()
+	{
+		return CR_NEURON_RANDNOISE_INPUT;
 	}
 }}

@@ -274,7 +274,7 @@ namespace cria_ai
 
 		for (index = 0; index < mat->Rows * mat->Cols; index++)
 		{
-			mat->Data[index] = RandFloat();
+			mat->Data[index] = CRRandFloat();
 		}
 	}
 

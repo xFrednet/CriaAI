@@ -1,4 +1,4 @@
-﻿/******************************************************************************
+/******************************************************************************
 * Cria  - The worst artificial intelligence on the market.                    *
 *         <https://github.com/xFrednet/CriaAI>                                *
 *                                                                             *
@@ -30,70 +30,84 @@
 *       distribution.                                                         *
 *                                                                             *
 ******************************************************************************/
-#include "OSContext.h"
-#include "win/WinOSContext.h"
+#pragma once
 
-namespace cria_ai { namespace api {
-	
-	CROSContext* CROSContext::s_Instance = nullptr;
+#include "NetworkUtil.h"
 
-	CROSContext::CROSContext()
-	{
-	}
-	CROSContext::~CROSContext()
-	{
-	}
+#include "../api/InputLogger.h"
+#include "../api/InputSimulator.h"
 
-	crresult CROSContext::InitInstance()
-	{
-		CROSContext* instance = nullptr;
-		
-		/*
-		 * Create instance
-		 */
-#ifdef CRIA_OS_WIN
-		instance = new win::CRWinOSContext();
+#ifndef CR_NEURON_OUTPUT_ACTIVATION_LIMIT
+#	define CR_NEURON_OUTPUT_ACTIVATION_LIMIT     crnwdec(0.5)
 #endif
-		if (!instance)
-		{
-			return CRRES_ERR_NEW_FAILED;
-		}
 
-		/*
-		 * init
-		 */
-		crresult result = instance->init();
-		if (CR_FAILED(result))
-		{
-			delete instance;
-			return result;
-		}
+namespace cria_ai { namespace network {
+	
+	typedef enum CR_NEURON_TYPE_ {
+		CR_NEURON_INPUT_LAYER        = 0x0100,
+		CR_NEURON_DATA_INPUT         = 0x0101,
+		CR_NEURON_RANDNOISE_INPUT    = 0x0102,
 
-		/*
-		 * finishing
-		 */
-		s_Instance = instance;
-		return CRRES_OK;
-	}
+		CR_NEURON_HIDDEN_LAYER       = 0x0200,
+		CR_NEURON_NORMAL             = 0x0201,
+		CR_NEURON_INPUT_DELAY        = 0x0203,
 
-	crresult CROSContext::TerminateInstance()
+		CR_NEURON_OUTPUT_LAYER       = 0x0400,
+		CR_NEURON_KEYBOARD_OUTPUT    = 0x0401,
+		CR_NEURON_MMOVE_OUTPUT       = 0x0402,
+		CR_NEURON_MBUTTON_OUTPUT     = 0x0403
+	} CR_NEURON_TYPE;
+
+	class CRNeuronGroup
 	{
-		/*
-		 * validation check
-		 */
-		if (!s_Instance)
-			return CRRES_OK_STATIC_INSTANCE_IS_NULL;
+	protected:
+		static api::CRInputSimulator* s_InputSim;
+	public:
+		static crresult InitStaticMembers(api::CRInputSimulator* inputSim);
+		static crresult TerminateStaticMembers();
+	protected:
+		uint m_NeuronCount;
+
+		CRNeuronGroup(uint neuronCount);
+	public:
+		virtual ~CRNeuronGroup();
 
 		/*
-		 * Deleting the instance
+		 * Neuron stuff
 		 */
-		CROSContext* instance = s_Instance;
-		s_Instance = nullptr;
-		delete instance;
+		/**
+		 * \brief This method processes the input data and returns the result in outData
+		 * 
+		 * \param inData This has to be an array of data with a minimum size of the 
+		 * neuron count. Each element is processed by one neuron.
+		 * \param outData This has to be an array of data with a minimum size of the 
+		 * neuron count. It holds the processed data afterwards.
+		 */
+		virtual void processData(crnwdec const* inData, crnwdec* outData) = 0;
+		/**
+		 * \brief This method is the inverse process from processData. It returns the expected 
+		 * input(outData) for a given output of processData(inData)
+		 * 
+		 * \param inData This has to be an array of data with a minimum size of the 
+		 * neuron count. Each element is processed by one neuron.
+		 * \param outData This has to be an array of data with a minimum size of the 
+		 * neuron count. It holds the expected input data for the output data from
+		 * inData.
+		 */
+		virtual void processDataInverse(crnwdec const* inData, crnwdec* outData) = 0;
+		/**
+		 * \brief This is used in the first creation of the neurons. It should initialize
+		 * the member values with random values.
+		 */
+		virtual void randInit() = 0;
 
 		/*
-		 * Yay return "okay"
+		 * Getters
 		 */
-		return CRRES_OK;
-	}
+		// type stuff and things
+		virtual CR_NEURON_TYPE getType() = 0;
+		bool isType(const CR_NEURON_TYPE& type);
+	};
+
+	typedef cr_ptr<CRNeuronGroup> CRNeuronGroupPtr;
 }}

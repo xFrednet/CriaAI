@@ -5,21 +5,21 @@
 
 namespace cria_ai
 {
-	void RandSetSeed(long seed)
+	void CRRandSetSeed(long seed)
 	{
 		srand(seed);
 	}
-	void RandNewSeed()
+	void CRRandNewSeed()
 	{
-		RandSetSeed((long)time(0));
+		CRRandSetSeed((long)time(0));
 	}
 
-	float RandFloat()
+	float CRRandFloat()
 	{
 		return (float)rand() / (float)RAND_MAX;
 	}
-	int32 RandInt(int32 max)
+	int32 CRRandInt(int32 cap)
 	{
-		return rand() % max;
+		return rand() % cap;
 	}
 }

@@ -1,4 +1,4 @@
-﻿/******************************************************************************
+/******************************************************************************
 * Cria  - The worst artificial intelligence on the market.                    *
 *         <https://github.com/xFrednet/CriaAI>                                *
 *                                                                             *
@@ -30,70 +30,22 @@
 *       distribution.                                                         *
 *                                                                             *
 ******************************************************************************/
-#include "OSContext.h"
-#include "win/WinOSContext.h"
+#pragma once
 
-namespace cria_ai { namespace api {
+#include "../NeuronGroup.h"
+
+namespace cria_ai { namespace network {
 	
-	CROSContext* CROSContext::s_Instance = nullptr;
-
-	CROSContext::CROSContext()
+	class CRDataInputNeuron : public CRNeuronGroup
 	{
-	}
-	CROSContext::~CROSContext()
-	{
-	}
-
-	crresult CROSContext::InitInstance()
-	{
-		CROSContext* instance = nullptr;
 		
-		/*
-		 * Create instance
-		 */
-#ifdef CRIA_OS_WIN
-		instance = new win::CRWinOSContext();
-#endif
-		if (!instance)
-		{
-			return CRRES_ERR_NEW_FAILED;
-		}
+	public:
+		CRDataInputNeuron(uint neuronCount);
 
-		/*
-		 * init
-		 */
-		crresult result = instance->init();
-		if (CR_FAILED(result))
-		{
-			delete instance;
-			return result;
-		}
-
-		/*
-		 * finishing
-		 */
-		s_Instance = instance;
-		return CRRES_OK;
-	}
-
-	crresult CROSContext::TerminateInstance()
-	{
-		/*
-		 * validation check
-		 */
-		if (!s_Instance)
-			return CRRES_OK_STATIC_INSTANCE_IS_NULL;
-
-		/*
-		 * Deleting the instance
-		 */
-		CROSContext* instance = s_Instance;
-		s_Instance = nullptr;
-		delete instance;
-
-		/*
-		 * Yay return "okay"
-		 */
-		return CRRES_OK;
-	}
+		void processData(crnwdec const* inData, crnwdec* outData) override;
+		void processDataInverse(crnwdec const* inData, crnwdec* outData) override;
+		void randInit() override;
+		
+		CR_NEURON_TYPE getType() override;
+	};
 }}

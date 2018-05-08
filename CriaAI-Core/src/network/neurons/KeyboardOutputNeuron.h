@@ -30,70 +30,26 @@
 *       distribution.                                                         *
 *                                                                             *
 ******************************************************************************/
-#include "OSContext.h"
-#include "win/WinOSContext.h"
+#pragma once
 
-namespace cria_ai { namespace api {
+#include "../NeuronGroup.h"
+
+namespace cria_ai { namespace network {
 	
-	CROSContext* CROSContext::s_Instance = nullptr;
-
-	CROSContext::CROSContext()
+	class CRKeyboardOutputNeuron : public CRNeuronGroup
 	{
-	}
-	CROSContext::~CROSContext()
-	{
-	}
+	private:
+		CR_KEY_ID* m_KeyIDs;
+		bool* m_LastStates;
+	public:
+		CRKeyboardOutputNeuron(uint neuronCount, CR_KEY_ID* keyIDs);
+		CRKeyboardOutputNeuron(CR_KEY_ID keyID);
+		~CRKeyboardOutputNeuron();
 
-	crresult CROSContext::InitInstance()
-	{
-		CROSContext* instance = nullptr;
-		
-		/*
-		 * Create instance
-		 */
-#ifdef CRIA_OS_WIN
-		instance = new win::CRWinOSContext();
-#endif
-		if (!instance)
-		{
-			return CRRES_ERR_NEW_FAILED;
-		}
+		void processData(crnwdec const* inData, crnwdec* outData) override;
+		void processDataInverse(crnwdec const* inData, crnwdec* outData) override;
+		void randInit() override;
+		CR_NEURON_TYPE getType() override;
+	};
 
-		/*
-		 * init
-		 */
-		crresult result = instance->init();
-		if (CR_FAILED(result))
-		{
-			delete instance;
-			return result;
-		}
-
-		/*
-		 * finishing
-		 */
-		s_Instance = instance;
-		return CRRES_OK;
-	}
-
-	crresult CROSContext::TerminateInstance()
-	{
-		/*
-		 * validation check
-		 */
-		if (!s_Instance)
-			return CRRES_OK_STATIC_INSTANCE_IS_NULL;
-
-		/*
-		 * Deleting the instance
-		 */
-		CROSContext* instance = s_Instance;
-		s_Instance = nullptr;
-		delete instance;
-
-		/*
-		 * Yay return "okay"
-		 */
-		return CRRES_OK;
-	}
 }}
