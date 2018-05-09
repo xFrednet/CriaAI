@@ -37,7 +37,7 @@ namespace cria_ai { namespace os {
 	crresult CRScreenCapturer::setTarget(CRWindowPtr target)
 	{
 		if (!target.get())
-			return CRRES_ERR_API_TARGET_IS_NULL;
+			return CRRES_ERR_OS_TARGET_IS_NULL;
 
 		/*
 		 * Create new bmp

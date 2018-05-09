@@ -30,10 +30,63 @@
 *       distribution.                                                         *
 *                                                                             *
 ******************************************************************************/
-#pragma once
+#include "PaCoContext.h"
 
-#include "NetworkUtil.h"
+#ifdef CRIA_PACO_CUDA
+#	include "cuda/CuContext.cuh"
+#endif
 
-namespace cria_ai { namespace network {
+namespace cria_ai { namespace paco {
 	
+	crresult CRPaCoContext::InitInstance()
+	{
+		CRPaCoContext* instance = nullptr;
+
+#ifdef CRIA_PACO_CUDA
+		instance = new cu::CRCuContext();
+#endif
+
+		if (!instance)
+			return CRRES_ERR_PACO_IS_NOT_SUPPORTED;
+
+		crresult result = instance->init();
+		if (CR_FAILED(result))
+		{
+			delete instance;
+			return result;
+		}
+
+		s_Instance = instance;
+		
+		return CRRES_OK;
+	}
+	crresult CRPaCoContext::TerminateInstance()
+	{
+		CRPaCoContext* instance = s_Instance;
+		s_Instance = nullptr;
+		
+		delete instance;
+
+		return CRRES_OK;
+	}
+
+	void* CRPaCoMalloc(size_t size)
+	{
+#ifdef CRIA_PACO_CUDA
+		return cu::CRCuMalloc(size);
+#else
+#		error CRPaCoMalloc is not implementet for the current parallel computing API
+		return nullptr;
+#endif
+	}
+	void CRPaCoFree(void* mem)
+	{
+#ifdef CRIA_PACO_CUDA
+		return cu::CRCuFree(mem);
+#else
+#		error CRPaCoFree is not implementet for the current parallel computing API
+		return nullptr;
+#endif
+	}
+
 }}

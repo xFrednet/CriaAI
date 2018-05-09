@@ -67,9 +67,14 @@ namespace cria_ai
 /* ********************************************************* */
 #define CRRES_SOURCE_UNKNOWN                     CRIA_RES_TYPEDEF(0x0000)
 #define CRRES_SOURCE_UTILS                       CRIA_RES_TYPEDEF(0x0100)
-#define CRRES_SOURCE_API                         CRIA_RES_TYPEDEF(0x0A00)
-#define CRRES_SOURCE_CUDA                        CRIA_RES_TYPEDEF(0x0B00)
-#define CRRES_SOURCE_WIN                         CRIA_RES_TYPEDEF(0x0C00)
+
+#define CRRES_SOURCE_OS                          CRIA_RES_TYPEDEF(0x0A00)
+#define CRRES_SOURCE_WIN                         CRIA_RES_TYPEDEF(0x0B00)
+//CRRES_SOURCE_LINUX                                              0x0C00
+//CRRES_SOURCE_MAC                                                0x0D00
+
+#define CRRES_SOURCE_PACO                        CRIA_RES_TYPEDEF(0x0E00)
+#define CRRES_SOURCE_CUDA                        CRIA_RES_TYPEDEF(0x0F00)
 
 /* //////////////////////////////////////////////////////////////////////////////// */
 // // ZA_RESULT_SOURCE_NO_SOURCE //
@@ -89,25 +94,6 @@ namespace cria_ai
 #define CRRES_ERR_STATIC_VAR_IS_ALREADY_VALID    CRIA_RES_TYPEDEF(0x8009)
 
 /* //////////////////////////////////////////////////////////////////////////////// */
-// // CRRES_SOURCE_API //
-/* //////////////////////////////////////////////////////////////////////////////// */
-#define CRRES_ERR_API_UNKNOWN                    CRIA_RES_TYPEDEF(0x8A00)
-#define CRRES_OK_API                             CRIA_RES_TYPEDEF(0x0A00)
-
-#define CRRES_OK_API_INPUTSIM_TARGET_NOT_FOCUSED CRIA_RES_TYPEDEF(0x0A01)
-#define CRRES_OK_API_INPUTSIM_CURSOR_OUTSIDE     CRIA_RES_TYPEDEF(0x0A02)
-
-#define CRRES_ERR_API_OS_UNSUPPORTED             CRIA_RES_TYPEDEF(0x8A01)
-#define CRRES_ERR_API_STATIC_INSTANCE_IS_NULL    CRIA_RES_TYPEDEF(0x8A02)
-#define CRRES_ERR_API_KEY_OUT_OF_BOUNDS          CRIA_RES_TYPEDEF(0x8A03)
-#define CRRES_ERR_API_BUTTON_OUT_OF_BOUNDS       CRIA_RES_TYPEDEF(0x8A04)
-#define CRRES_ERR_API_INPUTSIM_INIT_FAILED       CRIA_RES_TYPEDEF(0x8A05)
-#define CRRES_ERR_API_WINDOW_INIT_FAILED         CRIA_RES_TYPEDEF(0x8A06)
-#define CRRES_ERR_API_WINDOW_TITLE_NOT_FOUND     CRIA_RES_TYPEDEF(0x8A07)
-#define CRRES_ERR_API_TARGET_IS_NULL             CRIA_RES_TYPEDEF(0x8A08)
-#define CRRES_ERR_API_WINDOW_RESIZE_FAILED       CRIA_RES_TYPEDEF(0x8A09)
-
-/* //////////////////////////////////////////////////////////////////////////////// */
 // // CRRES_SOURCE_UTILS //
 /* //////////////////////////////////////////////////////////////////////////////// */
 #define CRRES_ERR_UTILS_UNKNOWN                  CRIA_RES_TYPEDEF(0x8100)
@@ -115,24 +101,51 @@ namespace cria_ai
 #define CRRES_ERR_UTILS_FAILED_TO_CREATE_FBMP    CRIA_RES_TYPEDEF(0x8101)
 
 /* //////////////////////////////////////////////////////////////////////////////// */
-// // CRRES_SOURCE_CUDA //
+// // CRRES_SOURCE_OS //
 /* //////////////////////////////////////////////////////////////////////////////// */
-#define CRRES_ERR_CUDA_UNKNOWN                   CRIA_RES_TYPEDEF(0x8B00)
+#define CRRES_ERR_OS_UNKNOWN                    CRIA_RES_TYPEDEF(0x8A00)
+#define CRRES_OK_OS                             CRIA_RES_TYPEDEF(0x0A00)
+
+#define CRRES_OK_OS_INPUTSIM_TARGET_NOT_FOCUSED CRIA_RES_TYPEDEF(0x0A01)
+#define CRRES_OK_OS_INPUTSIM_CURSOR_OUTSIDE     CRIA_RES_TYPEDEF(0x0A02)
+
+#define CRRES_ERR_OS_OS_UNSUPPORTED             CRIA_RES_TYPEDEF(0x8A01)
+#define CRRES_ERR_OS_STATIC_INSTANCE_IS_NULL    CRIA_RES_TYPEDEF(0x8A02)
+#define CRRES_ERR_OS_KEY_OUT_OF_BOUNDS          CRIA_RES_TYPEDEF(0x8A03)
+#define CRRES_ERR_OS_BUTTON_OUT_OF_BOUNDS       CRIA_RES_TYPEDEF(0x8A04)
+#define CRRES_ERR_OS_INPUTSIM_INIT_FAILED       CRIA_RES_TYPEDEF(0x8A05)
+#define CRRES_ERR_OS_WINDOW_INIT_FAILED         CRIA_RES_TYPEDEF(0x8A06)
+#define CRRES_ERR_OS_WINDOW_TITLE_NOT_FOUND     CRIA_RES_TYPEDEF(0x8A07)
+#define CRRES_ERR_OS_TARGET_IS_NULL             CRIA_RES_TYPEDEF(0x8A08)
+#define CRRES_ERR_OS_WINDOW_RESIZE_FAILED       CRIA_RES_TYPEDEF(0x8A09)
+
 
 /* //////////////////////////////////////////////////////////////////////////////// */
 // // CRRES_SOURCE_WIN //
 /* //////////////////////////////////////////////////////////////////////////////// */
-#define CRRES_ERR_WIN_UNKNOWN                    CRIA_RES_TYPEDEF(0x8C00)
-#define CRRES_OK_WIN                             CRIA_RES_TYPEDEF(0x0C00)
+#define CRRES_ERR_WIN_UNKNOWN                    CRIA_RES_TYPEDEF(0x8B00)
 
-#define CRRES_ERR_WIN_FAILED_TO_RETRIVE_DC       CRIA_RES_TYPEDEF(0x8C01)
-#define CRRES_ERR_WIN_FAILED_TO_CREATE_DC        CRIA_RES_TYPEDEF(0x8C02)
-#define CRRES_ERR_WIN_FAILED_TO_CREATE_HBMP      CRIA_RES_TYPEDEF(0x8C03)
-#define CRRES_ERR_WIN_INPUT_THREAD_BLOCKED       CRIA_RES_TYPEDEF(0x8C04)
-#define CRRES_ERR_WIN_SYSTEMPARMINFO_FAILED      CRIA_RES_TYPEDEF(0x8C05)
-#define CRRES_ERR_WIN_FAILED_TO_INSTALL_HOCK     CRIA_RES_TYPEDEF(0x8C06)
-#define CRRES_ERR_WIN_COULD_NOT_GET_KEY_LAYOUT   CRIA_RES_TYPEDEF(0x8C07)
+#define CRRES_OK_WIN                             CRIA_RES_TYPEDEF(0x0B00)
 
+#define CRRES_ERR_WIN_FAILED_TO_RETRIVE_DC       CRIA_RES_TYPEDEF(0x8B01)
+#define CRRES_ERR_WIN_FAILED_TO_CREATE_DC        CRIA_RES_TYPEDEF(0x8B02)
+#define CRRES_ERR_WIN_FAILED_TO_CREATE_HBMP      CRIA_RES_TYPEDEF(0x8B03)
+#define CRRES_ERR_WIN_INPUT_THREAD_BLOCKED       CRIA_RES_TYPEDEF(0x8B04)
+#define CRRES_ERR_WIN_SYSTEMPARMINFO_FAILED      CRIA_RES_TYPEDEF(0x8B05)
+#define CRRES_ERR_WIN_FAILED_TO_INSTALL_HOCK     CRIA_RES_TYPEDEF(0x8B06)
+#define CRRES_ERR_WIN_COULD_NOT_GET_KEY_LAYOUT   CRIA_RES_TYPEDEF(0x8B07)
+
+/* //////////////////////////////////////////////////////////////////////////////// */
+// // CRRES_SOURCE_PACO //
+/* //////////////////////////////////////////////////////////////////////////////// */
+#define CRRES_ERR_PACO                           CRIA_RES_TYPEDEF(0x8E00)
+
+#define CRRES_ERR_PACO_IS_NOT_SUPPORTED          CRIA_RES_TYPEDEF(0x8E01)
+
+/* //////////////////////////////////////////////////////////////////////////////// */
+// // CRRES_SOURCE_CUDA //
+/* //////////////////////////////////////////////////////////////////////////////// */
+#define CRRES_ERR_CUDA_UNKNOWN                   CRIA_RES_TYPEDEF(0x8F00)
 /* //////////////////////////////////////////////////////////////////////////////// */
 // // CRGetCRResultName //
 /* //////////////////////////////////////////////////////////////////////////////// */
@@ -175,30 +188,23 @@ namespace cria_ai {
 					default:
 						return String("CRRESULT_UNNAMED_RESULT");
 				}
-			case CRRES_SOURCE_API.Value:
+			case CRRES_SOURCE_OS.Value:
 				switch (result.Value) {
-					CRIA_SWITCH_CRRESULT(CRRES_ERR_API_UNKNOWN);
-					CRIA_SWITCH_CRRESULT(CRRES_OK_API);
+					CRIA_SWITCH_CRRESULT(CRRES_ERR_OS_UNKNOWN);
+					CRIA_SWITCH_CRRESULT(CRRES_OK_OS);
 
-					CRIA_SWITCH_CRRESULT(CRRES_OK_API_INPUTSIM_TARGET_NOT_FOCUSED); 
-					CRIA_SWITCH_CRRESULT(CRRES_OK_API_INPUTSIM_CURSOR_OUTSIDE);
+					CRIA_SWITCH_CRRESULT(CRRES_OK_OS_INPUTSIM_TARGET_NOT_FOCUSED); 
+					CRIA_SWITCH_CRRESULT(CRRES_OK_OS_INPUTSIM_CURSOR_OUTSIDE);
 
-					CRIA_SWITCH_CRRESULT(CRRES_ERR_API_OS_UNSUPPORTED);
-					CRIA_SWITCH_CRRESULT(CRRES_ERR_API_STATIC_INSTANCE_IS_NULL);
-					CRIA_SWITCH_CRRESULT(CRRES_ERR_API_KEY_OUT_OF_BOUNDS);
-					CRIA_SWITCH_CRRESULT(CRRES_ERR_API_BUTTON_OUT_OF_BOUNDS);
-					CRIA_SWITCH_CRRESULT(CRRES_ERR_API_INPUTSIM_INIT_FAILED);
-					CRIA_SWITCH_CRRESULT(CRRES_ERR_API_WINDOW_INIT_FAILED);
-					CRIA_SWITCH_CRRESULT(CRRES_ERR_API_WINDOW_TITLE_NOT_FOUND);
-					CRIA_SWITCH_CRRESULT(CRRES_ERR_API_TARGET_IS_NULL);
-					CRIA_SWITCH_CRRESULT(CRRES_ERR_API_WINDOW_RESIZE_FAILED);
-
-					default:
-						return String("CRRESULT_UNNAMED_RESULT");
-				}
-			case CRRES_SOURCE_CUDA.Value:
-				switch (result.Value) {
-					CRIA_SWITCH_CRRESULT(CRRES_ERR_CUDA_UNKNOWN);
+					CRIA_SWITCH_CRRESULT(CRRES_ERR_OS_OS_UNSUPPORTED);
+					CRIA_SWITCH_CRRESULT(CRRES_ERR_OS_STATIC_INSTANCE_IS_NULL);
+					CRIA_SWITCH_CRRESULT(CRRES_ERR_OS_KEY_OUT_OF_BOUNDS);
+					CRIA_SWITCH_CRRESULT(CRRES_ERR_OS_BUTTON_OUT_OF_BOUNDS);
+					CRIA_SWITCH_CRRESULT(CRRES_ERR_OS_INPUTSIM_INIT_FAILED);
+					CRIA_SWITCH_CRRESULT(CRRES_ERR_OS_WINDOW_INIT_FAILED);
+					CRIA_SWITCH_CRRESULT(CRRES_ERR_OS_WINDOW_TITLE_NOT_FOUND);
+					CRIA_SWITCH_CRRESULT(CRRES_ERR_OS_TARGET_IS_NULL);
+					CRIA_SWITCH_CRRESULT(CRRES_ERR_OS_WINDOW_RESIZE_FAILED);
 
 					default:
 						return String("CRRESULT_UNNAMED_RESULT");
@@ -216,6 +222,22 @@ namespace cria_ai {
 					CRIA_SWITCH_CRRESULT(CRRES_ERR_WIN_SYSTEMPARMINFO_FAILED);
 					CRIA_SWITCH_CRRESULT(CRRES_ERR_WIN_FAILED_TO_INSTALL_HOCK);
 					CRIA_SWITCH_CRRESULT(CRRES_ERR_WIN_COULD_NOT_GET_KEY_LAYOUT);
+
+					default:
+						return String("CRRESULT_UNNAMED_RESULT");
+				}
+			case CRRES_ERR_PACO.Value:
+				switch (result.Value) {
+					CRIA_SWITCH_CRRESULT(CRRES_ERR_PACO);
+
+					CRIA_SWITCH_CRRESULT(CRRES_ERR_PACO_IS_NOT_SUPPORTED);
+
+					default:
+						return String("CRRESULT_UNNAMED_RESULT");
+				}
+			case CRRES_SOURCE_CUDA.Value:
+				switch (result.Value) {
+					CRIA_SWITCH_CRRESULT(CRRES_ERR_CUDA_UNKNOWN);
 
 					default:
 						return String("CRRESULT_UNNAMED_RESULT");

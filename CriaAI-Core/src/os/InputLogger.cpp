@@ -57,7 +57,7 @@ namespace cria_ai { namespace os {
 #endif
 
 		if (!s_Instance)
-			return CRRES_ERR_API_OS_UNSUPPORTED;
+			return CRRES_ERR_OS_OS_UNSUPPORTED;
 
 		/*
 		 * Init and return the result
@@ -71,7 +71,7 @@ namespace cria_ai { namespace os {
 		 * singleton check
 		 */
 		if (!s_Instance)
-			return CRRES_ERR_API_STATIC_INSTANCE_IS_NULL;
+			return CRRES_ERR_OS_STATIC_INSTANCE_IS_NULL;
 
 		CRInputLogger* logger = s_Instance;
 		s_Instance = nullptr;

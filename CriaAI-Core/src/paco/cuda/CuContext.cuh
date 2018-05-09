@@ -30,102 +30,31 @@
 *       distribution.                                                         *
 *                                                                             *
 ******************************************************************************/
-#include "WinWindow.h"
+#pragma once
 
-namespace cria_ai { namespace os { namespace win {
-	CRWinWindow::CRWinWindow(const String& title)
-		: CRWindow(title),
-		m_Hwnd(nullptr)
+#include "../PaCoContext.h"
+
+#ifdef CRIA_PACO_CUDA 
+
+#include "cuda_runtime.h"
+#include "device_launch_parameters.h"
+
+namespace cria_ai { namespace paco { namespace cu {
+	
+	class CRCuContext : public CRPaCoContext
 	{
-	}
+	protected:
+		crresult init() override;
+	};
 
-	crresult CRWinWindow::init(const String& title)
+	void* CRCuMalloc(size_t size);
+	void CRCuFree(void* mem);
+
+	template <typename _T>
+	inline _T* CRCuMalloc()
 	{
-		/*
-		 * Getting the HWND
-		 */
-		if (title.empty()) 
-			m_Hwnd = GetDesktopWindow(); 
-		else 
-			m_Hwnd = FindWindow(nullptr, title.c_str());
-		
-		/*
-		 * Error check
-		 */
-		if (!m_Hwnd)
-			return CRRES_ERR_OS_WINDOW_TITLE_NOT_FOUND;
-
-		/*
-		 * Return
-		 */
-		return CRRES_OK_OS;
-	}
-
-	bool CRWinWindow::isFocussed() const
-	{
-		return (GetForegroundWindow() == m_Hwnd);
-	}
-
-	CR_RECT CRWinWindow::getClientArea() const
-	{
-		WINDOWINFO winInfo;
-		if (!GetWindowInfo(m_Hwnd, &winInfo))
-			return CR_RECT{0, 0, 0, 0};
-		RECT winCArea = winInfo.rcClient;
-
-		/*
-		* Translating the area
-		*/
-		CR_RECT cArea;
-		cArea.X      = (int)winCArea.left;
-		cArea.Y      = (int)winCArea.top;
-		cArea.Width  = (uint)(winCArea.right - winCArea.left);
-		cArea.Height = (uint)(winCArea.bottom - winCArea.top);
-
-		return cArea;
-	}
-
-	CR_VEC2I CRWinWindow::getCorrectResizeSize(uint width, uint height) const
-	{
-		LONG hwndStyle = GetWindowLong(m_Hwnd, GWL_STYLE);
-
-		RECT size = {0, 0, (LONG)width, (LONG)height};
-		AdjustWindowRect(&size, hwndStyle, false);
-
-		return CR_VEC2I(size.right - size.left, size.bottom - size.top);
-	}
-	crresult CRWinWindow::setPos(int x, int y)
-	{
-		if (!SetWindowPos(m_Hwnd, nullptr, (int)x, (int)y, 0, 0, 
-			SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOZORDER))
-			return CRRES_ERR_OS_WINDOW_RESIZE_FAILED;
-
-		return CRRES_OK;
-	}
-	crresult CRWinWindow::setSize(uint width, uint height)
-	{
-		CR_VEC2I size = getCorrectResizeSize(width, height);
-
-		if (!SetWindowPos(m_Hwnd, nullptr, 0, 0, size.X, size.Y,
-			SWP_NOMOVE | SWP_NOACTIVATE | SWP_NOZORDER))
-			return CRRES_ERR_OS_WINDOW_RESIZE_FAILED;
-
-		return CRRES_OK;
-	}
-	crresult CRWinWindow::setClientArea(const CR_RECT& bounds)
-	{
-		CR_VEC2I size = getCorrectResizeSize(bounds.Width, bounds.Height);
-
-		if (!SetWindowPos(m_Hwnd, nullptr, bounds.X, bounds.Y, size.X, size.Y,
-			SWP_NOACTIVATE | SWP_NOZORDER))
-			return CRRES_ERR_OS_WINDOW_RESIZE_FAILED;
-
-		return CRRES_OK;
-	}
-
-
-	HWND CRWinWindow::getHWND()
-	{
-		return m_Hwnd;
+		return (_T*)CRCuMalloc(sizeof(_T));
 	}
 }}}
+
+#endif // CRIA_PACO_CUDA

@@ -11,6 +11,12 @@
 #	error The targeted operating system is not supported, sorry!!!
 #endif
 
+#if CR_CUDA
+#	define CRIA_PACO_CUDA
+#else
+#	error No parallel computing api was selected!!! (Try defining CR_CUDA)
+#endif
+
 /*
  * Value helpers
  */

@@ -1,4 +1,4 @@
-/******************************************************************************
+﻿/******************************************************************************
 * Cria  - The worst artificial intelligence on the market.                    *
 *         <https://github.com/xFrednet/CriaAI>                                *
 *                                                                             *
@@ -30,8 +30,34 @@
 *       distribution.                                                         *
 *                                                                             *
 ******************************************************************************/
-#include "ActivationFunctions.h"
+#pragma once
 
-namespace cria_ai { namespace network {
+#include "../network/NetworkUtil.h"
+
+namespace cria_ai { namespace paco {
 	
+	typedef void(*cr_activation_func) (CRNWMat const* input, CRNWMat* output);
+	typedef void(*cr_activation_func_inv) (CRNWMat const* input, CRNWMat* output);
+
+	/**
+	 * \brief A activation function
+	 * 
+	 * Equation:     1 / (1 + e^-x)
+	 * Output Range: (0, 1)
+	 * 
+	 * \param input  A matrix containing values for processing.
+	 * \param output A matrix that holds the output values.
+	 */
+	void CRSigmoid(CRNWMat const* input, CRNWMat* output);
+	/**
+	* \brief A inverse activation function
+	*
+	* Equation:    1 / (1 + e^-x)
+	* Input Range: (0, 1)
+	*
+	* \param input  A matrix containing values for processing.
+	* \param output A matrix that holds the output values.
+	*/
+	void CRSigmoidInv(CRNWMat const* input, CRNWMat* output);
+
 }}

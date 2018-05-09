@@ -4,7 +4,7 @@
 #include "../../Dependencies/BmpRenderer/Dependencies/libbmpread/bmpread.h"
 #include "../os/FileSystem.h"
 
-#include "../os/cuda/CudaContext.cuh"
+#include "../paco/cuda/CuContext.cuh"
 
 #define FBMP_PX_INDEX(x, y, bmp)            (((x) + (y) * bmp->Width) * bmp->FloatsPerPixel)
 

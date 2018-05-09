@@ -46,18 +46,18 @@ namespace cria_ai { namespace os { namespace win {
 	crresult CRWinInputSimulator::sendInputMessage(INPUT* message) const
 	{
 		if (m_TargetWindow->isFocussed())
-			return CRRES_OK_API_INPUTSIM_TARGET_NOT_FOCUSED;
+			return CRRES_OK_OS_INPUTSIM_TARGET_NOT_FOCUSED;
 
 		CR_RECT mBounds = m_TargetWindow->getClientArea();
 		CR_VEC2I pos = getMousePos();
 		if (pos.X < 0 || pos.X >= (int)mBounds.Width ||
 			pos.Y < 0 || pos.Y >= (int)mBounds.Height)
-			return CRRES_OK_API_INPUTSIM_CURSOR_OUTSIDE;
+			return CRRES_OK_OS_INPUTSIM_CURSOR_OUTSIDE;
 
 		if (!SendInput(1, message, sizeof(INPUT)))
 			return CRRES_ERR_WIN_INPUT_THREAD_BLOCKED;
 
-		return CRRES_OK_API;
+		return CRRES_OK_OS;
 	}
 
 	CRWinInputSimulator::CRWinInputSimulator()
@@ -80,7 +80,7 @@ namespace cria_ai { namespace os { namespace win {
 		m_OriginalMouseAccellState = GetMouseAccellState();
 		if (CR_FAILED(SetMouseAccellState(false)))
 		{
-			return CRRES_ERR_API_INPUTSIM_INIT_FAILED;
+			return CRRES_ERR_OS_INPUTSIM_INIT_FAILED;
 		}
 
 		/*
@@ -142,7 +142,7 @@ namespace cria_ai { namespace os { namespace win {
 				input.mi.dwFlags = MOUSEEVENTF_RIGHTDOWN;
 				break;
 			default:
-				return  CRRES_ERR_API_BUTTON_OUT_OF_BOUNDS;
+				return  CRRES_ERR_OS_BUTTON_OUT_OF_BOUNDS;
 		}
 
 		return sendInputMessage(&input);
@@ -164,7 +164,7 @@ namespace cria_ai { namespace os { namespace win {
 				input.mi.dwFlags = MOUSEEVENTF_RIGHTUP;
 				break;
 			default:
-				return  CRRES_ERR_API_BUTTON_OUT_OF_BOUNDS;
+				return  CRRES_ERR_OS_BUTTON_OUT_OF_BOUNDS;
 		}
 
 		return sendInputMessage(&input);
