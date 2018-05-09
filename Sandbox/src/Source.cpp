@@ -36,17 +36,18 @@ int main(int argc, char* argv)
 	/*
 	 * CROSContext
 	 */
-	r = api::CROSContext::InitInstance();
-	printf("api::CROSContext::InitInstance: %s \n", CRGetCRResultName(r).c_str());
-	api::CROSContext::Sleep(10);
+	r = os::CROSContext::InitInstance();
+	printf("os::CROSContext::InitInstance: %s \n", CRGetCRResultName(r).c_str());
+	os::CROSContext::Sleep(10);
 
 	/*
 	 * CRWindow
 	 */
-	api::CRWindowPtr targetWin = api::CRWindow::CreateInstance(BOI_TITLE, &r);
-	printf("api::CRWindow::CreateInstance: %s \n", CRGetCRResultName(r).c_str());
+	os::CRWindowPtr targetWin = os::CRWindow::CreateInstance(BOI_TITLE, &r);
+	printf("os::CRWindow::CreateInstance: %s \n", CRGetCRResultName(r).c_str());
 	if (!targetWin.get())
 	{
+		printf("GOODBYE [ENTER]\n>");
 		std::cin.get();
 		return 1;
 	}
@@ -66,28 +67,28 @@ int main(int argc, char* argv)
 	/*
 	 * CRInputLogger
 	 */
-	r = api::CRInputLogger::InitInstance();
-	printf("api::CRInputLogger::InitInstance: %s \n", CRGetCRResultName(r).c_str());
-	api::CRInputLogger::SetTargetWindow(targetWin);
-	api::CRInputLogger::AddKeyCallback(keyInput);
+	r = os::CRInputLogger::InitInstance();
+	printf("os::CRInputLogger::InitInstance: %s \n", CRGetCRResultName(r).c_str());
+	os::CRInputLogger::SetTargetWindow(targetWin);
+	os::CRInputLogger::AddKeyCallback(keyInput);
 
 
 	for (int timer = 0; timer < 101; timer++)
 	{
-		api::CRInputLogger::Update();
-		api::CROSContext::Sleep(0, 10);
+		os::CRInputLogger::Update();
+		os::CROSContext::Sleep(0, 10);
 
 		if (timer % 100 == 0)
 		{
-			printf("[%s] ", (api::CRInputLogger::GetMButtonState(CR_MBUTTON_LEFT)   ? "X" : " "));
-			printf("[%s] ", (api::CRInputLogger::GetMButtonState(CR_MBUTTON_MIDDLE) ? "X" : " "));
-			printf("[%s] ", (api::CRInputLogger::GetMButtonState(CR_MBUTTON_RIGHT)  ? "X" : " "));
-			printf("POS(%4i, %4i) \n", api::CRInputLogger::GetMouseClientPos().X, api::CRInputLogger::GetMouseClientPos().Y);
+			printf("[%s] ", (os::CRInputLogger::GetMButtonState(CR_MBUTTON_LEFT)   ? "X" : " "));
+			printf("[%s] ", (os::CRInputLogger::GetMButtonState(CR_MBUTTON_MIDDLE) ? "X" : " "));
+			printf("[%s] ", (os::CRInputLogger::GetMButtonState(CR_MBUTTON_RIGHT)  ? "X" : " "));
+			printf("POS(%4i, %4i) \n", os::CRInputLogger::GetMouseClientPos().X, os::CRInputLogger::GetMouseClientPos().Y);
 		}
 	}
 
-	api::CRInputLogger::TerminateInstance();
-	api::CROSContext::TerminateInstance();
+	os::CRInputLogger::TerminateInstance();
+	os::CROSContext::TerminateInstance();
 
 	cin.get();
 	return 0;

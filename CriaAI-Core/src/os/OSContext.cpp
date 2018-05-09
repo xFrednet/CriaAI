@@ -30,49 +30,70 @@
 *       distribution.                                                         *
 *                                                                             *
 ******************************************************************************/
-#pragma once
+#include "OSContext.h"
+#include "win/WinOSContext.h"
 
-#include "../Common.hpp"
-
-namespace cria_ai { namespace api {
+namespace cria_ai { namespace os {
 	
-	class CROSContext
+	CROSContext* CROSContext::s_Instance = nullptr;
+
+	CROSContext::CROSContext()
 	{
-	protected:
-		static CROSContext* s_Instance;
+	}
+	CROSContext::~CROSContext()
+	{
+	}
 
-		virtual crresult init() = 0;
-
-		virtual void sleep(uint sec, uint ms) = 0;
-		virtual CR_VEC2I getMousePos() = 0;
-		virtual CR_RECT getVirtualScreenClientArea() = 0;
-
-		CROSContext();
-	public:
-		virtual ~CROSContext();
-
-		static crresult InitInstance();
-		static crresult TerminateInstance();
-
-		inline static void Sleep(uint sec, uint ms = 0)
+	crresult CROSContext::InitInstance()
+	{
+		CROSContext* instance = nullptr;
+		
+		/*
+		 * Create instance
+		 */
+#ifdef CRIA_OS_WIN
+		instance = new win::CRWinOSContext();
+#endif
+		if (!instance)
 		{
-			if (s_Instance) 
-				s_Instance->sleep(sec, ms);
+			return CRRES_ERR_NEW_FAILED;
 		}
-		inline static CR_VEC2I GetMousePos()
+
+		/*
+		 * init
+		 */
+		crresult result = instance->init();
+		if (CR_FAILED(result))
 		{
-			if (s_Instance)
-				return s_Instance->getMousePos();
-
-			return CR_VEC2I(0, 0);
+			delete instance;
+			return result;
 		}
-		inline static CR_RECT GetVirtualScreenClientArea()
-		{
-			if (s_Instance)
-				return s_Instance->getVirtualScreenClientArea();
 
-			return CR_RECT(0, 0, 0, 0);
-		}
-	};
+		/*
+		 * finishing
+		 */
+		s_Instance = instance;
+		return CRRES_OK;
+	}
 
+	crresult CROSContext::TerminateInstance()
+	{
+		/*
+		 * validation check
+		 */
+		if (!s_Instance)
+			return CRRES_OK_STATIC_INSTANCE_IS_NULL;
+
+		/*
+		 * Deleting the instance
+		 */
+		CROSContext* instance = s_Instance;
+		s_Instance = nullptr;
+		delete instance;
+
+		/*
+		 * Yay return "okay"
+		 */
+		return CRRES_OK;
+	}
 }}

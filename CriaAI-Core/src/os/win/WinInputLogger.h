@@ -1,4 +1,4 @@
-﻿/******************************************************************************
+/******************************************************************************
 * Cria  - The worst artificial intelligence on the market.                    *
 *         <https://github.com/xFrednet/CriaAI>                                *
 *                                                                             *
@@ -30,70 +30,41 @@
 *       distribution.                                                         *
 *                                                                             *
 ******************************************************************************/
-#include "OSContext.h"
-#include "win/WinOSContext.h"
+#pragma once
 
-namespace cria_ai { namespace api {
-	
-	CROSContext* CROSContext::s_Instance = nullptr;
+#include "../InputLogger.h"
 
-	CROSContext::CROSContext()
-	{
-	}
-	CROSContext::~CROSContext()
-	{
-	}
-
-	crresult CROSContext::InitInstance()
-	{
-		CROSContext* instance = nullptr;
-		
-		/*
-		 * Create instance
-		 */
 #ifdef CRIA_OS_WIN
-		instance = new win::CRWinOSContext();
-#endif
-		if (!instance)
-		{
-			return CRRES_ERR_NEW_FAILED;
-		}
 
-		/*
-		 * init
-		 */
-		crresult result = instance->init();
-		if (CR_FAILED(result))
-		{
-			delete instance;
-			return result;
-		}
+#include "WinOSContext.h"
 
-		/*
-		 * finishing
-		 */
-		s_Instance = instance;
-		return CRRES_OK;
-	}
-
-	crresult CROSContext::TerminateInstance()
+namespace cria_ai { namespace os { namespace win {
+	
+	class CRWinInputLogger : public CRInputLogger
 	{
-		/*
-		 * validation check
-		 */
-		if (!s_Instance)
-			return CRRES_OK_STATIC_INSTANCE_IS_NULL;
+	private:
+		HHOOK m_KeyboardHook;
+		HKL m_KeyLayout;
+		
+		HHOOK m_MouseHook;
 
-		/*
-		 * Deleting the instance
-		 */
-		CROSContext* instance = s_Instance;
-		s_Instance = nullptr;
-		delete instance;
+		CR_VEC2I m_OldMousePos;
 
-		/*
-		 * Yay return "okay"
-		 */
-		return CRRES_OK;
-	}
-}}
+	public:
+		CRWinInputLogger();
+		~CRWinInputLogger();
+	private:
+		static LRESULT CALLBACK HandleKeyboardHook(UINT message, WPARAM wp, LPARAM lp);
+		static LRESULT CALLBACK HandleMouseHook(UINT message, WPARAM wp, LPARAM lp);
+	protected:
+		crresult init() override;
+
+		void update() override;
+		
+		void processNewMousePos(CR_VEC2I newPos);
+
+	};
+
+}}}
+
+#endif

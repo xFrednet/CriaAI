@@ -34,7 +34,7 @@
 
 #include "win/WinInputLogger.h"
 
-namespace cria_ai { namespace api {
+namespace cria_ai { namespace os {
 
 	/*
 	* Singleton instance

@@ -1,4 +1,4 @@
-/******************************************************************************
+﻿/******************************************************************************
 * Cria  - The worst artificial intelligence on the market.                    *
 *         <https://github.com/xFrednet/CriaAI>                                *
 *                                                                             *
@@ -31,37 +31,9 @@
 *                                                                             *
 ******************************************************************************/
 #pragma once
-#include "../Window.h"
 
-#include "../../Common.hpp"
+#include "NetworkUtil.h"
 
-#ifdef CRIA_OS_WIN
-
-#include "WinOSContext.h"
-
-namespace cria_ai { namespace api { namespace win {
+namespace cria_ai { namespace network {
 	
-	class CRWinWindow : public CRWindow
-	{
-	private:
-		HWND m_Hwnd;
-
-		CR_VEC2I getCorrectResizeSize(uint width, uint height) const;
-	public:
-		CRWinWindow(const String& title);
-	protected:
-		crresult init(const String& title) override;
-	public:
-		bool isFocussed() const override;
-
-		CR_RECT getClientArea() const override;
-		crresult setPos(int x, int y) override;
-		crresult setSize(uint width, uint height) override;
-		crresult setClientArea(const CR_RECT& bounds) override;
-
-		HWND getHWND();
-	};
-
-}}}
-
-#endif // CRIA_OS_WIN
+}}

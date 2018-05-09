@@ -30,49 +30,45 @@
 *       distribution.                                                         *
 *                                                                             *
 ******************************************************************************/
-#pragma once
+#include "WinOSContext.h"
+#include <thread>
 
-#include "../Common.hpp"
-
-
-#define CR_DESTOP_WINDOW_TITLE         ""
-
-namespace cria_ai { namespace api {
-	
-	class CRWindow;
-
-	typedef cr_ptr<CRWindow> CRWindowPtr;
-
-	class CRWindow
+namespace cria_ai { namespace os { namespace win {
+	CRWinOSContext::CRWinOSContext()
 	{
-	public:
-		static CRWindowPtr CreateDestopWindowInstance(crresult* result = nullptr);
-		static CRWindowPtr CreateInstance(const String& title, crresult* result = nullptr);
-	protected:
-		String  m_Title;
-		
-		/*
-		 * constructor and destructor
-		 */
-		CRWindow(const String& title);
-		virtual crresult init(const String& title) = 0;
-	public:
-		virtual ~CRWindow();
+	}
 
-		inline String getTitle() const
-		{
-			return m_Title;
-		}
+	CRWinOSContext::~CRWinOSContext()
+	{
+	}
 
-		virtual bool isFocussed() const = 0;
+	crresult CRWinOSContext::init()
+	{
+		return CRRES_OK;
+	}
 
-		virtual crresult setPos(int x, int y) = 0;
-		virtual crresult setSize(uint width, uint height) = 0;
-		virtual crresult setClientArea(const CR_RECT& bounds) = 0;
+	void CRWinOSContext::sleep(uint sec, uint ms)
+	{
+		std::this_thread::sleep_for(std::chrono::seconds(sec) + std::chrono::milliseconds(ms));
+	}
 
-		virtual CR_RECT getClientArea() const = 0;
-	};
+	CR_VEC2I CRWinOSContext::getMousePos()
+	{
+		POINT p;
+		GetCursorPos(&p);
 
+		return CR_VEC2I(p.x, p.y);
+	}
 
+	CR_RECT CRWinOSContext::getVirtualScreenClientArea()
+	{
+		CR_RECT vArea;
 
-}}
+		vArea.X = GetSystemMetrics(SM_XVIRTUALSCREEN);
+		vArea.Y = GetSystemMetrics(SM_YVIRTUALSCREEN);
+		vArea.Width = GetSystemMetrics(SM_CXVIRTUALSCREEN);
+		vArea.Height = GetSystemMetrics(SM_CYVIRTUALSCREEN);
+
+		return vArea;
+	}
+}}}

@@ -7,7 +7,7 @@
 
 #include "WinOSContext.h"
 
-namespace cria_ai { namespace api { namespace win {
+namespace cria_ai { namespace os { namespace win {
 	
 	class CRWinInputSimulator : public CRInputSimulator
 	{

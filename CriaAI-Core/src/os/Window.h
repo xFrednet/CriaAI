@@ -32,39 +32,47 @@
 ******************************************************************************/
 #pragma once
 
-#include "../InputLogger.h"
+#include "../Common.hpp"
 
-#ifdef CRIA_OS_WIN
 
-#include "WinOSContext.h"
+#define CR_DESTOP_WINDOW_TITLE         ""
 
-namespace cria_ai { namespace api { namespace win {
+namespace cria_ai { namespace os {
 	
-	class CRWinInputLogger : public CRInputLogger
+	class CRWindow;
+
+	typedef cr_ptr<CRWindow> CRWindowPtr;
+
+	class CRWindow
 	{
-	private:
-		HHOOK m_KeyboardHook;
-		HKL m_KeyLayout;
-		
-		HHOOK m_MouseHook;
-
-		CR_VEC2I m_OldMousePos;
-
 	public:
-		CRWinInputLogger();
-		~CRWinInputLogger();
-	private:
-		static LRESULT CALLBACK HandleKeyboardHook(UINT message, WPARAM wp, LPARAM lp);
-		static LRESULT CALLBACK HandleMouseHook(UINT message, WPARAM wp, LPARAM lp);
+		static CRWindowPtr CreateDestopWindowInstance(crresult* result = nullptr);
+		static CRWindowPtr CreateInstance(const String& title, crresult* result = nullptr);
 	protected:
-		crresult init() override;
-
-		void update() override;
+		String  m_Title;
 		
-		void processNewMousePos(CR_VEC2I newPos);
+		/*
+		 * constructor and destructor
+		 */
+		CRWindow(const String& title);
+		virtual crresult init(const String& title) = 0;
+	public:
+		virtual ~CRWindow();
 
+		inline String getTitle() const
+		{
+			return m_Title;
+		}
+
+		virtual bool isFocussed() const = 0;
+
+		virtual crresult setPos(int x, int y) = 0;
+		virtual crresult setSize(uint width, uint height) = 0;
+		virtual crresult setClientArea(const CR_RECT& bounds) = 0;
+
+		virtual CR_RECT getClientArea() const = 0;
 	};
 
-}}}
 
-#endif
+
+}}

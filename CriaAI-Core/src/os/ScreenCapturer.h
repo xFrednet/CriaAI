@@ -5,7 +5,7 @@
 
 #define CR_SCREENCAP_CHANNEL_COUNT     4
 
-namespace cria_ai { namespace api {
+namespace cria_ai { namespace os {
 
 	class CRScreenCapturer 
 	{

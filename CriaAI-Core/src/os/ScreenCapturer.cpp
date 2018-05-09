@@ -2,7 +2,7 @@
 
 #include "win/WinScreenCapturer.h"
 
-namespace cria_ai { namespace api {
+namespace cria_ai { namespace os {
 
 	CRScreenCapturer* CRScreenCapturer::CreateInstance(CRWindowPtr target, crresult* result)
 	{

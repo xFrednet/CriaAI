@@ -14,12 +14,14 @@ Directory            - dir
 Error                - err
 Float Bitmap         - fBmp
 Floats per pixel     - fpp
+Function             - func
 Input Simulator      - inputSim
 Integer              - int
 Matrix               - mat
 Mouse button         - mButton
 Mouse movement       - mMove
 Mouse Wheel          - mWheel
+Network decimal      - nwdec
 Number               - no
 Operating system     - os
 Pixel                - px

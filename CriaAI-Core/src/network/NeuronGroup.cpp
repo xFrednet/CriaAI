@@ -2,9 +2,9 @@
 
 namespace cria_ai { namespace network {
 	
-	api::CRInputSimulator* CRNeuronGroup::s_InputSim = nullptr;
+	os::CRInputSimulator* CRNeuronGroup::s_InputSim = nullptr;
 
-	crresult CRNeuronGroup::InitStaticMembers(api::CRInputSimulator* inputSim)
+	crresult CRNeuronGroup::InitStaticMembers(os::CRInputSimulator* inputSim)
 	{
 		if (!inputSim)
 			return CRRES_ERR_INVALUD_ARGUMENTS;

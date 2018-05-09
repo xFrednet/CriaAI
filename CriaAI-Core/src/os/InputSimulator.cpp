@@ -2,7 +2,7 @@
 
 #include "win/WinInputSimulator.h"
 
-namespace cria_ai { namespace api {
+namespace cria_ai { namespace os {
 	CRInputSimulator* CRInputSimulator::GetInstance(const CRWindowPtr& targetWindow, crresult* result)
 	{
 		CRInputSimulator* inputSim = nullptr;

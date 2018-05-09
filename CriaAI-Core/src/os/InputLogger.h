@@ -37,7 +37,7 @@
 #include "InputUtil.h"
 #include "Window.h"
 
-namespace cria_ai { namespace api {
+namespace cria_ai { namespace os {
 
 	typedef void (*cr_logger_key_cb)     (CR_KEY_ID keyID, bool down);
 	typedef void (*cr_logger_mbutton_cb) (CR_MBUTTON_ID buttonID, bool down);

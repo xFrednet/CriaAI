@@ -12,7 +12,7 @@
  */
 #define CRIA_WIN_VIRTUAL_SCREEN_SIZE             65536
 
-namespace cria_ai { namespace api { namespace win {
+namespace cria_ai { namespace os { namespace win {
 	
 	bool GetMouseAccellState()
 	{

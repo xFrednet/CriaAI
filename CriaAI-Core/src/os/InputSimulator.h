@@ -9,7 +9,7 @@
 #	define CR_INPUTSIM_CLICK_TIME_MS             0
 #endif
 
-namespace cria_ai { namespace api {
+namespace cria_ai { namespace os {
 	
 	class CRInputSimulator
 	{

@@ -30,43 +30,8 @@
 *       distribution.                                                         *
 *                                                                             *
 ******************************************************************************/
-#include "Window.h"
-#include "win/WinWindow.h"
+#include "ActivationFunctions.h"
 
-namespace cria_ai { namespace api {
-	CRWindowPtr CRWindow::CreateDestopWindowInstance(crresult* result)
-	{
-		return CreateInstance(CR_DESTOP_WINDOW_TITLE, result);
-	}
-	CRWindowPtr CRWindow::CreateInstance(const String& title, crresult* result)
-	{
-#ifdef CRIA_OS_WIN
-		CRWindowPtr window = std::make_shared<win::CRWinWindow>(title);
-#else
-		CRWindowPtr window = nullptr;
-#endif
-		
-		if (!window.get())
-		{
-			if (result) 
-				*result = CRRES_ERR_MAKE_SHARED_FAILED;
-			return window;
-		}
-
-		crresult res = window.get()->init(title);
-		if (CR_FAILED(res))
-			window.reset();
-		if (result)
-			*result = res;
-
-		return window;
-	}
-
-	CRWindow::CRWindow(const String& title)
-		: m_Title(title)
-	{
-	}
-
-	CRWindow::~CRWindow()
-	{}
+namespace cria_ai { namespace network {
+	
 }}

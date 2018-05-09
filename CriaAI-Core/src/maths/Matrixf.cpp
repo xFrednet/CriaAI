@@ -3,7 +3,7 @@
 #include "../Common.hpp"
 
 #include "../../Dependencies/BmpRenderer/BmpRenderer.hpp"
-#include "../api/FileSystem.h"
+#include "../os/FileSystem.h"
 
 #define VALID_MAT(mat)                 (mat && mat->Cols != 0 && mat->Rows != 0)
 

@@ -2,9 +2,9 @@
 
 #include "../Common.hpp"
 #include "../../Dependencies/BmpRenderer/Dependencies/libbmpread/bmpread.h"
-#include "../api/FileSystem.h"
+#include "../os/FileSystem.h"
 
-#include "../api/cuda/CudaContext.cuh"
+#include "../os/cuda/CudaContext.cuh"
 
 #define FBMP_PX_INDEX(x, y, bmp)            (((x) + (y) * bmp->Width) * bmp->FloatsPerPixel)
 

@@ -35,7 +35,17 @@
 #include "NetworkUtil.h"
 #include "../maths/Matrixf.hpp"
 
-namespace cria_ai {
+#include "NeuronGroup.h"
+
+namespace cria_ai { namespace network {
+
+	typedef struct CR_NEURON_LIST_NODE_
+	{
+		CR_NEURON_LIST_NODE_* Next;
+		CRNeuronGroup* Neurons;
+	} CR_NEURON_LIST_NODE;
+
+	typedef void(*cr_nw_activation_func)(CRNWMat const* input, CRNWMat* output);
 
 	class CRNeuronLayer
 	{
@@ -44,6 +54,8 @@ namespace cria_ai {
 		
 		CRNWMat* m_Conections;
 		CRNWMat* m_Bias;
+
+		CR_NEURON_LIST_NODE m_NeuronList;
 
 		//TODO function / invFunction
 
@@ -65,4 +77,4 @@ namespace cria_ai {
 		}
 	};
 
-}
+}}

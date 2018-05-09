@@ -9,7 +9,7 @@
 #include "WinOSContext.h"
 #include "WinWindow.h"
 
-namespace cria_ai { namespace api { namespace win {
+namespace cria_ai { namespace os { namespace win {
 	
 	/*
 	 * This capturer is currently only able to capture areas on the primary monitor.

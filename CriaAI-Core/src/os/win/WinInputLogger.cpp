@@ -34,9 +34,9 @@
 
 #ifdef CRIA_OS_WIN
 
-#define getInstance()                  ((cria_ai::api::win::CRWinInputLogger*)s_Instance)
+#define getInstance()                  ((cria_ai::os::win::CRWinInputLogger*)s_Instance)
 
-namespace cria_ai { namespace api { namespace win {
+namespace cria_ai { namespace os { namespace win {
 	LRESULT CRWinInputLogger::HandleKeyboardHook(UINT message, WPARAM wp, LPARAM lp)
 	{
 		if (s_Instance && message == HC_ACTION) {

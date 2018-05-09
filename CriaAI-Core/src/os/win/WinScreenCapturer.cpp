@@ -6,7 +6,7 @@
 #	error The window screen capturer does not support a different channel count than 4.
 #endif
 
-namespace cria_ai { namespace api { namespace win {
+namespace cria_ai { namespace os { namespace win {
 	
 	CRWinScreenCapturer::CRWinScreenCapturer()
 		: CRScreenCapturer(),

@@ -31,83 +31,37 @@
 *                                                                             *
 ******************************************************************************/
 #pragma once
+#include "../Window.h"
 
-#include "NetworkUtil.h"
+#include "../../Common.hpp"
 
-#include "../os/InputLogger.h"
-#include "../os/InputSimulator.h"
+#ifdef CRIA_OS_WIN
 
-#ifndef CR_NEURON_OUTPUT_ACTIVATION_LIMIT
-#	define CR_NEURON_OUTPUT_ACTIVATION_LIMIT     crnwdec(0.5)
-#endif
+#include "WinOSContext.h"
 
-namespace cria_ai { namespace network {
+namespace cria_ai { namespace os { namespace win {
 	
-	typedef enum CR_NEURON_TYPE_ {
-		CR_NEURON_INPUT_LAYER        = 0x0100,
-		CR_NEURON_DATA_INPUT         = 0x0101,
-		CR_NEURON_RANDNOISE_INPUT    = 0x0102,
-
-		CR_NEURON_HIDDEN_LAYER       = 0x0200,
-		CR_NEURON_NORMAL             = 0x0201,
-		CR_NEURON_INPUT_DELAY        = 0x0203,
-
-		CR_NEURON_OUTPUT_LAYER       = 0x0400,
-		CR_NEURON_KEYBOARD_OUTPUT    = 0x0401,
-		CR_NEURON_MMOVE_OUTPUT       = 0x0402,
-		CR_NEURON_MBUTTON_OUTPUT     = 0x0403
-	} CR_NEURON_TYPE;
-
-	class CRNeuronGroup
+	class CRWinWindow : public CRWindow
 	{
-	protected:
-		static os::CRInputSimulator* s_InputSim;
+	private:
+		HWND m_Hwnd;
+
+		CR_VEC2I getCorrectResizeSize(uint width, uint height) const;
 	public:
-		static crresult InitStaticMembers(os::CRInputSimulator* inputSim);
-		static crresult TerminateStaticMembers();
+		CRWinWindow(const String& title);
 	protected:
-		uint m_NeuronCount;
-
-		CRNeuronGroup(uint neuronCount);
+		crresult init(const String& title) override;
 	public:
-		virtual ~CRNeuronGroup();
+		bool isFocussed() const override;
 
-		/*
-		 * Neuron stuff
-		 */
-		/**
-		 * \brief This method processes the input data and returns the result in outData
-		 * 
-		 * \param inData This has to be an array of data with a minimum size of the 
-		 * neuron count. Each element is processed by one neuron.
-		 * \param outData This has to be an array of data with a minimum size of the 
-		 * neuron count. It holds the processed data afterwards.
-		 */
-		virtual void processData(crnwdec const* inData, crnwdec* outData) = 0;
-		/**
-		 * \brief This method is the inverse process from processData. It returns the expected 
-		 * input(outData) for a given output of processData(inData)
-		 * 
-		 * \param inData This has to be an array of data with a minimum size of the 
-		 * neuron count. Each element is processed by one neuron.
-		 * \param outData This has to be an array of data with a minimum size of the 
-		 * neuron count. It holds the expected input data for the output data from
-		 * inData.
-		 */
-		virtual void processDataInverse(crnwdec const* inData, crnwdec* outData) = 0;
-		/**
-		 * \brief This is used in the first creation of the neurons. It should initialize
-		 * the member values with random values.
-		 */
-		virtual void randInit() = 0;
+		CR_RECT getClientArea() const override;
+		crresult setPos(int x, int y) override;
+		crresult setSize(uint width, uint height) override;
+		crresult setClientArea(const CR_RECT& bounds) override;
 
-		/*
-		 * Getters
-		 */
-		// type stuff and things
-		virtual CR_NEURON_TYPE getType() = 0;
-		bool isType(const CR_NEURON_TYPE& type);
+		HWND getHWND();
 	};
 
-	typedef cr_ptr<CRNeuronGroup> CRNeuronGroupPtr;
-}}
+}}}
+
+#endif // CRIA_OS_WIN
