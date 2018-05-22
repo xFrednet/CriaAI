@@ -32,31 +32,35 @@
 ******************************************************************************/
 #pragma once
 
-#include "../Common.hpp"
+#include "../ActivationFunctions.h"
 
-namespace cria_ai { namespace os {
+#ifdef CRIA_PACO_NULL
+
+#include "NuContext.h"
+
+namespace cria_ai { namespace paco { namespace null {
 	
-	class CROSContext
-	{
-	public:
-		static CROSContext* s_Instance;
-	protected:
+	/**
+	* \brief A activation function
+	*
+	* Equation:     1 / (1 + e^-x) = r
+	* Output Range: (0 < x < 1)
+	*
+	* \param input  A matrix containing values for processing.
+	* \param output A matrix that holds the output values.
+	*/
+	void CRNuSigmoid(CRNWMat const* input, CRNWMat* output);
+	/**
+	* \brief A inverse activation function
+	*
+	* Equation:    -ln((1/r) - 1) = x
+	* Input Range: (0 < r < 1)
+	*
+	* \param input  A matrix containing values for processing.
+	* \param output A matrix that holds the output values.
+	*/
+	void CRNuSigmoidInv(CRNWMat const* input, CRNWMat* output);
 
-		virtual crresult init() = 0;
+}}}
 
-		virtual void sleep(uint sec, uint ms) = 0;
-		virtual CR_VEC2I getMousePos() = 0;
-		virtual CR_RECT getVirtualScreenClientArea() = 0;
-
-		CROSContext();
-	public:
-		virtual ~CROSContext();
-
-		static crresult InitInstance();
-		static crresult TerminateInstance();
-
-		static void Sleep(uint sec, uint ms = 0);
-		static CR_VEC2I GetMousePos();
-		static CR_RECT GetVirtualScreenClientArea();
-	};
-}}
+#endif // CRIA_PACO_NULL

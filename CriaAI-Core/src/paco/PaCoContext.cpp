@@ -38,6 +38,8 @@
 
 namespace cria_ai { namespace paco {
 	
+	CRPaCoContext* CRPaCoContext::s_Instance = nullptr;
+
 	crresult CRPaCoContext::InitInstance()
 	{
 		CRPaCoContext* instance = nullptr;

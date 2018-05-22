@@ -42,7 +42,7 @@ namespace cria_ai { namespace os { namespace win {
 		return CRRES_OK;
 	}
 	
-	//TODO the "source engine", "arma" and probably some other engines do not work with this virtual input method 
+	//TODO the "source engine] "arma" and probably some other engines do not work with this virtual input method 
 	crresult CRWinInputSimulator::sendInputMessage(INPUT* message) const
 	{
 		if (m_TargetWindow->isFocussed())

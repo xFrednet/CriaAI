@@ -2,11 +2,25 @@
 
 #include "../Common.hpp"
 
-namespace cria_ai
-{
+#include "NetworkUtil.h"
 
-	class CRNeuronNetwork
+#include "NeuronLayer.h"
+
+namespace cria_ai { namespace network {
+	
+	class CRNeuronNetwork 
 	{
-		
+	private:
+		std::list<CRNeuronLayerPtr> m_LayerList;
+
+	public:
+
+		void addLayer(const CRNeuronLayerPtr& layer);
+		void removeLayer(const CRNeuronLayerPtr& layer);
+
+		void initRandom();
+
+		void process(CRMatrixf const* data);
 	};
-}
+
+}}

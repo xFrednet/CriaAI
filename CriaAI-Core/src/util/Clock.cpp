@@ -1,4 +1,4 @@
-﻿/******************************************************************************
+/******************************************************************************
 * Cria  - The worst artificial intelligence on the market.                    *
 *         <https://github.com/xFrednet/CriaAI>                                *
 *                                                                             *
@@ -30,33 +30,50 @@
 *       distribution.                                                         *
 *                                                                             *
 ******************************************************************************/
-#pragma once
+#include "Clock.h"
 
-#include "../Common.hpp"
-
-namespace cria_ai { namespace os {
-	
-	class CROSContext
+namespace cria_ai
+{
+	StopWatch::StopWatch()
+		: m_StartTime(std::chrono::high_resolution_clock::now())
 	{
-	public:
-		static CROSContext* s_Instance;
-	protected:
+	}
 
-		virtual crresult init() = 0;
+	void StopWatch::start()
+	{
+		m_StartTime = std::chrono::high_resolution_clock::now();
+	}
+	void StopWatch::stop()
+	{
+		m_StopTime = std::chrono::high_resolution_clock::now();
+	}
 
-		virtual void sleep(uint sec, uint ms) = 0;
-		virtual CR_VEC2I getMousePos() = 0;
-		virtual CR_RECT getVirtualScreenClientArea() = 0;
+	StopWatch::time_point StopWatch::getStart() const
+	{
+		return m_StartTime;
+	}
+	StopWatch::time_point StopWatch::getStop() const
+	{
+		return m_StopTime;
+	}
 
-		CROSContext();
-	public:
-		virtual ~CROSContext();
+	double StopWatch::getTimeSinceStart() const
+	{
+		using namespace std::chrono;
+		return duration_cast<duration<double>>(high_resolution_clock::now() - m_StartTime).count();
+	}
+	double StopWatch::getTime() const
+	{
+		using namespace std::chrono;
+		return duration_cast<duration<double>>(m_StopTime - m_StartTime).count();
+	}
 
-		static crresult InitInstance();
-		static crresult TerminateInstance();
-
-		static void Sleep(uint sec, uint ms = 0);
-		static CR_VEC2I GetMousePos();
-		static CR_RECT GetVirtualScreenClientArea();
-	};
-}}
+	uint StopWatch::getTimeMSSinceStart() const
+	{
+		return (uint)floor(getTimeSinceStart() * CR_MS_IN_SEC);
+	}
+	uint StopWatch::getTimeMS() const
+	{
+		return (uint)floor(getTime() * CR_MS_IN_SEC);
+	}
+}

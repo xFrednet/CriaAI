@@ -32,31 +32,23 @@
 ******************************************************************************/
 #pragma once
 
-#include "../Common.hpp"
+#include "../PaCoContext.h"
 
-namespace cria_ai { namespace os {
+#ifdef CRIA_PACO_NULL
+
+namespace cria_ai { namespace paco { namespace null {
 	
-	class CROSContext
+	class CRNuContext : public CRPaCoContext
 	{
-	public:
-		static CROSContext* s_Instance;
 	protected:
-
-		virtual crresult init() = 0;
-
-		virtual void sleep(uint sec, uint ms) = 0;
-		virtual CR_VEC2I getMousePos() = 0;
-		virtual CR_RECT getVirtualScreenClientArea() = 0;
-
-		CROSContext();
+		crresult init() override;
 	public:
-		virtual ~CROSContext();
-
-		static crresult InitInstance();
-		static crresult TerminateInstance();
-
-		static void Sleep(uint sec, uint ms = 0);
-		static CR_VEC2I GetMousePos();
-		static CR_RECT GetVirtualScreenClientArea();
+	
 	};
-}}
+
+	void* CRNuMalloc(size_t size);
+	void CRNuFree(void* mem);
+
+}}}
+
+#endif // CRIA_PACO_NULL

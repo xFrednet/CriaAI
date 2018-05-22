@@ -11,6 +11,7 @@
  */
 #include "util/CRResult.h"
 #include "util/Random.h"
+#include "util/Clock.h"
 #include "util/FloatBitmap.h"
 
 /*
@@ -26,3 +27,4 @@
 #include <iostream>
 #include <fstream>
 #include <memory>
+#include <chrono>

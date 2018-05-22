@@ -28,10 +28,11 @@ namespace cria_ai
 
 	CR_FLOAT_BITMAP* CRCreateFBmp(uint32_t width, uint32_t height, uint8_t floatsPerPixel);
 	CR_FLOAT_BITMAP* CRLoadFBmp(const char* file);
-	CR_FLOAT_BITMAP* CRCreateFBmpCopy(CR_FLOAT_BITMAP* bmp);
+	CR_FLOAT_BITMAP* CRCreateFBmpCopy(CR_FLOAT_BITMAP const* bmp);
 	void             CRDeleteFBmp(CR_FLOAT_BITMAP* bmp);
 
 	CR_FLOAT_BITMAP* CRConvertToFloatsPerPixel(CR_FLOAT_BITMAP const* bmp, uint8_t floatsPerPixel);
+	CR_FLOAT_BITMAP* CRScaleFBmpDown(CR_FLOAT_BITMAP const* bmp, uint8_t downScale);
 
 	/**
 	 * \brief This function converts the content of this bitmap to a bitmap that uses

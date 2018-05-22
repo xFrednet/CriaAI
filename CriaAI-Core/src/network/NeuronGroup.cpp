@@ -39,4 +39,9 @@ namespace cria_ai { namespace network {
 	{
 		return ((getType() & type) != 0);//black magic
 	}
+
+	uint CRNeuronGroup::getNeuronCount() const
+	{
+		return m_NeuronCount;
+	}
 }}

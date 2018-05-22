@@ -12,3 +12,5 @@
 #include "src/os/InputSimulator.h"
 #include "src/os/InputLogger.h"
 #include "src/os/FileSystem.h"
+
+#include "src/network/NeuronNetwork.h"

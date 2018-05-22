@@ -40,7 +40,11 @@ namespace cria_ai { namespace network {
 
 	void CRNormalNeuron::processData(crnwdec const* inData, crnwdec* outData)
 	{
-		memcpy(outData, inData, sizeof(crnwdec) * m_NeuronCount);
+		//memcpy(outData, inData, sizeof(crnwdec) * m_NeuronCount);
+		for (uint index = 0; index < m_NeuronCount; index++)
+		{
+			outData[index] = inData[index];
+		}
 	}
 	void CRNormalNeuron::processDataInverse(crnwdec const* inData, crnwdec* outData)
 	{

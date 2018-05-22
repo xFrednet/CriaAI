@@ -107,6 +107,8 @@ namespace cria_ai { namespace network {
 		// type stuff and things
 		virtual CR_NEURON_TYPE getType() = 0;
 		bool isType(const CR_NEURON_TYPE& type);
+
+		uint getNeuronCount() const;
 	};
 
 	typedef cr_ptr<CRNeuronGroup> CRNeuronGroupPtr;

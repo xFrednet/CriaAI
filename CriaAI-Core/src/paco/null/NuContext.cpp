@@ -30,33 +30,26 @@
 *       distribution.                                                         *
 *                                                                             *
 ******************************************************************************/
-#pragma once
+#include "NuContext.h"
 
-#include "../Common.hpp"
+#ifdef CRIA_PACO_NULL
 
-namespace cria_ai { namespace os {
+namespace cria_ai { namespace paco { namespace null {
 	
-	class CROSContext
+	crresult CRNuContext::init()
 	{
-	public:
-		static CROSContext* s_Instance;
-	protected:
+		return CRRES_OK;
+	}
 
-		virtual crresult init() = 0;
+	void* CRNuMalloc(size_t size)
+	{
+		return malloc(size);
+	}
+	void CRNuFree(void* mem)
+	{
+		free(mem);
+	}
 
-		virtual void sleep(uint sec, uint ms) = 0;
-		virtual CR_VEC2I getMousePos() = 0;
-		virtual CR_RECT getVirtualScreenClientArea() = 0;
+}}}
 
-		CROSContext();
-	public:
-		virtual ~CROSContext();
-
-		static crresult InitInstance();
-		static crresult TerminateInstance();
-
-		static void Sleep(uint sec, uint ms = 0);
-		static CR_VEC2I GetMousePos();
-		static CR_RECT GetVirtualScreenClientArea();
-	};
-}}
+#endif // CRIA_PACO_NULL

@@ -96,4 +96,26 @@ namespace cria_ai { namespace os {
 		 */
 		return CRRES_OK;
 	}
+
+	void CROSContext::Sleep(uint sec, uint ms)
+	{
+		if (s_Instance)
+			s_Instance->sleep(sec, ms);
+	}
+
+	CR_VEC2I CROSContext::GetMousePos()
+	{
+		if (s_Instance)
+			return s_Instance->getMousePos();
+
+		return CR_VEC2I(0, 0);
+	}
+
+	CR_RECT CROSContext::GetVirtualScreenClientArea()
+	{
+		if (s_Instance)
+			return s_Instance->getVirtualScreenClientArea();
+
+		return CR_RECT(0, 0, 0, 0);
+	}
 }}

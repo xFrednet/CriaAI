@@ -33,48 +33,90 @@
 #pragma once
 
 #include "NetworkUtil.h"
+
 #include "../maths/Matrixf.hpp"
 
 #include "NeuronGroup.h"
+
+#include "../paco/ActivationFunctions.h"
 
 namespace cria_ai { namespace network {
 
 	typedef struct CR_NEURON_LIST_NODE_
 	{
 		CR_NEURON_LIST_NODE_* Next;
-		CRNeuronGroup* Neurons;
+		CRNeuronGroupPtr Neurons;
 	} CR_NEURON_LIST_NODE;
 
-	typedef void(*cr_nw_activation_func)(CRNWMat const* input, CRNWMat* output);
-
+	
+	/**
+	 * \brief 
+	 * 
+	 * Structure:
+	 * 
+	 * [CRNeuronLayer]
+	 * 
+	 * m_ActivationFunc([input] * [m_Weights] - [m_Bias]) -> [Neurons->processData] -> [m_Output]
+	 * 
+	 */
 	class CRNeuronLayer
 	{
 	protected:
+		CRNeuronLayer const* m_PrevLayer;
+
 		CRNWMat* m_Output;
-		
-		CRNWMat* m_Conections;
+		CRNWMat* m_PreNeuronOutput;
+
+		CRNWMat* m_Weights;
 		CRNWMat* m_Bias;
 
-		CR_NEURON_LIST_NODE m_NeuronList;
-
-		//TODO function / invFunction
+		CR_NEURON_LIST_NODE* m_NeuronList;
 
 		uint m_NeuronCount;
 		uint m_NeuronGroupCount;
-	public:
 
+		paco::cr_activation_func     m_ActivationFunc;
+		paco::cr_activation_func_inv m_ActivationFuncInv;
+
+		bool m_IsOperational;
+
+		void updateMatrixSizes();
+		void updateIsOperational();
+	public:
+		/**
+		 * \brief 
+		 * 
+		 * \param prevLayer This is a pointer to the previous layer, this may only
+		 * be null if the created Layer is the first layer. In all other 
+		 * circumstances this pointer has to be valid.
+		 * 
+		 * \param result This is a pointer to retrieve the result of the creation operations.
+		 */
+		CRNeuronLayer(CRNeuronLayer const* prevLayer, crresult* result = nullptr);
+		~CRNeuronLayer();
+
+		void addNeuronGroup(const CRNeuronGroupPtr& neuronGroup);
+		void removeNeuronGroup(const CRNeuronGroupPtr& neuronGroup);
+		void intiRandom();
+
+		void setActivationFunc(paco::cr_activation_func activationFunc, paco::cr_activation_func_inv activationFuncInv);
+
+		void processData(CRNWMat const* inputData);
 
 		/*
 		 * getters
 		 */
-		CRMatrixf* getOutput()
-		{
-			return m_Output;
-		}
-		CRMatrixf const* getOutput() const
-		{
-			return m_Output;
-		}
+		CRNWMat* getOutput();
+		CRNWMat const* getOutput() const;
+		CRNWMat* getWeights();
+		CRNWMat const* getWeights() const;
+		CRNWMat* getBias();
+		CRNWMat const* getBias() const;
+
+		uint getNeuronCount() const;
+		uint getNeuronGroupCount() const;
 	};
+
+	typedef cr_ptr<CRNeuronLayer> CRNeuronLayerPtr;
 
 }}

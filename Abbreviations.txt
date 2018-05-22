@@ -27,6 +27,7 @@ Number               - no
 Operating system     - os
 Parallel Computing   - paCo                      //I like this abbreviation
 Pixel                - px
+Previous             - Prev
 Rectangle            - rect
 Screen capturer      - screencap
 Source               - src

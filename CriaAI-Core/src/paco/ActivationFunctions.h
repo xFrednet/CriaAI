@@ -42,8 +42,8 @@ namespace cria_ai { namespace paco {
 	/**
 	 * \brief A activation function
 	 * 
-	 * Equation:     1 / (1 + e^-x)
-	 * Output Range: (0, 1)
+	 * Equation:     1 / (1 + e^-x) = r
+	 * Output Range: (0 < x < 1)
 	 * 
 	 * \param input  A matrix containing values for processing.
 	 * \param output A matrix that holds the output values.
@@ -52,8 +52,8 @@ namespace cria_ai { namespace paco {
 	/**
 	* \brief A inverse activation function
 	*
-	* Equation:    1 / (1 + e^-x)
-	* Input Range: (0, 1)
+	* Equation:    -ln((1/r) - 1) = x
+	* Input Range: (0 < r < 1)
 	*
 	* \param input  A matrix containing values for processing.
 	* \param output A matrix that holds the output values.

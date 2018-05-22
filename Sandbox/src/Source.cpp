@@ -1,27 +1,136 @@
 #include <Cria.hpp>
-
-#include <ctime>
+#include "src/util/FloatBitmap.h"
 
 #include <thread>
 
 #include "tests/MathTests.h"
-#include <windows.h>
+#include "src/network/neurons/DataInputNeuron.h"
+#include "src/network/neurons/NormalNeuron.h"
 
 #define BOI_TITLE                      "Binding of Isaac: Afterbirth+"
 #define BOI_BASE_WIDTH                 512
 #define BOI_BASE_HEIGHT                288
-#define BOI_SCALE                      2
+#define BOI_SCALE                      1
+#define BOI_SAMPLE_SIZE                2
 
 #define CON_TITLE "C:\\Users\\xFrednet\\My Projects\\VS Projects\\CriaAI\\bin\\Debug\\Sandbox.exe"
 
 using namespace std;
 using namespace cria_ai;
 using namespace bmp_renderer;
+using namespace network;
 
 
-void keyInput(CR_KEY_ID keyID, bool down)
+CR_FLOAT_BITMAP* processBOIFrame(CR_FLOAT_BITMAP* inFrame)
 {
-	std::cout << CRGetKeyIDName(keyID) << ((down) ? " [X]" : " [ ]") << std::endl;
+	if (inFrame->Width != BOI_BASE_WIDTH * BOI_SCALE || inFrame->Height != BOI_BASE_HEIGHT * BOI_SCALE)
+	{
+		std::cout << "processBOIFrame: something is wrong" << std::endl;
+		return nullptr;
+	}
+
+	CR_FLOAT_BITMAP* fpp1Out = CRConvertToFloatsPerPixel(inFrame, 1);
+	CR_FLOAT_BITMAP* scaleOut = CRScaleFBmpDown(fpp1Out, BOI_SCALE);
+	CR_FLOAT_BITMAP* poolOut = CRPoolBitmap(scaleOut, 2);
+
+	CRDeleteFBmp(fpp1Out);
+	CRDeleteFBmp(scaleOut);
+	
+	return poolOut;
+}
+CRNeuronNetwork* createBOINetwork(CRNeuronLayerPtr& outputLayer)
+{
+	std::cout << " > createBOINetwork" << std::endl;
+	CRNeuronNetwork* network = new CRNeuronNetwork;
+	
+	/*
+	 * Layer 1
+	 */
+	CRNeuronLayerPtr layer1 = make_shared<CRNeuronLayer>(nullptr);
+	layer1->setActivationFunc(paco::CRSigmoid, paco::CRSigmoidInv);
+	layer1->addNeuronGroup(make_shared<CRDataInputNeuron>(BOI_BASE_WIDTH / BOI_SAMPLE_SIZE * BOI_BASE_HEIGHT / BOI_SAMPLE_SIZE)); // 36864 Neurons :O
+	network->addLayer(layer1);
+
+	/*
+	 * Layer 2
+	 */
+	CRNeuronLayerPtr layer2 = make_shared<CRNeuronLayer>(layer1.get());
+	layer2->setActivationFunc(paco::CRSigmoid, paco::CRSigmoidInv);
+	layer2->addNeuronGroup(make_shared<CRNormalNeuron>(100));
+	network->addLayer(layer2);
+
+	/*
+	* Layer 3
+	*/
+	CRNeuronLayerPtr layer3 = make_shared<CRNeuronLayer>(layer2.get());
+	layer3->setActivationFunc(paco::CRSigmoid, paco::CRSigmoidInv);
+	layer3->addNeuronGroup(make_shared<CRNormalNeuron>(100));
+	network->addLayer(layer3);
+
+	/*
+	* Layer 4
+	*/
+	outputLayer = make_shared<CRNeuronLayer>(layer3.get());
+	outputLayer->setActivationFunc(paco::CRSigmoid, paco::CRSigmoidInv);
+	outputLayer->addNeuronGroup(make_shared<CRNormalNeuron>(12));//WASD[^][<][v][>][ ][STRG]EQ
+	network->addLayer(outputLayer);
+
+	/*
+	 * Finish and return
+	 */
+	network->initRandom();
+	std::cout << " < createBOINetwork" << std::endl;
+	return network;
+}
+void printBOIOutput(CRNWMat const* mat)
+{
+	if (mat->Cols != 1 || mat->Rows != 12)
+		return;
+	String buttons[] = {"W", "A", "S", "D", "UP", "LEFT", "DOWN", "RIGHT", " ", "STRG", "E", "Q"};
+
+	for (uint index = 0; index < 12; index++)
+	{
+		printf("BOI Button: [%5s] [%3f]\n", buttons[index].c_str(), mat->Data[index]);
+	}
+}
+CRMatrixf* bmpToMat(CR_FLOAT_BITMAP* bmp)
+{
+	CRMatrixf* mat = CRCreateMatrixf(1, bmp->Width * bmp->Height);
+	memcpy(mat->Data, bmp->Data, sizeof(float) * mat->Rows);
+
+	return mat;
+}
+void testBOINetwork()
+{
+	std::cout << "> testBOINetwork" << std::endl;
+	
+	CR_FLOAT_BITMAP* frame = CRLoadFBmp("screenshots/The Binding of Isaac Afterbirth+.bmp");
+	CRNeuronLayerPtr outputLayer;
+	CRNeuronNetwork* network = createBOINetwork(outputLayer);
+	
+	std::cout << "= init finish" << std::endl;
+	std::cout << std::endl;
+
+	StopWatch timer;
+	timer.start();
+	
+	CR_FLOAT_BITMAP* processedFrame = processBOIFrame(frame);
+	CRMatrixf* data = bmpToMat(processedFrame);
+	CRDeleteFBmp(processedFrame);
+	
+	network->process(data);
+	CRFreeMatrixf(data);
+
+	timer.stop();
+	std::cout << " [INFO] process time[ms]: " << timer.getTimeMS() << std::endl;
+	std::cout << std::endl;
+
+	printBOIOutput(outputLayer->getOutput());
+
+	CRDeleteFBmp(frame);
+	delete network;
+
+	std::cout << "< testBOINetwork" << std::endl;
 }
 
 int main(int argc, char* argv)
@@ -30,7 +139,8 @@ int main(int argc, char* argv)
 
 	cout << "CR_VEC2 Test result " << TestVec2() << std::endl;
 	cout << "########################################################" << std::endl;
-	
+
+
 	crresult r;
 
 	/*
@@ -38,56 +148,19 @@ int main(int argc, char* argv)
 	 */
 	r = os::CROSContext::InitInstance();
 	printf("os::CROSContext::InitInstance: %s \n", CRGetCRResultName(r).c_str());
-	os::CROSContext::Sleep(10);
 
 	/*
-	 * CRWindow
+	 * time test
 	 */
-	os::CRWindowPtr targetWin = os::CRWindow::CreateInstance(BOI_TITLE, &r);
-	printf("os::CRWindow::CreateInstance: %s \n", CRGetCRResultName(r).c_str());
-	if (!targetWin.get())
-	{
-		printf("GOODBYE [ENTER]\n>");
-		std::cin.get();
-		return 1;
-	}
 
 	/*
-	 * Debug info
+	 * Network test
 	 */
-	targetWin->setPos(50, 50);
-	CR_RECT rect = (targetWin.get() ? targetWin->getClientArea() : CR_RECT(0, 0, 0, 0));
-	std::cout << "Target Win: " << targetWin.get() << " " << rect.X << " " << rect.Y << " " << rect.Width << " " << rect.Height << std::endl;
-	
-	targetWin->setClientArea(CR_RECT{50, 50, BOI_BASE_WIDTH * BOI_SCALE, BOI_BASE_HEIGHT * BOI_SCALE});
-
-	rect = (targetWin.get() ? targetWin->getClientArea() : CR_RECT(0, 0, 0, 0));
-	std::cout << "Target Win: " << targetWin.get() << " " << rect.X << " " << rect.Y << " " << rect.Width << " " << rect.Height << std::endl;
+	testBOINetwork();
 
 	/*
-	 * CRInputLogger
+	 * cleanup
 	 */
-	r = os::CRInputLogger::InitInstance();
-	printf("os::CRInputLogger::InitInstance: %s \n", CRGetCRResultName(r).c_str());
-	os::CRInputLogger::SetTargetWindow(targetWin);
-	os::CRInputLogger::AddKeyCallback(keyInput);
-
-
-	for (int timer = 0; timer < 101; timer++)
-	{
-		os::CRInputLogger::Update();
-		os::CROSContext::Sleep(0, 10);
-
-		if (timer % 100 == 0)
-		{
-			printf("[%s] ", (os::CRInputLogger::GetMButtonState(CR_MBUTTON_LEFT)   ? "X" : " "));
-			printf("[%s] ", (os::CRInputLogger::GetMButtonState(CR_MBUTTON_MIDDLE) ? "X" : " "));
-			printf("[%s] ", (os::CRInputLogger::GetMButtonState(CR_MBUTTON_RIGHT)  ? "X" : " "));
-			printf("POS(%4i, %4i) \n", os::CRInputLogger::GetMouseClientPos().X, os::CRInputLogger::GetMouseClientPos().Y);
-		}
-	}
-
-	os::CRInputLogger::TerminateInstance();
 	os::CROSContext::TerminateInstance();
 
 	cin.get();

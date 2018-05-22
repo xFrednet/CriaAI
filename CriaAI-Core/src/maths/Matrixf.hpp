@@ -11,11 +11,11 @@ namespace cria_ai
 		float* Data;
 	};
 
-	CRMatrixf* CreateMatrixf(uint cols, uint rows);
-	void       FreeMatrixf(CRMatrixf* matrix);
+	CRMatrixf* CRCreateMatrixf(uint cols, uint rows);
+	void       CRFreeMatrixf(CRMatrixf* matrix);
 
-	bool       SaveMatrixf(CRMatrixf* mat, char const* fileName);
-	CRMatrixf* LoadMatrixf(char const* file);
+	bool       CRSaveMatrixf(CRMatrixf* mat, char const* fileName);
+	CRMatrixf* CRLoadMatrixf(char const* file);
 	/**
 	 * \brief This function writes matrix in form of multiple floats
 	 * rounded up to the number of decimals specified.
@@ -28,21 +28,21 @@ namespace cria_ai
 	 * 
 	 * \return This returns 1(true) on success.
 	 */
-	bool       WriteMatrixf(CRMatrixf* mat, char const* fileName, uint decimals = 3);
-	bool       WriteMatrixfBmp(CRMatrixf* mat, char const* fileName);
+	bool       CRWriteMatrixf(CRMatrixf* mat, char const* fileName, uint decimals = 3);
+	bool       CRWriteMatrixfBmp(CRMatrixf* mat, char const* fileName);
 
-	bool       IsMatValid(CRMatrixf* mat);
+	bool       CRIsMatValid(CRMatrixf* mat);
 
-	void       FillMatrixRand(CRMatrixf* mat);
+	void       CRFillMatrixRand(CRMatrixf* mat);
 
-	float      GetMaxValue(CRMatrixf const* mat);
-	float      GetMinValue(CRMatrixf const* mat);
-	CRMatrixf* Clamp(CRMatrixf const* mat, float min, float max);
+	float      CRGetMaxValue(CRMatrixf const* mat);
+	float      CRGetMinValue(CRMatrixf const* mat);
+	CRMatrixf* CRClamp(CRMatrixf const* mat, float min, float max);
 
-	CRMatrixf* Add(CRMatrixf const* a, CRMatrixf const* b);
-	CRMatrixf* Sub(CRMatrixf const* a, CRMatrixf const* b);
-	CRMatrixf* Mul(CRMatrixf const* a, CRMatrixf const* b);
+	CRMatrixf* CRAdd(CRMatrixf const* a, CRMatrixf const* b);
+	CRMatrixf* CRSub(CRMatrixf const* a, CRMatrixf const* b);
+	CRMatrixf* CRMul(CRMatrixf const* a, CRMatrixf const* b);
 
-	CRMatrixf* Mul(CRMatrixf const* a, float b);
-	CRMatrixf* Div(CRMatrixf const* a, float b);
+	CRMatrixf* CRMul(CRMatrixf const* a, float b);
+	CRMatrixf* CRDiv(CRMatrixf const* a, float b);
 }

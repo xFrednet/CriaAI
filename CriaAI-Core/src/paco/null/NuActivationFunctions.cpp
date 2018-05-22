@@ -30,33 +30,29 @@
 *       distribution.                                                         *
 *                                                                             *
 ******************************************************************************/
-#pragma once
+#include "NuActivationFunctions.h"
 
-#include "../Common.hpp"
+#ifdef CRIA_PACO_NULL
 
-namespace cria_ai { namespace os {
-	
-	class CROSContext
+namespace cria_ai { namespace paco { namespace null {
+	void CRNuSigmoid(CRNWMat const* input, CRNWMat* output)
 	{
-	public:
-		static CROSContext* s_Instance;
-	protected:
+		for (uint index = 0; index < input->Cols * input->Rows; index++) {
+			output->Data[index] = 1 / (1 + exp(-input->Data[index]));
+		}
+	}
 
-		virtual crresult init() = 0;
+	void CRNuSigmoidInv(CRNWMat const* input, CRNWMat* output)
+	{
+		for (uint index = 0; index < input->Cols * input->Rows; index++) {
 
-		virtual void sleep(uint sec, uint ms) = 0;
-		virtual CR_VEC2I getMousePos() = 0;
-		virtual CR_RECT getVirtualScreenClientArea() = 0;
+			if (input->Data[index] > 0 || input->Data[index] < 1)
+				output->Data[index] = -log((1 / input->Data[index]) - 1);
+			else
+				output->Data[index] = 0;
 
-		CROSContext();
-	public:
-		virtual ~CROSContext();
+		}
+	}
+}}}
 
-		static crresult InitInstance();
-		static crresult TerminateInstance();
-
-		static void Sleep(uint sec, uint ms = 0);
-		static CR_VEC2I GetMousePos();
-		static CR_RECT GetVirtualScreenClientArea();
-	};
-}}
+#endif // CRIA_PACO_NULL

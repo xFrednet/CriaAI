@@ -1,4 +1,4 @@
-﻿/******************************************************************************
+/******************************************************************************
 * Cria  - The worst artificial intelligence on the market.                    *
 *         <https://github.com/xFrednet/CriaAI>                                *
 *                                                                             *
@@ -30,33 +30,59 @@
 *       distribution.                                                         *
 *                                                                             *
 ******************************************************************************/
-#pragma once
+#include "ActivationFunctions.h"
 
-#include "../Common.hpp"
+#ifdef CRIA_PACO_CUDA
+#	include "cuda/CuActivationFunctions.cuh"
+#endif
 
-namespace cria_ai { namespace os {
+#ifdef CRIA_PACO_NULL
+#	include "null/NuActivationFunctions.h"
+
+#	define CRIA_IF_NULL(x)             x
+#else
+#	define CRIA_IF_NULL(x)
+#endif
+
+namespace cria_ai { namespace paco {
 	
-	class CROSContext
+	void CRSigmoidInv(CRNWMat const* input, CRNWMat* output)
 	{
-	public:
-		static CROSContext* s_Instance;
-	protected:
+		if (input->Cols != output->Cols ||
+			input->Rows != output->Rows) 
+		{
+			memset(output->Data, 0, sizeof(crnwdec) * output->Cols * output->Rows);
+			return;
+		}
 
-		virtual crresult init() = 0;
+#ifdef CRIA_PACO_CUDA
+		cuda::CRCuSigmoidInv<<<CR_CUDA_AF_BLOCK_COUNT, CR_CUDA_AF_THREAD_COUNT>>>(input, output);
+		cudaDeviceSynchronize();
+#elif CRIA_PACO_NULL
+		CRIA_IF_NULL(null::CRNuSigmoid(input, output));
+#else
+		memset(output, 0, sizeof(crnwdec) * output->Cols * output->Rows);
+#endif
 
-		virtual void sleep(uint sec, uint ms) = 0;
-		virtual CR_VEC2I getMousePos() = 0;
-		virtual CR_RECT getVirtualScreenClientArea() = 0;
+	}
 
-		CROSContext();
-	public:
-		virtual ~CROSContext();
+	void CRSigmoid(CRNWMat const* input, CRNWMat* output)
+	{
+		if (input->Cols != output->Cols ||
+			input->Rows != output->Rows) 
+		{
+			memset(output->Data, 0, sizeof(crnwdec) * output->Cols * output->Rows);
+			return;
+		}
 
-		static crresult InitInstance();
-		static crresult TerminateInstance();
+#ifdef CRIA_PACO_CUDA
+		cuda::CRCuSigmoid<<<CR_CUDA_AF_BLOCK_COUNT, CR_CUDA_AF_THREAD_COUNT >>>(input, output);
+		cudaDeviceSynchronize();
+#elif CRIA_PACO_NULL
+		CRIA_IF_NULL(null::CRNuSigmoidInv(input, output));
+#else
+		memset(output, 0, sizeof(crnwdec) * output->Cols * output->Rows);
+#endif
 
-		static void Sleep(uint sec, uint ms = 0);
-		static CR_VEC2I GetMousePos();
-		static CR_RECT GetVirtualScreenClientArea();
-	};
+	}
 }}

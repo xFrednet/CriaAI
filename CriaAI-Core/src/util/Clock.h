@@ -1,4 +1,4 @@
-﻿/******************************************************************************
+/******************************************************************************
 * Cria  - The worst artificial intelligence on the market.                    *
 *         <https://github.com/xFrednet/CriaAI>                                *
 *                                                                             *
@@ -32,31 +32,40 @@
 ******************************************************************************/
 #pragma once
 
-#include "../Common.hpp"
+#include "../Macros.hpp"
+#include "../Types.hpp"
 
-namespace cria_ai { namespace os {
+#include <chrono>
+
+#define CR_MS_IN_SEC                   1000
+
+namespace cria_ai
+{
 	
-	class CROSContext
+	/**
+	 * \brief This class stops the time from the start point to the end point.
+	 * The result is a double representing seconds and fractions of seconds.
+	 */
+	class StopWatch
 	{
+		typedef std::chrono::high_resolution_clock::time_point time_point;
+	private:
+		time_point m_StartTime;
+		time_point m_StopTime;
+
 	public:
-		static CROSContext* s_Instance;
-	protected:
+		StopWatch();
 
-		virtual crresult init() = 0;
+		void start();
+		void stop();
 
-		virtual void sleep(uint sec, uint ms) = 0;
-		virtual CR_VEC2I getMousePos() = 0;
-		virtual CR_RECT getVirtualScreenClientArea() = 0;
+		time_point getStart() const;
+		time_point getStop() const;
 
-		CROSContext();
-	public:
-		virtual ~CROSContext();
+		double getTimeSinceStart() const;
+		double getTime() const;
 
-		static crresult InitInstance();
-		static crresult TerminateInstance();
-
-		static void Sleep(uint sec, uint ms = 0);
-		static CR_VEC2I GetMousePos();
-		static CR_RECT GetVirtualScreenClientArea();
+		uint getTimeMSSinceStart() const;
+		uint getTimeMS() const;
 	};
-}}
+}

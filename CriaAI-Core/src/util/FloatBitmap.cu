@@ -5,6 +5,9 @@
 #include "../os/FileSystem.h"
 
 #include "../paco/cuda/CuContext.cuh"
+//TODO move this into it's own paco classes
+#include "cuda_runtime.h"
+#include "device_launch_parameters.h"
 
 #define FBMP_PX_INDEX(x, y, bmp)            (((x) + (y) * bmp->Width) * bmp->FloatsPerPixel)
 
@@ -36,7 +39,7 @@ namespace cria_ai
 	}
 	CR_FLOAT_BITMAP* CRLoadFBmp(const char* file)
 	{
-		CRIA_AUTO_ASSERT(file, "LoadFloatBmp the source file is undefined")
+		CRIA_AUTO_ASSERT(file, "LoadFloatBmp the source file is undefined");
 			if (!file)
 				return nullptr;
 
@@ -53,7 +56,7 @@ namespace cria_ai
 
 		return bmp;
 	}
-	CR_FLOAT_BITMAP* CRCreateFBmpCopy(CR_FLOAT_BITMAP* bmp)
+	CR_FLOAT_BITMAP* CRCreateFBmpCopy(CR_FLOAT_BITMAP const* bmp)
 	{
 		CRIA_AUTO_ASSERT(bmp, "CRCreateFBmpCopy: the source bmp should be existence");
 		if (!bmp)
@@ -194,6 +197,57 @@ namespace cria_ai
 		}
 		
 		return bmpOut;
+	}
+
+	CR_FLOAT_BITMAP* CRScaleFBmpDown(CR_FLOAT_BITMAP const* bmp, uint8_t downScale)
+	{
+		/* 
+		 * input validation 
+		 */
+		CRIA_AUTO_ASSERT(bmp, "CRPoolBitmap the bitmap that should be pooled should also be valid.");
+		CRIA_AUTO_ASSERT(downScale != 0, "CRPoolBitmap: A pool size of 0 is invalid");
+		if (!bmp || downScale == 0)
+			return nullptr;
+
+		/*
+		 * downScale 1 check
+		 */
+		if (downScale == 1)
+		{
+			return CRCreateFBmpCopy(bmp);
+		}
+
+		/* 
+		 * creating the output bitmap 
+		 */
+		CR_FLOAT_BITMAP* outBmp = CRCreateFBmp(
+			((bmp->Width / downScale) + ((bmp->Width  % downScale == 0) ? 0 : 1)),
+			((bmp->Height / downScale) + ((bmp->Height % downScale == 0) ? 0 : 1)),
+			bmp->FloatsPerPixel
+		);
+		CRIA_AUTO_ASSERT(outBmp, "CRScaleFBmpDown: Failed to create the output bitmap");
+		if (!outBmp)
+			return nullptr;
+
+		/*
+		 * Scaling down
+		 */
+		for (uint dstY = 0; dstY < outBmp->Height; dstY++)
+		{
+			uint srcY = dstY * downScale;
+			for (uint dstX = 0; dstX < outBmp->Width; dstX++)
+			{
+				uint srcX = dstX * downScale;
+
+				for (uint channel = 0; channel < bmp->FloatsPerPixel; channel++)
+				{
+					outBmp->Data[FBMP_PX_INDEX(dstX, dstY, outBmp) + channel] =
+						bmp->Data[FBMP_PX_INDEX(srcX, srcY, bmp) + channel];
+				}
+			}
+		}
+
+		return outBmp;
 	}
 
 #define CR_DEFAULT_ALPHA_VALUE         255
