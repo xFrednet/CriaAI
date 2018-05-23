@@ -67,9 +67,7 @@ namespace cria_ai
 		if (!copy)
 			return nullptr;
 		
-		//TODO does this work
-		cudaMemcpy(&copy->Data[0], &bmp->Data[0], sizeof(float) * bmp->Width * bmp->Height * bmp->FloatsPerPixel, cudaMemcpyDeviceToDevice);
-		//memcpy(&copy->Data[0], &bmp->Data[0], sizeof(float) * bmp->Width * bmp->Height * bmp->FloatsPerPixel);
+		memcpy(&copy->Data[0], &bmp->Data[0], sizeof(float) * bmp->Width * bmp->Height * bmp->FloatsPerPixel);
 		
 		return copy;
 	}
@@ -198,7 +196,23 @@ namespace cria_ai
 		
 		return bmpOut;
 	}
+	__global__ void CRCUScaleFBmpDown(CR_FLOAT_BITMAP const* inBmp, CR_FLOAT_BITMAP* outBmp, uint8_t downScale)
+	{
+		int startIndex = blockIdx.x * blockDim.x + threadIdx.x;
+		int stride = blockDim.x * gridDim.x;
 
+		for (uint pixel = startIndex; pixel < outBmp->Width * outBmp->Height; pixel += stride) {
+			uint srcX = (pixel % outBmp->Width) * downScale;
+			uint srcY = (pixel / outBmp->Width) * downScale;
+
+			uint dstIndex = pixel * inBmp->FloatsPerPixel;
+			uint srcIndex = (srcX + srcY * inBmp->Width) * inBmp->FloatsPerPixel;
+
+			for (uint channel = 0; channel < inBmp->FloatsPerPixel; channel++) {
+				outBmp->Data[dstIndex + channel] = inBmp->Data[srcIndex + channel];
+			}
+		}
+	}
 	CR_FLOAT_BITMAP* CRScaleFBmpDown(CR_FLOAT_BITMAP const* bmp, uint8_t downScale)
 	{
 		/* 
@@ -232,20 +246,15 @@ namespace cria_ai
 		/*
 		 * Scaling down
 		 */
-		for (uint dstY = 0; dstY < outBmp->Height; dstY++)
+		/*for (uint pixel = 0; pixel < outBmp->Width * outBmp->Height * outBmp->FloatsPerPixel; pixel += outBmp->FloatsPerPixel)
 		{
-			uint srcY = dstY * downScale;
-			for (uint dstX = 0; dstX < outBmp->Width; dstX++)
-			{
-				uint srcX = dstX * downScale;
-
-				for (uint channel = 0; channel < bmp->FloatsPerPixel; channel++)
-				{
-					outBmp->Data[FBMP_PX_INDEX(dstX, dstY, outBmp) + channel] =
-						bmp->Data[FBMP_PX_INDEX(srcX, srcY, bmp) + channel];
-				}
+			uint srcPixel = pixel * downScale;
+			for (uint channel = 0; channel < bmp->FloatsPerPixel; channel++) {
+				outBmp->Data[pixel + channel] =	bmp->Data[srcPixel + channel];
 			}
-		}
+		}*/
+		CRCUScaleFBmpDown<<<4, 256>>>(bmp, outBmp, downScale);
+		cudaDeviceSynchronize();
 
 		return outBmp;
 	}

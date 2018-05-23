@@ -10,7 +10,7 @@
 #define BOI_TITLE                      "Binding of Isaac: Afterbirth+"
 #define BOI_BASE_WIDTH                 512
 #define BOI_BASE_HEIGHT                288
-#define BOI_SCALE                      1
+#define BOI_SCALE                      2
 #define BOI_SAMPLE_SIZE                2
 
 #define CON_TITLE "C:\\Users\\xFrednet\\My Projects\\VS Projects\\CriaAI\\bin\\Debug\\Sandbox.exe"
@@ -29,9 +29,20 @@ CR_FLOAT_BITMAP* processBOIFrame(CR_FLOAT_BITMAP* inFrame)
 		return nullptr;
 	}
 
+
+	StopWatch timer;
 	CR_FLOAT_BITMAP* fpp1Out = CRConvertToFloatsPerPixel(inFrame, 1);
-	CR_FLOAT_BITMAP* scaleOut = CRScaleFBmpDown(fpp1Out, BOI_SCALE);
-	CR_FLOAT_BITMAP* poolOut = CRPoolBitmap(scaleOut, 2);
+	std::cout << "    [INFO] fpp1Out      : " << timer.getTimeMSSinceStart() << std::endl;
+	timer.start();
+
+	CR_FLOAT_BITMAP* scaleOut = CRPoolBitmap(fpp1Out, BOI_SCALE);
+	std::cout << "    [INFO] scaleOut     : " << timer.getTimeMSSinceStart() << std::endl;
+	timer.start();
+
+	CR_FLOAT_BITMAP* poolOut = CRPoolBitmap(scaleOut, BOI_SAMPLE_SIZE);
+	std::cout << "    [INFO] poolOut      : " << timer.getTimeMSSinceStart() << std::endl;
+	timer.start();
+
 
 	CRDeleteFBmp(fpp1Out);
 	CRDeleteFBmp(scaleOut);
@@ -104,20 +115,24 @@ void testBOINetwork()
 {
 	std::cout << "> testBOINetwork" << std::endl;
 	
-	CR_FLOAT_BITMAP* frame = CRLoadFBmp("screenshots/The Binding of Isaac Afterbirth+.bmp");
+	CR_FLOAT_BITMAP* frame = CRLoadFBmp("screenshots/The Binding of Isaac Afterbirth+2.bmp");
 	CRNeuronLayerPtr outputLayer;
 	CRNeuronNetwork* network = createBOINetwork(outputLayer);
-	
-	std::cout << "= init finish" << std::endl;
+	CRDeleteFBmp(CRPoolBitmap(frame, 2));
+
+	std::cout << " = init finish" << std::endl;
 	std::cout << std::endl;
 
 	StopWatch timer;
 	timer.start();
 	
+
 	CR_FLOAT_BITMAP* processedFrame = processBOIFrame(frame);
+	std::cout << " [INFO] processedFrame[ms]: " << timer.getTimeMSSinceStart() << std::endl;
 	CRMatrixf* data = bmpToMat(processedFrame);
 	CRDeleteFBmp(processedFrame);
 	
+
 	network->process(data);
 	CRFreeMatrixf(data);
 
