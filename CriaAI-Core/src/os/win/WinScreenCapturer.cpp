@@ -16,7 +16,7 @@ namespace cria_ai { namespace os { namespace win {
 		m_BmpIntBuffer(nullptr)
 	{
 	}
-	crresult CRWinScreenCapturer::init(CRWindowPtr target)
+	crresult CRWinScreenCapturer::init(CRWindowPtr& target)
 	{
 		m_SrcHwnd = GetDesktopWindow();
 		if (!m_SrcHwnd)
@@ -25,7 +25,7 @@ namespace cria_ai { namespace os { namespace win {
 		/*
 		 * Return
 		 */
-		return CRRES_OK;
+		return setTarget(target);
 	}
 
 	CRWinScreenCapturer::~CRWinScreenCapturer()
@@ -37,7 +37,7 @@ namespace cria_ai { namespace os { namespace win {
 			free(m_BmpIntBuffer);
 	}
 
-	crresult CRWinScreenCapturer::newTarget(CRWindowPtr target)
+	crresult CRWinScreenCapturer::newTarget(CRWindowPtr& target)
 	{
 		if (!m_SrcHwnd)
 			return CRRES_ERR_MISSING_INFORMATION;
@@ -54,7 +54,7 @@ namespace cria_ai { namespace os { namespace win {
 		/*
 		* retrieving the client area
 		*/
-		CR_RECT area = m_Target->getClientArea();
+		CR_RECT area = target->getClientArea();
 
 		/*
 		 * creating a new windows bitmap
@@ -132,7 +132,6 @@ namespace cria_ai { namespace os { namespace win {
 			return CRRES_ERR_WIN_FAILED_TO_CREATE_DC;
 		}
 
-
 		/*
 		 * Getting the Data
 		 */
@@ -145,7 +144,7 @@ namespace cria_ai { namespace os { namespace win {
 			m_LastFrame->Data[pxNo + 0] = ((float)m_BmpIntBuffer[pxNo + 2]) / 255.0f; /* R */
 			m_LastFrame->Data[pxNo + 1] = ((float)m_BmpIntBuffer[pxNo + 1]) / 255.0f; /* G */
 			m_LastFrame->Data[pxNo + 2] = ((float)m_BmpIntBuffer[pxNo + 0]) / 255.0f; /* B */
-			m_LastFrame->Data[pxNo + 3] = 255.0f; /* A */
+			m_LastFrame->Data[pxNo + 3] = 1.0f; /* A */
 		}
 
 		/*

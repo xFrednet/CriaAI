@@ -20,8 +20,8 @@ namespace cria_ai { namespace os {
 		CR_FLOAT_BITMAP* m_LastFrame;
 
 		CRScreenCapturer();
-		virtual crresult init(CRWindowPtr target) = 0;
-		virtual crresult newTarget(CRWindowPtr target) = 0;
+		virtual crresult init(CRWindowPtr& target) = 0;
+		virtual crresult newTarget(CRWindowPtr& target) = 0;
 	public:
 		virtual ~CRScreenCapturer();
 

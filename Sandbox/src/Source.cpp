@@ -6,6 +6,7 @@
 #include "tests/MathTests.h"
 #include "src/network/neurons/DataInputNeuron.h"
 #include "src/network/neurons/NormalNeuron.h"
+#include <AsyncInfo.h>
 
 #define BOI_TITLE                      "Binding of Isaac: Afterbirth+"
 #define BOI_BASE_WIDTH                 512
@@ -15,34 +16,55 @@
 
 #define CON_TITLE "C:\\Users\\xFrednet\\My Projects\\VS Projects\\CriaAI\\bin\\Debug\\Sandbox.exe"
 
+//#define LOG_TIME
+
 using namespace std;
 using namespace cria_ai;
 using namespace bmp_renderer;
 using namespace network;
-
-
+uint g_frameNo = 0;
+uint g_iteration = 0;
 CR_FLOAT_BITMAP* processBOIFrame(CR_FLOAT_BITMAP* inFrame)
 {
-	if (inFrame->Width != BOI_BASE_WIDTH * BOI_SCALE || inFrame->Height != BOI_BASE_HEIGHT * BOI_SCALE)
+	if (!inFrame || inFrame->Width != BOI_BASE_WIDTH * BOI_SCALE || inFrame->Height != BOI_BASE_HEIGHT * BOI_SCALE)
 	{
-		std::cout << "processBOIFrame: something is wrong" << std::endl;
+		std::cout << "    [INFO] processBOIFrame: something is wrong" << std::endl;
 		return nullptr;
 	}
 
-
+#ifdef LOG_TIME
 	StopWatch timer;
+#endif
 	CR_FLOAT_BITMAP* fpp1Out = CRConvertToFloatsPerPixel(inFrame, 1);
+#ifdef LOG_TIME
 	std::cout << "    [INFO] fpp1Out      : " << timer.getTimeMSSinceStart() << std::endl;
 	timer.start();
+#endif
 
-	CR_FLOAT_BITMAP* scaleOut = CRPoolBitmap(fpp1Out, BOI_SCALE);
+	CR_FLOAT_BITMAP* scaleOut = CRScaleFBmpDown(fpp1Out, BOI_SCALE);
+#ifdef LOG_TIME
 	std::cout << "    [INFO] scaleOut     : " << timer.getTimeMSSinceStart() << std::endl;
 	timer.start();
+#endif
 
 	CR_FLOAT_BITMAP* poolOut = CRPoolBitmap(scaleOut, BOI_SAMPLE_SIZE);
+#ifdef LOG_TIME
 	std::cout << "    [INFO] poolOut      : " << timer.getTimeMSSinceStart() << std::endl;
 	timer.start();
+#endif
 
+	if (g_iteration == 0)
+	{
+		String inFrameName = String("test/inFrame") + std::to_string(g_frameNo) + String(".bmp");
+		CRSaveBitmap(inFrame, inFrameName.c_str());
+		String fpp1OutName = String("test/fpp1Out") + std::to_string(g_frameNo) + String(".bmp");
+		CRSaveBitmap(fpp1Out, fpp1OutName.c_str());
+		String scaleOutName = String("test/scaleOut") + std::to_string(g_frameNo) + String(".bmp");
+		CRSaveBitmap(scaleOut, scaleOutName.c_str());
+		String poolOutName = String("test/poolOut") + std::to_string(g_frameNo) + String(".bmp");
+		CRSaveBitmap(poolOut, poolOutName.c_str());
+		g_frameNo++;
+	}
 
 	CRDeleteFBmp(fpp1Out);
 	CRDeleteFBmp(scaleOut);
@@ -90,6 +112,14 @@ CRNeuronNetwork* createBOINetwork(CRNeuronLayerPtr& outputLayer)
 	 * Finish and return
 	 */
 	network->initRandom();
+
+	CRWriteMatrixf(layer2->getWeights(), "l2weights.txt");
+	CRWriteMatrixf(layer2->getBias(), "l2bias.txt");
+	CRWriteMatrixf(layer3->getWeights(), "l3weights.txt");
+	CRWriteMatrixf(layer3->getBias(), "l3bias.txt");
+	CRWriteMatrixf(outputLayer->getWeights(), "l4weights.txt");
+	CRWriteMatrixf(outputLayer->getBias(), "l4bias.txt");
+
 	std::cout << " < createBOINetwork" << std::endl;
 	return network;
 }
@@ -114,35 +144,85 @@ CRMatrixf* bmpToMat(CR_FLOAT_BITMAP* bmp)
 void testBOINetwork()
 {
 	std::cout << "> testBOINetwork" << std::endl;
-	
-	CR_FLOAT_BITMAP* frame = CRLoadFBmp("screenshots/The Binding of Isaac Afterbirth+2.bmp");
+
+	/*
+	 * Init
+	 */
 	CRNeuronLayerPtr outputLayer;
 	CRNeuronNetwork* network = createBOINetwork(outputLayer);
-	CRDeleteFBmp(CRPoolBitmap(frame, 2));
+	crresult result;
+	os::CRWindowPtr window = os::CRWindow::CreateInstance(BOI_TITLE, &result);
+	if (CR_FAILED(result))
+	{
+		printf(" [ERROR] os::CRWindow::CreateInstance failed!! Exit");
+		return;
+	}
+	window->setClientArea(CR_RECT{50, 50, BOI_BASE_WIDTH * BOI_SCALE, BOI_BASE_HEIGHT * BOI_SCALE});
+	os::CRScreenCapturer* capturer = os::CRScreenCapturer::CreateInstance(window, &result);
+	if (CR_FAILED(result))
+	{
+		printf(" [ERROR] os::CRScreenCapturer::CreateInstance failed !! Exit");
+		return;
+	}
 
-	std::cout << " = init finish" << std::endl;
-	std::cout << std::endl;
+	std::cout << " [INFO] = init finish" << std::endl;
 
+	/*
+	 * Loop
+	 */
 	StopWatch timer;
-	timer.start();
+	bool running = true;
+	uint iterations = 0;
+	while (running)
+	{
+		g_iteration = iterations;
+		/*
+		 * Exit check
+		 */
+		if (GetAsyncKeyState('X'))
+		{
+			running = false;
+			printf(" [EXIT] exit because u wanted it \n");
+			break;
+		}
+
+		/*
+		 * Network
+		 */
+		capturer->grabFrame();
+		CR_FLOAT_BITMAP* frame = capturer->getLastFrame();
+		CR_FLOAT_BITMAP* processedFrame = processBOIFrame(frame);
+		
+		if (true)
+		{
+			// bmp to mat
+			CRMatrixf* data = bmpToMat(processedFrame);
+			CRDeleteFBmp(processedFrame);
 	
+			// process data
+			network->process(data);
+			CRFreeMatrixf(data);
 
-	CR_FLOAT_BITMAP* processedFrame = processBOIFrame(frame);
-	std::cout << " [INFO] processedFrame[ms]: " << timer.getTimeMSSinceStart() << std::endl;
-	CRMatrixf* data = bmpToMat(processedFrame);
-	CRDeleteFBmp(processedFrame);
-	
+			// print result
+			printBOIOutput(outputLayer->getOutput());
+		}
+		
+		/*
+		 * Info 
+		 */
+		iterations++;
+		if (timer.getTimeMSSinceStart() >= 1000)
+		{
+			std::cout << std::endl;
+			std::cout << " [INFO] IPS: " << iterations << ", average:" << (timer.getTimeMSSinceStart() / iterations) << std::endl;
+			std::cout << std::endl;
 
-	network->process(data);
-	CRFreeMatrixf(data);
+			timer.start();
+			iterations = 0;
+		}
+		
+	}
 
-	timer.stop();
-	std::cout << " [INFO] process time[ms]: " << timer.getTimeMS() << std::endl;
-	std::cout << std::endl;
-
-	printBOIOutput(outputLayer->getOutput());
-
-	CRDeleteFBmp(frame);
 	delete network;
 
 	std::cout << "< testBOINetwork" << std::endl;
@@ -155,7 +235,6 @@ int main(int argc, char* argv)
 	cout << "CR_VEC2 Test result " << TestVec2() << std::endl;
 	cout << "########################################################" << std::endl;
 
-
 	crresult r;
 
 	/*
@@ -164,9 +243,11 @@ int main(int argc, char* argv)
 	r = os::CROSContext::InitInstance();
 	printf("os::CROSContext::InitInstance: %s \n", CRGetCRResultName(r).c_str());
 
-	/*
-	 * time test
-	 */
+	for (uint sleep = 10; sleep > 0; sleep--)
+	{
+		os::CROSContext::Sleep(1);
+		std::cout << "[INFO] network start in: " << sleep << std::endl;
+	}
 
 	/*
 	 * Network test

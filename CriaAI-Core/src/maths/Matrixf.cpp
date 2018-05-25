@@ -208,11 +208,11 @@ namespace cria_ai
 		if (!file.is_open())
 			return false;
 
-		char* str = new char[predecimals + 1 + decimals + 1];
-		str[predecimals + 1 + decimals] = 0;
+		char* str = new char[1 + predecimals + 1 + decimals + 1 + 1];
+		str[1 + predecimals + 1 + decimals + 1] = 0;
 		for (index = 0; index < mat->Cols * mat->Rows; index++)
 		{
-			sprintf(str, "%*.*f ", predecimals, decimals, mat->Data[index]);
+			sprintf(str, "%+*.*f ", predecimals, decimals, mat->Data[index]);
 			file << str;
 			
 			if ((index + 1) % mat->Cols == 0)
@@ -276,7 +276,7 @@ namespace cria_ai
 
 		for (index = 0; index < mat->Rows * mat->Cols; index++)
 		{
-			mat->Data[index] = CRRandFloat();
+			mat->Data[index] = (CRRandFloat() * 2.0f) - 1.0f;
 		}
 	}
 

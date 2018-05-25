@@ -68,5 +68,7 @@ namespace cria_ai { namespace os {
 	}
 
 	CRWindow::~CRWindow()
-	{}
+	{
+		printf("~CRWindow\n");
+	}
 }}
