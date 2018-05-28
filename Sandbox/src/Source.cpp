@@ -4,8 +4,6 @@
 #include <thread>
 
 #include "tests/MathTests.h"
-#include "src/network/neurons/DataInputNeuron.h"
-#include "src/network/neurons/NormalNeuron.h"
 #include <AsyncInfo.h>
 
 #define BOI_TITLE                      "Binding of Isaac: Afterbirth+"
