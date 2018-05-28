@@ -36,17 +36,9 @@
 
 #include "../maths/Matrixf.hpp"
 
-#include "NeuronGroup.h"
-
 #include "../paco/ActivationFunctions.h"
 
 namespace cria_ai { namespace network {
-
-	typedef struct CR_NEURON_LIST_NODE_
-	{
-		CR_NEURON_LIST_NODE_* Next;
-		CRNeuronGroupPtr Neurons;
-	} CR_NEURON_LIST_NODE;
 
 	
 	/**
@@ -56,7 +48,7 @@ namespace cria_ai { namespace network {
 	 * 
 	 * [CRNeuronLayer]
 	 * 
-	 * m_ActivationFunc([input] * [m_Weights] - [m_Bias]) -> [Neurons->processData] -> [m_Output]
+	 * m_ActivationFunc([input] * [m_Weights] - [m_Bias]) -> [m_Output]
 	 * 
 	 */
 	class CRNeuronLayer
@@ -65,22 +57,18 @@ namespace cria_ai { namespace network {
 		CRNeuronLayer const* m_PrevLayer;
 
 		CRNWMat* m_Output;
-		CRNWMat* m_PreNeuronOutput;
 
 		CRNWMat* m_Weights;
 		CRNWMat* m_Bias;
 
-		CR_NEURON_LIST_NODE* m_NeuronList;
-
 		uint m_NeuronCount;
-		uint m_NeuronGroupCount;
 
 		paco::cr_activation_func     m_ActivationFunc;
 		paco::cr_activation_func_inv m_ActivationFuncInv;
 
 		bool m_IsOperational;
 
-		void updateMatrixSizes();
+		crresult initMatrices();
 		void updateIsOperational();
 	public:
 		/**
@@ -90,18 +78,18 @@ namespace cria_ai { namespace network {
 		 * be null if the created Layer is the first layer. In all other 
 		 * circumstances this pointer has to be valid.
 		 * 
+		 * \param neuronCount The amount of neurons in this layer.
+		 * 
 		 * \param result This is a pointer to retrieve the result of the creation operations.
 		 */
-		CRNeuronLayer(CRNeuronLayer const* prevLayer, crresult* result = nullptr);
+		CRNeuronLayer(CRNeuronLayer const* prevLayer, uint neuronCount, crresult* result = nullptr);
 		~CRNeuronLayer();
 
-		void addNeuronGroup(const CRNeuronGroupPtr& neuronGroup);
-		void removeNeuronGroup(const CRNeuronGroupPtr& neuronGroup);
 		void intiRandom();
 
 		void setActivationFunc(paco::cr_activation_func activationFunc, paco::cr_activation_func_inv activationFuncInv);
 
-		void processData(CRNWMat const* inputData);
+		void processData(CRMatrixf const* inputData);
 
 		/*
 		 * getters
@@ -114,7 +102,6 @@ namespace cria_ai { namespace network {
 		CRNWMat const* getBias() const;
 
 		uint getNeuronCount() const;
-		uint getNeuronGroupCount() const;
 	};
 
 	typedef cr_ptr<CRNeuronLayer> CRNeuronLayerPtr;

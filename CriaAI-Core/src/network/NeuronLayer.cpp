@@ -33,77 +33,61 @@
 #include "NeuronLayer.h"
 
 namespace cria_ai { namespace network {
-	void CRNeuronLayer::updateMatrixSizes()
+	
+	crresult CRNeuronLayer::initMatrices()
 	{
 		/*
 		 * Cleanup
 		 */
 		m_IsOperational = false;
 
-		if (m_Output) {
-			CRFreeMatrixf(m_Output);
-			m_Output = nullptr;
-		}
-		if (m_PreNeuronOutput) {
-			CRFreeMatrixf(m_PreNeuronOutput);
-			m_PreNeuronOutput = nullptr;
-		}
-		if (m_Weights) {
-			CRFreeMatrixf(m_Weights);
-			m_Weights = nullptr;
-		}
-		if (m_Bias) {
-			CRFreeMatrixf(m_Bias);
-			m_Bias = nullptr;
-		}
+		if (m_Output || m_Weights || m_Bias)
+			return CRRES_ERR_NN_LAYER_MATRICIES_NOT_NULL;
 
 		/*
 		 * Validation check
 		 */
 		if (m_NeuronCount == 0)
-			return;
+			return CRRES_ERR_NN_LAYER_INVALID_NEURON_COUNT;
 
 		m_Output = CRCreateMatrixf(1, m_NeuronCount);
-		m_PreNeuronOutput = CRCreateMatrixf(1, m_NeuronCount);
+		if (!m_Output)
+			return CRRES_ERR_NN_LAYER_MATRICIES_INIT_FAILED;
 		if (m_PrevLayer && m_PrevLayer->getNeuronCount() != 0) // => if not first layer
 		{
 			// m_Weights has one column per input neuron and one row per output neuron
 			m_Weights = CRCreateMatrixf(m_PrevLayer->getNeuronCount(), m_NeuronCount);
 			m_Bias = CRCreateMatrixf(1, m_NeuronCount);
+
+			if (!m_Weights || !m_Bias)
+				return CRRES_ERR_NN_LAYER_MATRICIES_INIT_FAILED;
 		}
 
-		/*
-		 * Check if this layer is ready to operate
-		 */
-		updateIsOperational();
+		return CRRES_OK;
 	}
 	void CRNeuronLayer::updateIsOperational()
 	{
 		m_IsOperational = (
 			m_Output &&
-			m_PreNeuronOutput &&
-			m_NeuronList &&
 			m_NeuronCount != 0 &&
-			m_NeuronGroupCount != 0 &&
 			m_ActivationFunc &&
 			m_ActivationFuncInv);
 	}
 
-	CRNeuronLayer::CRNeuronLayer(CRNeuronLayer const* prevLayer, crresult* result)
+	CRNeuronLayer::CRNeuronLayer(CRNeuronLayer const* prevLayer, uint neuronCount, crresult* result)
 		: m_PrevLayer(prevLayer), 
-		m_Output(nullptr), 
-		m_PreNeuronOutput(nullptr),
+		m_Output(nullptr),
 		m_Weights(nullptr), 
-		m_Bias(nullptr), 
-		m_NeuronList(nullptr),
-		m_NeuronCount(0),
-		m_NeuronGroupCount(0), 
+		m_Bias(nullptr),
+		m_NeuronCount(neuronCount),
 		m_ActivationFunc(nullptr), 
 		m_ActivationFuncInv(nullptr),
 		m_IsOperational(false)
 	{
+		crresult initRes = initMatrices();
+
 		if (result)
-			*result = CRRES_OK;
+			*result = initRes;
 	}
 
 	CRNeuronLayer::~CRNeuronLayer()
@@ -118,11 +102,6 @@ namespace cria_ai { namespace network {
 			CRFreeMatrixf(m_Output);
 			m_Output = nullptr;
 		}
-		if (m_PreNeuronOutput)
-		{
-			CRFreeMatrixf(m_PreNeuronOutput);
-			m_PreNeuronOutput = nullptr;
-		}
 		if (m_Weights)
 		{
 			CRFreeMatrixf(m_Weights);
@@ -134,100 +113,6 @@ namespace cria_ai { namespace network {
 			m_Bias = nullptr;
 		}
 
-		/*
-		 * delete node list
-		 */
-		CR_NEURON_LIST_NODE* currentNode = m_NeuronList;
-		m_NeuronList = nullptr;
-		CR_NEURON_LIST_NODE* nextNode;
-		while (currentNode)
-		{
-			nextNode = currentNode->Next;
-			delete currentNode;
-			currentNode = nextNode;
-		}
-	}
-
-	void CRNeuronLayer::addNeuronGroup(const CRNeuronGroupPtr& neuronGroup)
-	{
-		/*
-		 * Validation
-		 */
-		if (!neuronGroup.get() || neuronGroup->getNeuronCount() == 0)
-			return;
-
-		/*
-		 * Create new Node
-		 */
-		CR_NEURON_LIST_NODE* node = new CR_NEURON_LIST_NODE;
-		if (!node)
-			return;
-		node->Next = nullptr;
-		node->Neurons = neuronGroup;
-
-		/*
-		 * add neuron group
-		 */
-		m_IsOperational = false;
-		//CRAdd group
-		{
-			if (!m_NeuronList)
-			{
-				m_NeuronList = node;
-			} 
-			else // -> m_NeuronList is valid
-			{
-				CR_NEURON_LIST_NODE* loopNode = m_NeuronList;
-				while (loopNode->Next)
-				{
-					loopNode = loopNode->Next;
-				}
-				loopNode->Next = node;
-			}
-		}
-		m_NeuronGroupCount++;
-		m_NeuronCount     += neuronGroup->getNeuronCount();
-
-		updateMatrixSizes();
-		updateIsOperational();
-	}
-	void CRNeuronLayer::removeNeuronGroup(const CRNeuronGroupPtr& neuronGroup)
-	{
-		/*
-		* Validation
-		*/
-		if (!neuronGroup.get() || neuronGroup->getNeuronCount() != 0 || !m_NeuronList)
-			return;
-
-		/*
-		 * search node
-		 */
-		m_IsOperational = false;
-
-		CR_NEURON_LIST_NODE* loopNode = m_NeuronList;
-		CR_NEURON_LIST_NODE** prevNextPtr = &m_NeuronList;
-		while (loopNode && loopNode->Neurons != neuronGroup)
-		{
-			prevNextPtr = &loopNode->Next;
-			loopNode = loopNode->Next;
-		}
-
-		/*
-		 * delete node if it was fount
-		 */
-		if (loopNode)
-		{
-			m_NeuronGroupCount--;
-			m_NeuronCount -= loopNode->Neurons->getNeuronCount();
-			*prevNextPtr = loopNode->Next; //remove node from list
-			
-			delete loopNode; // delete Node
-		}
-
-		/*
-		 * finishing
-		 */
-		updateIsOperational();
 	}
 
 	void CRNeuronLayer::intiRandom()
@@ -236,13 +121,6 @@ namespace cria_ai { namespace network {
 			CRFillMatrixRand(m_Weights);
 		if (m_Bias)
 			CRFillMatrixRand(m_Bias);
-
-		CR_NEURON_LIST_NODE* node = m_NeuronList;
-		while (node) {
-			node->Neurons->randInit();
-
-			node = node->Next;
-		}
 	}
 
 	void CRNeuronLayer::setActivationFunc(paco::cr_activation_func activationFunc,
@@ -261,11 +139,11 @@ namespace cria_ai { namespace network {
 		m_ActivationFunc = activationFunc;
 		m_ActivationFuncInv = activationFuncInv;
 
-		updateMatrixSizes();
+		initMatrices();
 		updateIsOperational();
 	}
 
-	void CRNeuronLayer::processData(CRNWMat const* inputData)
+	void CRNeuronLayer::processData(CRMatrixf const* inputData)
 	{
 		if (!m_IsOperational || !inputData)
 		{
@@ -277,11 +155,7 @@ namespace cria_ai { namespace network {
 		/*
 		 * Process weights and biases
 		 */
-		if (!m_PrevLayer)
-		{
-			memcpy(m_PreNeuronOutput, inputData, sizeof(float) * inputData->Rows);
-		}
-		else
+		if (m_PrevLayer)
 		{
 			if (inputData->Rows != m_Weights->Cols) {
 				memset(m_Output, 0, sizeof(float) * m_NeuronCount);
@@ -294,29 +168,16 @@ namespace cria_ai { namespace network {
 			CRNWMat* biasOut   = CRSub(weightOut, m_Bias);
 
 			timer.start();
-			m_ActivationFunc(biasOut, m_PreNeuronOutput);
+			m_ActivationFunc(biasOut, m_Output);
 
 			CRFreeMatrixf(weightOut);
 			CRFreeMatrixf(biasOut);
 		}
-
-
-		/*
-		 * Push to neurons
-		 */
-
-		/*memcpy(m_Output->Data, m_PreNeuronOutput->Data, sizeof(float) * m_NeuronCount);
-		return;*/
-		StopWatch timer;
-		uint neuronNo = 0;
-		CR_NEURON_LIST_NODE* node = m_NeuronList;
-		while (node) 
+		else
 		{
-			node->Neurons->processData(&(m_PreNeuronOutput->Data[neuronNo]), &(m_Output->Data[neuronNo]));
-
-			neuronNo = node->Neurons->getNeuronCount();
-			node = node->Next;
+			memcpy(m_Output, inputData, sizeof(float) * inputData->Rows);
 		}
+
 	}
 
 	/*
@@ -350,8 +211,5 @@ namespace cria_ai { namespace network {
 	{
 		return m_NeuronCount;
 	}
-	uint CRNeuronLayer::getNeuronGroupCount() const
-	{
-		return m_NeuronGroupCount;
-	}
+
 }}

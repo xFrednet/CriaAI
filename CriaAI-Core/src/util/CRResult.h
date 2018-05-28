@@ -100,13 +100,21 @@ namespace cria_ai
 #define CRRES_SOURCE_UNKNOWN                     CRIA_RES_TYPEDEF(0x0000)
 #define CRRES_SOURCE_UTILS                       CRIA_RES_TYPEDEF(0x0100)
 
+#define CRRES_SOURCE_NN                          CRIA_RES_TYPEDEF(0x0400)
+
 #define CRRES_SOURCE_OS                          CRIA_RES_TYPEDEF(0x0A00)
 #define CRRES_SOURCE_WIN                         CRIA_RES_TYPEDEF(0x0B00)
-//CRRES_SOURCE_LINUX                                              0x0C00
-//CRRES_SOURCE_MAC                                                0x0D00
+//CRRES_SOURCE_OS                                                 0x0800
+//CRRES_SOURCE_WIN                                                0x0900
+//CRRES_SOURCE_LINUX                                              0x0A00
+//CRRES_SOURCE_MAC                                                0x0B00
 
 #define CRRES_SOURCE_PACO                        CRIA_RES_TYPEDEF(0x0E00)
 #define CRRES_SOURCE_CUDA                        CRIA_RES_TYPEDEF(0x0F00)
+//CRRES_SOURCE_PACO                                               0x0C00
+//CRRES_SOURCE_CUDA                                               0x0D00
+//CRRES_SOURCE_PACO_NULL                                          0x0E00
+//CRRES_SOURCE_OPENCL                                             0x0F00
 
 /* //////////////////////////////////////////////////////////////////////////////// */
 // // ZA_RESULT_SOURCE_NO_SOURCE //
@@ -133,23 +141,33 @@ namespace cria_ai
 #define CRRES_ERR_UTILS_FAILED_TO_CREATE_FBMP    CRIA_RES_TYPEDEF(0x8101)
 
 /* //////////////////////////////////////////////////////////////////////////////// */
+// // CRRES_SOURCE_NN //
+/* //////////////////////////////////////////////////////////////////////////////// */
+#define CRRES_ERR_NN_UNKNOWN                     CRIA_RES_TYPEDEF(0x8400)
+#define CRRES_OK_NN                              CRIA_RES_TYPEDEF(0x0400)
+
+#define CRRES_ERR_NN_LAYER_INVALID_NEURON_COUNT  CRIA_RES_TYPEDEF(0x8401)
+#define CRRES_ERR_NN_LAYER_MATRICIES_NOT_NULL    CRIA_RES_TYPEDEF(0x8402)
+#define CRRES_ERR_NN_LAYER_MATRICIES_INIT_FAILED CRIA_RES_TYPEDEF(0x8403)
+
+/* //////////////////////////////////////////////////////////////////////////////// */
 // // CRRES_SOURCE_OS //
 /* //////////////////////////////////////////////////////////////////////////////// */
-#define CRRES_ERR_OS_UNKNOWN                    CRIA_RES_TYPEDEF(0x8A00)
-#define CRRES_OK_OS                             CRIA_RES_TYPEDEF(0x0A00)
+#define CRRES_ERR_OS_UNKNOWN                     CRIA_RES_TYPEDEF(0x8A00)
+#define CRRES_OK_OS                              CRIA_RES_TYPEDEF(0x0A00)
 
-#define CRRES_OK_OS_INPUTSIM_TARGET_NOT_FOCUSED CRIA_RES_TYPEDEF(0x0A01)
-#define CRRES_OK_OS_INPUTSIM_CURSOR_OUTSIDE     CRIA_RES_TYPEDEF(0x0A02)
+#define CRRES_OK_OS_INPUTSIM_TARGET_NOT_FOCUSED  CRIA_RES_TYPEDEF(0x0A01)
+#define CRRES_OK_OS_INPUTSIM_CURSOR_OUTSIDE      CRIA_RES_TYPEDEF(0x0A02)
 
-#define CRRES_ERR_OS_OS_UNSUPPORTED             CRIA_RES_TYPEDEF(0x8A01)
-#define CRRES_ERR_OS_STATIC_INSTANCE_IS_NULL    CRIA_RES_TYPEDEF(0x8A02)
-#define CRRES_ERR_OS_KEY_OUT_OF_BOUNDS          CRIA_RES_TYPEDEF(0x8A03)
-#define CRRES_ERR_OS_BUTTON_OUT_OF_BOUNDS       CRIA_RES_TYPEDEF(0x8A04)
-#define CRRES_ERR_OS_INPUTSIM_INIT_FAILED       CRIA_RES_TYPEDEF(0x8A05)
-#define CRRES_ERR_OS_WINDOW_INIT_FAILED         CRIA_RES_TYPEDEF(0x8A06)
-#define CRRES_ERR_OS_WINDOW_TITLE_NOT_FOUND     CRIA_RES_TYPEDEF(0x8A07)
-#define CRRES_ERR_OS_TARGET_IS_NULL             CRIA_RES_TYPEDEF(0x8A08)
-#define CRRES_ERR_OS_WINDOW_RESIZE_FAILED       CRIA_RES_TYPEDEF(0x8A09)
+#define CRRES_ERR_OS_OS_UNSUPPORTED              CRIA_RES_TYPEDEF(0x8A01)
+#define CRRES_ERR_OS_STATIC_INSTANCE_IS_NULL     CRIA_RES_TYPEDEF(0x8A02)
+#define CRRES_ERR_OS_KEY_OUT_OF_BOUNDS           CRIA_RES_TYPEDEF(0x8A03)
+#define CRRES_ERR_OS_BUTTON_OUT_OF_BOUNDS        CRIA_RES_TYPEDEF(0x8A04)
+#define CRRES_ERR_OS_INPUTSIM_INIT_FAILED        CRIA_RES_TYPEDEF(0x8A05)
+#define CRRES_ERR_OS_WINDOW_INIT_FAILED          CRIA_RES_TYPEDEF(0x8A06)
+#define CRRES_ERR_OS_WINDOW_TITLE_NOT_FOUND      CRIA_RES_TYPEDEF(0x8A07)
+#define CRRES_ERR_OS_TARGET_IS_NULL              CRIA_RES_TYPEDEF(0x8A08)
+#define CRRES_ERR_OS_WINDOW_RESIZE_FAILED        CRIA_RES_TYPEDEF(0x8A09)
 
 
 /* //////////////////////////////////////////////////////////////////////////////// */
@@ -216,6 +234,19 @@ namespace cria_ai {
 					CRIA_SWITCH_CRRESULT(CRRES_ERR_UTILS_UNKNOWN);
 					
 					CRIA_SWITCH_CRRESULT(CRRES_ERR_UTILS_FAILED_TO_CREATE_FBMP);
+
+					default:
+						return String("CRRESULT_UNNAMED_RESULT");
+				}
+			case CRRES_SOURCE_NN.Value:
+				switch (result.Value) 
+				{
+					CRIA_SWITCH_CRRESULT(CRRES_ERR_NN_UNKNOWN);
+					CRIA_SWITCH_CRRESULT(CRRES_OK_NN);
+
+					CRIA_SWITCH_CRRESULT(CRRES_ERR_NN_LAYER_INVALID_NEURON_COUNT);
+					CRIA_SWITCH_CRRESULT(CRRES_ERR_NN_LAYER_MATRICIES_NOT_NULL);
+					CRIA_SWITCH_CRRESULT(CRRES_ERR_NN_LAYER_MATRICIES_INIT_FAILED);
 
 					default:
 						return String("CRRESULT_UNNAMED_RESULT");

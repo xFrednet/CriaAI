@@ -93,33 +93,29 @@ CRNeuronNetwork* createBOINetwork(CRNeuronLayerPtr& outputLayer)
 	/*
 	 * Layer 1
 	 */
-	CRNeuronLayerPtr layer1 = make_shared<CRNeuronLayer>(nullptr);
+	CRNeuronLayerPtr layer1 = make_shared<CRNeuronLayer>(nullptr, (BOI_BASE_WIDTH / BOI_SAMPLE_SIZE * BOI_BASE_HEIGHT / BOI_SAMPLE_SIZE));// 36864 Neurons :O
 	layer1->setActivationFunc(paco::CRSigmoid, paco::CRSigmoidInv);
-	layer1->addNeuronGroup(make_shared<CRDataInputNeuron>(BOI_BASE_WIDTH / BOI_SAMPLE_SIZE * BOI_BASE_HEIGHT / BOI_SAMPLE_SIZE)); // 36864 Neurons :O
 	network->addLayer(layer1);
 
 	/*
 	 * Layer 2
 	 */
-	CRNeuronLayerPtr layer2 = make_shared<CRNeuronLayer>(layer1.get());
+	CRNeuronLayerPtr layer2 = make_shared<CRNeuronLayer>(layer1.get(), 100);
 	layer2->setActivationFunc(paco::CRSigmoid, paco::CRSigmoidInv);
-	layer2->addNeuronGroup(make_shared<CRNormalNeuron>(100));
 	network->addLayer(layer2);
 
 	/*
 	* Layer 3
 	*/
-	CRNeuronLayerPtr layer3 = make_shared<CRNeuronLayer>(layer2.get());
+	CRNeuronLayerPtr layer3 = make_shared<CRNeuronLayer>(layer2.get(), 100);
 	layer3->setActivationFunc(paco::CRSigmoid, paco::CRSigmoidInv);
-	layer3->addNeuronGroup(make_shared<CRNormalNeuron>(100));
 	network->addLayer(layer3);
 
 	/*
 	* Layer 4
 	*/
-	outputLayer = make_shared<CRNeuronLayer>(layer3.get());
+	outputLayer = make_shared<CRNeuronLayer>(layer3.get(), 12);//WASD[^][<][v][>][ ][STRG]EQ
 	outputLayer->setActivationFunc(paco::CRSigmoid, paco::CRSigmoidInv);
-	outputLayer->addNeuronGroup(make_shared<CRNormalNeuron>(12));//WASD[^][<][v][>][ ][STRG]EQ
 	network->addLayer(outputLayer);
 
 	/*
@@ -180,6 +176,7 @@ void testBOINetwork()
 	 * Loop
 	 */
 	COORD conCursorPos = getConCursorPos();
+	uint frameNo = 0;
 	StopWatch timer;
 	bool running = true;
 	uint iterations = 0;
@@ -196,6 +193,12 @@ void testBOINetwork()
 		}
 
 		setConCursorPos(conCursorPos);
+
+		if (GetAsyncKeyState('O'))
+		{
+			String frameName = String("frame/frame") + std::to_string(frameNo++) + String(".bmp");
+			CRSaveBitmap(capturer->getLastFrame(), frameName.c_str());
+		}
 
 		/*
 		 * network
