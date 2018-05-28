@@ -32,7 +32,21 @@
 ******************************************************************************/
 #pragma once
 
+/*
+ * These functions are defined inside the paco specific files.
+ * 
+ * The paco files are inside the specific paco directory, the file name
+ * start this the paco specific prefix and continues with "AcrivationFunctions"
+ */
+
 #include "../network/NetworkUtil.h"
+
+#define CRIA_SIGMOID_VALIDATION_CHECK(inMap, outMat) \
+if (input->Cols != output->Cols || \
+	input->Rows != output->Rows) { \
+	memset(output->Data, 0, sizeof(crnwdec) * output->Cols * output->Rows); \
+	return; \
+}
 
 namespace cria_ai { namespace paco {
 	

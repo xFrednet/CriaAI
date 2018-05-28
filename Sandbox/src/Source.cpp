@@ -22,9 +22,33 @@ using namespace std;
 using namespace cria_ai;
 using namespace bmp_renderer;
 using namespace network;
-uint g_frameNo = 0;
-uint g_iteration = 0;
-CR_FLOAT_BITMAP* processBOIFrame(CR_FLOAT_BITMAP* inFrame)
+
+void setConCursorPos(COORD pos = {0, 0})
+{
+	HANDLE hCon = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleCursorPosition(hCon, pos);
+}
+COORD getConCursorPos()
+{
+	HANDLE hCon = GetStdHandle(STD_OUTPUT_HANDLE);
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	if (!GetConsoleScreenBufferInfo(
+		GetStdHandle(STD_OUTPUT_HANDLE),
+		&csbi
+	))
+		return {0, 0};
+
+	return csbi.dwCursorPosition;
+}
+
+CRMatrixf* bmpToMat(CR_FLOAT_BITMAP* bmp)
+{
+	CRMatrixf* mat = CRCreateMatrixf(1, bmp->Width * bmp->Height);
+	memcpy(mat->Data, bmp->Data, sizeof(float) * mat->Rows);
+
+	return mat;
+}
+CRMatrixf* processBOIFrame(CR_FLOAT_BITMAP* inFrame)
 {
 	if (!inFrame || inFrame->Width != BOI_BASE_WIDTH * BOI_SCALE || inFrame->Height != BOI_BASE_HEIGHT * BOI_SCALE)
 	{
@@ -53,23 +77,13 @@ CR_FLOAT_BITMAP* processBOIFrame(CR_FLOAT_BITMAP* inFrame)
 	timer.start();
 #endif
 
-	if (g_iteration == 0)
-	{
-		String inFrameName = String("test/inFrame") + std::to_string(g_frameNo) + String(".bmp");
-		CRSaveBitmap(inFrame, inFrameName.c_str());
-		String fpp1OutName = String("test/fpp1Out") + std::to_string(g_frameNo) + String(".bmp");
-		CRSaveBitmap(fpp1Out, fpp1OutName.c_str());
-		String scaleOutName = String("test/scaleOut") + std::to_string(g_frameNo) + String(".bmp");
-		CRSaveBitmap(scaleOut, scaleOutName.c_str());
-		String poolOutName = String("test/poolOut") + std::to_string(g_frameNo) + String(".bmp");
-		CRSaveBitmap(poolOut, poolOutName.c_str());
-		g_frameNo++;
-	}
+	CRMatrixf* mat = bmpToMat(poolOut);
 
 	CRDeleteFBmp(fpp1Out);
 	CRDeleteFBmp(scaleOut);
-	
-	return poolOut;
+	CRDeleteFBmp(poolOut);
+
+	return mat;
 }
 CRNeuronNetwork* createBOINetwork(CRNeuronLayerPtr& outputLayer)
 {
@@ -113,13 +127,6 @@ CRNeuronNetwork* createBOINetwork(CRNeuronLayerPtr& outputLayer)
 	 */
 	network->initRandom();
 
-	CRWriteMatrixf(layer2->getWeights(), "l2weights.txt");
-	CRWriteMatrixf(layer2->getBias(), "l2bias.txt");
-	CRWriteMatrixf(layer3->getWeights(), "l3weights.txt");
-	CRWriteMatrixf(layer3->getBias(), "l3bias.txt");
-	CRWriteMatrixf(outputLayer->getWeights(), "l4weights.txt");
-	CRWriteMatrixf(outputLayer->getBias(), "l4bias.txt");
-
 	std::cout << " < createBOINetwork" << std::endl;
 	return network;
 }
@@ -134,23 +141,15 @@ void printBOIOutput(CRNWMat const* mat)
 		printf("BOI Button: [%5s] [%3f]\n", buttons[index].c_str(), mat->Data[index]);
 	}
 }
-CRMatrixf* bmpToMat(CR_FLOAT_BITMAP* bmp)
-{
-	CRMatrixf* mat = CRCreateMatrixf(1, bmp->Width * bmp->Height);
-	memcpy(mat->Data, bmp->Data, sizeof(float) * mat->Rows);
-
-	return mat;
-}
 void testBOINetwork()
 {
 	std::cout << "> testBOINetwork" << std::endl;
 
+	crresult result;
 	/*
 	 * Init
 	 */
-	CRNeuronLayerPtr outputLayer;
-	CRNeuronNetwork* network = createBOINetwork(outputLayer);
-	crresult result;
+	// window
 	os::CRWindowPtr window = os::CRWindow::CreateInstance(BOI_TITLE, &result);
 	if (CR_FAILED(result))
 	{
@@ -158,6 +157,12 @@ void testBOINetwork()
 		return;
 	}
 	window->setClientArea(CR_RECT{50, 50, BOI_BASE_WIDTH * BOI_SCALE, BOI_BASE_HEIGHT * BOI_SCALE});
+	
+	// network
+	CRNeuronLayerPtr outputLayer;
+	CRNeuronNetwork* network = createBOINetwork(outputLayer);
+	
+	// screen capturer
 	os::CRScreenCapturer* capturer = os::CRScreenCapturer::CreateInstance(window, &result);
 	if (CR_FAILED(result))
 	{
@@ -167,45 +172,47 @@ void testBOINetwork()
 
 	std::cout << " [INFO] = init finish" << std::endl;
 
+	std::cout << std::endl;
+	std::cout << " [INFO] Press X to exit" << std::endl;
+	std::cout << std::endl;
+
 	/*
 	 * Loop
 	 */
+	COORD conCursorPos = getConCursorPos();
 	StopWatch timer;
 	bool running = true;
 	uint iterations = 0;
 	while (running)
 	{
-		g_iteration = iterations;
 		/*
 		 * Exit check
 		 */
 		if (GetAsyncKeyState('X'))
 		{
 			running = false;
-			printf(" [EXIT] exit because u wanted it \n");
+			printf("\n [EXIT] exit because u wanted it \n\n");
 			break;
 		}
 
+		setConCursorPos(conCursorPos);
+
 		/*
-		 * Network
+		 * network
 		 */
+		// retrieve frame
 		capturer->grabFrame();
 		CR_FLOAT_BITMAP* frame = capturer->getLastFrame();
-		CR_FLOAT_BITMAP* processedFrame = processBOIFrame(frame);
-		
-		if (true)
-		{
-			// bmp to mat
-			CRMatrixf* data = bmpToMat(processedFrame);
-			CRDeleteFBmp(processedFrame);
-	
-			// process data
-			network->process(data);
-			CRFreeMatrixf(data);
 
-			// print result
-			printBOIOutput(outputLayer->getOutput());
-		}
+		// frame processing
+		CRMatrixf* data = processBOIFrame(frame);
+	
+		// process data
+		network->process(data);
+		CRFreeMatrixf(data);
+
+		// print result
+		printBOIOutput(outputLayer->getOutput());
 		
 		/*
 		 * Info 
@@ -214,7 +221,7 @@ void testBOINetwork()
 		if (timer.getTimeMSSinceStart() >= 1000)
 		{
 			std::cout << std::endl;
-			std::cout << " [INFO] IPS: " << iterations << ", average:" << (timer.getTimeMSSinceStart() / iterations) << std::endl;
+			std::cout << " [INFO] IPS: " << iterations << ", average time[ms] :" << (timer.getTimeMSSinceStart() / iterations) << std::endl;
 			std::cout << std::endl;
 
 			timer.start();
@@ -224,6 +231,7 @@ void testBOINetwork()
 	}
 
 	delete network;
+	delete capturer;
 
 	std::cout << "< testBOINetwork" << std::endl;
 }
@@ -259,6 +267,5 @@ int main(int argc, char* argv)
 	 */
 	os::CROSContext::TerminateInstance();
 
-	cin.get();
 	return 0;
 }

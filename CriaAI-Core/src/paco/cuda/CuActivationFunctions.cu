@@ -1,8 +1,13 @@
-#include "CuActivationFunctions.cuh"
+#include "../ActivationFunctions.h"
 
 #ifdef CRIA_PACO_CUDA 
 
-namespace cria_ai { namespace paco { namespace cuda {
+#include "CuContext.cuh"
+
+#define CR_CUDA_AF_BLOCK_COUNT         1
+#define CR_CUDA_AF_THREAD_COUNT        256
+
+namespace cria_ai { namespace paco {
 	
 	/**
 	* \brief A activation function
@@ -13,6 +18,14 @@ namespace cria_ai { namespace paco { namespace cuda {
 	* \param input  A matrix containing values for processing.
 	* \param output A matrix that holds the output values.
 	*/
+	__global__ void CRCuSigmoid(CRNWMat const* input, CRNWMat* output);
+	void CRSigmoid(CRNWMat const* input, CRNWMat* output)
+	{
+		CRIA_SIGMOID_VALIDATION_CHECK(input, output);
+
+		CRCuSigmoid<<<CR_CUDA_AF_BLOCK_COUNT, CR_CUDA_AF_THREAD_COUNT >>>(input, output);
+		cudaDeviceSynchronize();
+	}
 	__global__ void CRCuSigmoid(CRNWMat const* input, CRNWMat* output)
 	{
 		int startIndex = blockIdx.x * blockDim.x + threadIdx.x;
@@ -33,6 +46,14 @@ namespace cria_ai { namespace paco { namespace cuda {
 	* \param input  A matrix containing values for processing.
 	* \param output A matrix that holds the output values.
 	*/
+	__global__ void CRCuSigmoidInv(CRNWMat const* input, CRNWMat* output);
+	void CRSigmoidInv(CRNWMat const* input, CRNWMat* output)
+	{
+		CRIA_SIGMOID_VALIDATION_CHECK(input, output);
+
+		CRCuSigmoidInv<<<CR_CUDA_AF_BLOCK_COUNT, CR_CUDA_AF_THREAD_COUNT>>>(input, output);
+		cudaDeviceSynchronize();
+	}
 	__global__ void CRCuSigmoidInv(CRNWMat const* input, CRNWMat* output)
 	{
 		int startIndex = blockIdx.x * blockDim.x + threadIdx.x;
@@ -47,6 +68,6 @@ namespace cria_ai { namespace paco { namespace cuda {
 
 		}
 	}
-}}}
+}}
 
 #endif //CRIA_PACO_CUDA 

@@ -292,12 +292,9 @@ namespace cria_ai { namespace network {
 			StopWatch timer;
 			CRNWMat* weightOut = CRMul(inputData, m_Weights);
 			CRNWMat* biasOut   = CRSub(weightOut, m_Bias);
-			std::cout << "    [INFO] weightOut and biasOut :" << timer.getTimeMSSinceStart() << std::endl;
 
 			timer.start();
 			m_ActivationFunc(biasOut, m_PreNeuronOutput);
-			std::cout << "    [INFO] m_ActivationFunc      :" << timer.getTimeMSSinceStart() << std::endl;
-
 
 			CRFreeMatrixf(weightOut);
 			CRFreeMatrixf(biasOut);
@@ -320,7 +317,6 @@ namespace cria_ai { namespace network {
 			neuronNo = node->Neurons->getNeuronCount();
 			node = node->Next;
 		}
-		std::cout << "    [INFO] node->Neurons->processData :" << timer.getTimeMSSinceStart() << std::endl;
 	}
 
 	/*

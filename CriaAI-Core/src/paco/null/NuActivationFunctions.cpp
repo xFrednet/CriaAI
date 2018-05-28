@@ -30,20 +30,25 @@
 *       distribution.                                                         *
 *                                                                             *
 ******************************************************************************/
-#include "NuActivationFunctions.h"
+#include "../ActivationFunctions.h"
 
 #ifdef CRIA_PACO_NULL
 
 namespace cria_ai { namespace paco { namespace null {
-	void CRNuSigmoid(CRNWMat const* input, CRNWMat* output)
+	
+	void CRSigmoid(CRNWMat const* input, CRNWMat* output)
 	{
+		CRIA_SIGMOID_VALIDATION_CHECK(input, output);
+		
 		for (uint index = 0; index < input->Cols * input->Rows; index++) {
 			output->Data[index] = 1 / (1 + exp(-input->Data[index]));
 		}
 	}
 
-	void CRNuSigmoidInv(CRNWMat const* input, CRNWMat* output)
+	void CRSigmoidInv(CRNWMat const* input, CRNWMat* output)
 	{
+		CRIA_SIGMOID_VALIDATION_CHECK(input, output);
+
 		for (uint index = 0; index < input->Cols * input->Rows; index++) {
 
 			if (input->Data[index] > 0 || input->Data[index] < 1)
@@ -53,6 +58,7 @@ namespace cria_ai { namespace paco { namespace null {
 
 		}
 	}
+
 }}}
 
 #endif // CRIA_PACO_NULL

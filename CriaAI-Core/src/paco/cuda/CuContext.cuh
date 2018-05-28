@@ -36,8 +36,9 @@
 
 #ifdef CRIA_PACO_CUDA 
 
-#include "cuda_runtime.h"
-#include "device_launch_parameters.h"
+#include <cuda_runtime.h>
+#include <device_launch_parameters.h>
+#include <cuda.h>
 
 namespace cria_ai { namespace paco { namespace cu {
 	

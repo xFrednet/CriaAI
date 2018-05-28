@@ -102,7 +102,6 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClCompile Include="Dependencies\BmpRenderer\src\Bitmap.cpp" />
     <ClCompile Include="Dependencies\BmpRenderer\src\Renderer.cpp" />
     <ClCompile Include="src\network\NeuronLayer.cpp" />
-    <CudaCompile Include="src\paco\ActivationFunctions.cpp" />
     <ClCompile Include="src\paco\null\NuActivationFunctions.cpp" />
     <ClCompile Include="src\paco\null\NuContext.cpp" />
     <ClCompile Include="src\paco\PaCoContext.cpp" />
@@ -140,9 +139,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="Dependencies\BmpRenderer\src\Bitmap.hpp" />
     <ClInclude Include="Dependencies\BmpRenderer\src\Common.h" />
     <ClInclude Include="Dependencies\BmpRenderer\src\Renderer.hpp" />
-    <ClInclude Include="src\paco\cuda\CuActivationFunctions.cuh" />
     <ClInclude Include="src\paco\cuda\CuContext.cuh" />
-    <ClInclude Include="src\paco\null\NuActivationFunctions.h" />
     <ClInclude Include="src\paco\null\NuContext.h" />
     <ClInclude Include="src\paco\PaCoContext.h" />
     <ClInclude Include="src\os\FileSystem.h" />
