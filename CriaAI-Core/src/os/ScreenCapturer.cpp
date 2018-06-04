@@ -31,7 +31,10 @@ namespace cria_ai { namespace os {
 	CRScreenCapturer::~CRScreenCapturer()
 	{
 		if (m_LastFrame)
+		{
 			CRDeleteFBmp(m_LastFrame);
+			m_LastFrame = nullptr;
+		}
 	}
 
 	crresult CRScreenCapturer::setTarget(CRWindowPtr target)
@@ -43,15 +46,19 @@ namespace cria_ai { namespace os {
 		 * Create new bmp
 		 */
 		CR_RECT tSize = target->getClientArea();
-		CR_FLOAT_BITMAP* newBmp = CRCreateFBmp(tSize.Width, tSize.Height, CR_SCREENCAP_CHANNEL_COUNT);
-		CR_FLOAT_BITMAP* oldBmp = m_LastFrame;
+		if (m_LastFrame)
+		{
+			CR_FLOAT_BITMAP* oldBmp = m_LastFrame;
+			m_LastFrame = nullptr;
+			CRDeleteFBmpNormal(oldBmp);
+		}
 		
 		/*
 		 * updating class members
 		 */
 		m_Target = target;
-		m_LastFrame = newBmp;
-		CRDeleteFBmp(oldBmp);
+		m_LastFrame = CRCreateFBmpNormal(tSize.Width, tSize.Height, CR_SCREENCAP_CHANNEL_COUNT);
+		// if I use CRCreateFBmp it always crashes for some weired reason. but it works with malloc this means CRCreateFBmpNormal
 
 		/*
 		 * return

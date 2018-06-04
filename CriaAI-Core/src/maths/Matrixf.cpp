@@ -20,6 +20,8 @@ namespace cria_ai
 
 		CRMatrixf* matrix = (CRMatrixf*)paco::CRPaCoMalloc(sizeof(CRMatrixf) + sizeof(float) * cols * rows);
 		CRIA_AUTO_ASSERT(matrix, "");
+		if (!matrix)
+			return nullptr;
 
 		matrix->Cols = cols;
 		matrix->Rows = rows;

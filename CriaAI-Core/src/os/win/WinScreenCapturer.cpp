@@ -89,7 +89,7 @@ namespace cria_ai { namespace os { namespace win {
 			if (m_BmpIntBuffer)
 				free(m_BmpIntBuffer);
 
-			size_t size = area.Width * area.Height * CR_SCREENCAP_CHANNEL_COUNT;
+			size_t size = area.Width * area.Height * CR_SCREENCAP_CHANNEL_COUNT * 4;
 			m_BmpIntBuffer = (byte*)malloc(size);
 			if (!m_BmpIntBuffer)
 				return CRRES_ERR_MALLOC_FAILED;
@@ -99,12 +99,7 @@ namespace cria_ai { namespace os { namespace win {
 		/*
 		 * Recreating the last frame bitmap
 		 */
-		CR_FLOAT_BITMAP* newFrameBmp = CRCreateFBmp(area.Width, area.Height, CR_SCREENCAP_CHANNEL_COUNT);
-		CR_FLOAT_BITMAP* oldFrameBmp = m_LastFrame;
-		m_LastFrame = newFrameBmp;
-		CRDeleteFBmp(oldFrameBmp);
-		if (!newFrameBmp)
-			return CRRES_ERR_UTILS_FAILED_TO_CREATE_FBMP;
+		
 
 		/*
 		 * Return
@@ -115,7 +110,14 @@ namespace cria_ai { namespace os { namespace win {
 
 	crresult CRWinScreenCapturer::grabFrame()
 	{
-		if (!m_WinBmp)
+		{
+			/*if (m_LastFrame)
+				CRDeleteFBmpNormal(m_LastFrame);
+			CR_RECT area = m_Target->getClientArea();
+			m_LastFrame = CRCreateFBmpNormal(area.Width, area.Height, 4);*/
+		}
+
+		if (!m_WinBmp || !m_LastFrame)
 			return CRRES_ERR_TIMING_THREADED_YAY_MULTI;
 
 		/*
@@ -136,9 +138,22 @@ namespace cria_ai { namespace os { namespace win {
 		 * Getting the Data
 		 */
 		CR_RECT area = m_Target->getClientArea();
+		area.Width  = m_LastFrame->Width;
+		area.Height = m_LastFrame->Height;
 		if (!BitBlt(dstDC, 0, 0, area.Width, area.Height, srcDC, area.X, area.Y, SRCCOPY) || /* copy data to the win bmp */
 			GetDIBits(dstDC, m_WinBmp, 0, area.Height, m_BmpIntBuffer, &m_WinBmpInfo, DIB_RGB_COLORS) != (int)area.Height) /* copy from win bmp to the int buffer*/
 			return CRRES_ERR_WIN_UNKNOWN;
+
+		/*
+		 * Finishing windows stuff
+		 */
+		SelectObject(dstDC, oldDstDcObj);
+		DeleteDC(dstDC);
+		ReleaseDC(m_SrcHwnd, srcDC);
+
+		/*
+		 * Converting data
+		 */
 		for (uint pxNo = 0; pxNo < area.Width * area.Height * CR_SCREENCAP_CHANNEL_COUNT; pxNo += 4)
 		{
 			m_LastFrame->Data[pxNo + 0] = ((float)m_BmpIntBuffer[pxNo + 2]) / 255.0f; /* R */
@@ -147,12 +162,6 @@ namespace cria_ai { namespace os { namespace win {
 			m_LastFrame->Data[pxNo + 3] = 1.0f; /* A */
 		}
 
-		/*
-		 * Finishing windows stuff
-		 */
-		SelectObject(dstDC, oldDstDcObj);
-		DeleteDC(dstDC);
-		ReleaseDC(m_SrcHwnd, srcDC);
 
 		/*
 		* Returning de la output

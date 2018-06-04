@@ -2,6 +2,7 @@
 
 #include "../Common.hpp"
 #include "Window.h"
+#include <mutex>
 
 #define CR_SCREENCAP_CHANNEL_COUNT     4
 
@@ -17,6 +18,7 @@ namespace cria_ai { namespace os {
 	     */
 	protected:
 		CRWindowPtr m_Target;
+
 		CR_FLOAT_BITMAP* m_LastFrame;
 
 		CRScreenCapturer();
@@ -27,6 +29,7 @@ namespace cria_ai { namespace os {
 
 		virtual crresult setTarget(CRWindowPtr target);
 		virtual crresult grabFrame() = 0;
+		void runCaptureThread();
 
 		CR_FLOAT_BITMAP* getLastFrame();
 		CR_FLOAT_BITMAP const* getLastFrame() const;

@@ -21,13 +21,44 @@ namespace cria_ai
 		if (width == 0 || height == 0 || floatsPerPixel == 0)
 			return nullptr;
 
-		CR_FLOAT_BITMAP* bmp;// = (CR_FLOAT_BITMAP*)malloc(sizeof(CR_FLOAT_BITMAP) + sizeof(float) * width * height * floatsPerPixel);
-		cudaMallocManaged(&bmp, sizeof(CR_FLOAT_BITMAP) + sizeof(float) * width * height * floatsPerPixel);
+		CR_FLOAT_BITMAP* bmp = nullptr;// = (CR_FLOAT_BITMAP*)malloc(sizeof(CR_FLOAT_BITMAP) + sizeof(float) * width * height * floatsPerPixel);
+		cudaError cudaRes = cudaMallocManaged(&bmp, sizeof(CR_FLOAT_BITMAP) + sizeof(float) * width * height * floatsPerPixel);
+		cudaDeviceSynchronize();
+		CRIA_AUTO_ASSERT(cudaRes == cudaSuccess,
+			"CreateFloatBmp failed to create a bmp: width %u, height %u, floats per pixel %i",
+			width, height, floatsPerPixel);
+		if (cudaRes != cudaSuccess)
+			return nullptr;
 		CRIA_AUTO_ASSERT(bmp,
 			"CreateFloatBmp failed to create a bmp: width %u, height %u, floats per pixel %i",
 			width, height, floatsPerPixel);
 		if (!bmp)
 			return nullptr;
+		
+		bmp->Width = width;
+		bmp->Height = height;
+		bmp->FloatsPerPixel = floatsPerPixel;
+		bmp->Data = (float*)((uintptr_t)bmp + sizeof(CR_FLOAT_BITMAP));
+		memset(bmp->Data, 0, sizeof(float) * width * height * floatsPerPixel);
+
+		return bmp;
+	}
+
+	CR_FLOAT_BITMAP* CRCreateFBmpNormal(uint32_t width, uint32_t height, uint8_t floatsPerPixel)
+	{
+		CRIA_AUTO_ASSERT(width != 0 && height != 0 && floatsPerPixel != 0,
+			"CreateFloatBmp failed to create a bmp: width %u, height %u, floats per pixel %i",
+			width, height, floatsPerPixel);
+		if (width == 0 || height == 0 || floatsPerPixel == 0)
+			return nullptr;
+
+		CR_FLOAT_BITMAP* bmp = (CR_FLOAT_BITMAP*)malloc(sizeof(CR_FLOAT_BITMAP) + sizeof(float) * width * height * floatsPerPixel);
+		CRIA_AUTO_ASSERT(bmp,
+			"CreateFloatBmp failed to create a bmp: width %u, height %u, floats per pixel %i",
+			width, height, floatsPerPixel);
+		if (!bmp)
+			return nullptr;
+
 
 		bmp->Width = width;
 		bmp->Height = height;
@@ -37,6 +68,7 @@ namespace cria_ai
 
 		return bmp;
 	}
+
 	CR_FLOAT_BITMAP* CRLoadFBmp(const char* file)
 	{
 		CRIA_AUTO_ASSERT(file, "LoadFloatBmp the source file is undefined");
@@ -73,9 +105,16 @@ namespace cria_ai
 	}
 	void CRDeleteFBmp(CR_FLOAT_BITMAP* bmp)
 	{
+		cudaDeviceSynchronize();
 		if (bmp)
 			cudaFree(bmp); /* this should free both the struct and the data since they are created by one malloc */
 	}
+	void CRDeleteFBmpNormal(CR_FLOAT_BITMAP* bmp)
+	{
+		if (bmp)
+			free(bmp); /* this should free both the struct and the data since they are created by one malloc */
+	}
+
 
 	void CRConvertTo1fpp(CR_FLOAT_BITMAP const* bmpIn, CR_FLOAT_BITMAP* bmpOut)
 	{

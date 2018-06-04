@@ -5,6 +5,7 @@
 
 #include "tests/MathTests.h"
 #include <AsyncInfo.h>
+#include <cuda_runtime_api.h>
 
 #define BOI_TITLE                      "Binding of Isaac: Afterbirth+"
 #define BOI_BASE_WIDTH                 512
@@ -20,6 +21,10 @@ using namespace std;
 using namespace cria_ai;
 using namespace bmp_renderer;
 using namespace network;
+
+static bool             s_Running = true;
+static std::mutex       s_FrameLock;
+static CR_FLOAT_BITMAP* s_Frame = nullptr;
 
 void setConCursorPos(COORD pos = {0, 0})
 {
@@ -59,7 +64,7 @@ CRMatrixf* processBOIFrame(CR_FLOAT_BITMAP* inFrame)
 #endif
 	CR_FLOAT_BITMAP* fpp1Out = CRConvertToFloatsPerPixel(inFrame, 1);
 #ifdef LOG_TIME
-	std::cout << "    [INFO] fpp1Out      : " << timer.getTimeMSSinceStart() << std::endl;
+	std::cout << "    [INFO] fpp1Out      : " << timer.getTimeMSSinceStart() << std::endl;,1,0,1
 	timer.start();
 #endif
 
@@ -135,6 +140,47 @@ void printBOIOutput(CRNWMat const* mat)
 		printf("BOI Button: [%5s] [%3f]\n", buttons[index].c_str(), mat->Data[index]);
 	}
 }
+
+void runScreenCap()
+{
+	//cudaSetDevice(0);
+
+	crresult result;
+	os::CRWindowPtr window = os::CRWindow::CreateInstance(BOI_TITLE, &result);
+	if (CR_FAILED(result)) {
+		printf(" [ERROR] os::CRWindow::CreateInstance failed!! Exit");
+		return;
+	}
+
+	os::CRScreenCapturer* capturer = os::CRScreenCapturer::CreateInstance(window, &result);
+	if (CR_FAILED(result)) {
+		printf(" [ERROR] os::CRScreenCapturer::CreateInstance failed !! Exit");
+		return;
+	}
+	
+	uint index = 0;
+	while (s_Running) 
+	{
+		capturer->grabFrame();
+		CR_FLOAT_BITMAP* frame = capturer->getLastFrame();
+		CR_FLOAT_BITMAP* newFrame = CRCreateFBmpNormal(BOI_BASE_WIDTH * BOI_SCALE, BOI_BASE_HEIGHT * BOI_SCALE, 4);
+		memcpy(newFrame->Data, frame->Data, sizeof(float) * newFrame->Width * newFrame->Height * newFrame->FloatsPerPixel);
+		
+		CR_FLOAT_BITMAP* oldFrame = nullptr;
+		{
+			s_FrameLock.lock();
+			oldFrame = s_Frame;
+			s_Frame = newFrame;
+			s_FrameLock.unlock();
+		}
+
+		if (oldFrame)
+			CRDeleteFBmpNormal(oldFrame);
+	}
+
+	delete capturer;
+
+}
 void testBOINetwork()
 {
 	std::cout << "> testBOINetwork" << std::endl;
@@ -150,19 +196,15 @@ void testBOINetwork()
 		printf(" [ERROR] os::CRWindow::CreateInstance failed!! Exit");
 		return;
 	}
-	window->setClientArea(CR_RECT{50, 50, BOI_BASE_WIDTH * BOI_SCALE, BOI_BASE_HEIGHT * BOI_SCALE});
+	window->setClientArea(CR_RECT{50, 100, BOI_BASE_WIDTH * BOI_SCALE, BOI_BASE_HEIGHT * BOI_SCALE});
 	
 	// network
 	CRNeuronLayerPtr outputLayer;
 	CRNeuronNetwork* network = createBOINetwork(outputLayer);
 	
 	// screen capturer
-	os::CRScreenCapturer* capturer = os::CRScreenCapturer::CreateInstance(window, &result);
-	if (CR_FAILED(result))
-	{
-		printf(" [ERROR] os::CRScreenCapturer::CreateInstance failed !! Exit");
-		return;
-	}
+
+	std::thread t(runScreenCap);
 
 	std::cout << " [INFO] = init finish" << std::endl;
 
@@ -176,38 +218,49 @@ void testBOINetwork()
 	COORD conCursorPos = getConCursorPos();
 	uint frameNo = 0;
 	StopWatch timer;
-	bool running = true;
 	uint iterations = 0;
-	while (running)
+	while (s_Running)
 	{
 		/*
 		 * Exit check
 		 */
 		if (GetAsyncKeyState('X'))
 		{
-			running = false;
+			s_Running = false;
 			printf("\n [EXIT] exit because u wanted it \n\n");
 			break;
 		}
 
 		setConCursorPos(conCursorPos);
 
+		/*
+		 * Frame
+		 */
+		s_FrameLock.lock();
+		CR_FLOAT_BITMAP* frame = s_Frame;
+		s_Frame = nullptr;
+		s_FrameLock.unlock();
+		
+
+		if (!frame)
+		{
+			continue;
+		}
+
 		if (GetAsyncKeyState('O'))
 		{
 			String frameName = String("frame/frame") + std::to_string(frameNo++) + String(".bmp");
-			CRSaveBitmap(capturer->getLastFrame(), frameName.c_str());
+			CRSaveBitmap(frame, frameName.c_str());
 		}
 
 		/*
 		 * network
 		 */
-		// retrieve frame
-		capturer->grabFrame();
-		CR_FLOAT_BITMAP* frame = capturer->getLastFrame();
 
 		// frame processing
 		CRMatrixf* data = processBOIFrame(frame);
-	
+		CRDeleteFBmpNormal(frame);
+
 		// process data
 		network->process(data);
 		CRFreeMatrixf(data);
@@ -231,8 +284,9 @@ void testBOINetwork()
 		
 	}
 
+	t.join();
+
 	delete network;
-	delete capturer;
 
 	std::cout << "< testBOINetwork" << std::endl;
 }
@@ -252,10 +306,22 @@ int main(int argc, char* argv)
 	r = os::CROSContext::InitInstance();
 	printf("os::CROSContext::InitInstance: %s \n", CRGetCRResultName(r).c_str());
 
+	std::cout << std::endl;
+	std::cout << "Press Y to skip" << std::endl;
+	std::cout << std::endl;
+
+	COORD conCursorPos = getConCursorPos();
 	for (uint sleep = 10; sleep > 0; sleep--)
 	{
+		if (GetAsyncKeyState('Y')) 
+		{
+			setConCursorPos(conCursorPos);
+			break;
+		}
+
 		os::CROSContext::Sleep(1);
-		std::cout << "[INFO] network start in: " << sleep << std::endl;
+		setConCursorPos(conCursorPos);
+		std::cout << "[INFO] network start in: " << sleep << " " << std::endl;
 	}
 
 	/*

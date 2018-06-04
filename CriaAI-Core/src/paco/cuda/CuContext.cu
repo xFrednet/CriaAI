@@ -12,7 +12,12 @@ namespace cria_ai { namespace paco { namespace cu {
 	void* CRCuMalloc(size_t size)
 	{
 		void* mem = nullptr;
-		cudaMallocManaged(&mem, size);
+		cudaError res = cudaMallocManaged(&mem, size);
+		
+		CRIA_AUTO_ASSERT(res == cudaSuccess, "Target size: %llu, Cuda Error code: %i", size, res);
+		if (res != cudaSuccess)
+			return nullptr;
+
 		return mem;
 	}
 	void CRCuFree(void* mem)
