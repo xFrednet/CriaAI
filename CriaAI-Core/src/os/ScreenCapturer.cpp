@@ -16,49 +16,76 @@ namespace cria_ai { namespace os {
 		/*
 		 * init
 		 */
-		crresult initRes = instance->init(target);
+		crresult res = instance->init();
 		if (result)
-			*result = initRes;
+			*result = res;
+
+		if (CR_FAILED(res))
+		{
+			delete instance;
+			return nullptr;
+		}
+
+		/*
+		 * set target
+		 */
+		res = instance->setTarget(target);
+		if (result)
+			*result = res;
+
+		if (CR_FAILED(res)) {
+			delete instance;
+			return nullptr;
+		}
 
 		return instance;
 	}
 
 	CRScreenCapturer::CRScreenCapturer()
-		: m_LastFrame(nullptr)
+		: m_Frame(nullptr),
+		m_FrameSize(0, 0, 0, 0),
+		m_ContinueCapture(false)
 	{
 	}
 
 	CRScreenCapturer::~CRScreenCapturer()
 	{
-		if (m_LastFrame)
-		{
-			CRDeleteFBmp(m_LastFrame);
-			m_LastFrame = nullptr;
+		if (isCaptureThreadRunnning())
+			stopCaptureThread();
+
+		m_FrameLock.lock();
+		if (m_Frame) {
+			CRDeleteFBmpNormal(m_Frame);
+			m_Frame = nullptr;
 		}
+		m_FrameLock.unlock();
 	}
 
-	crresult CRScreenCapturer::setTarget(CRWindowPtr target)
+	crresult CRScreenCapturer::setTarget(CRWindowPtr& target)
 	{
 		if (!target.get())
 			return CRRES_ERR_OS_TARGET_IS_NULL;
 
+		CR_RECT area = target->getClientArea();
 		/*
 		 * Create new bmp
 		 */
-		CR_RECT tSize = target->getClientArea();
-		if (m_LastFrame)
+		m_FrameLock.lock();
+		// delete old frame
+		if (m_Frame)
 		{
-			CR_FLOAT_BITMAP* oldBmp = m_LastFrame;
-			m_LastFrame = nullptr;
-			CRDeleteFBmpNormal(oldBmp);
+			CRDeleteFBmpNormal(m_Frame);
+			m_Frame = nullptr;
 		}
-		
-		/*
-		 * updating class members
-		 */
+		// Frame size
+		m_FrameSize.Width = area.Width;
+		m_FrameSize.Height = area.Height;
+
+		//update m_Target
 		m_Target = target;
-		m_LastFrame = CRCreateFBmpNormal(tSize.Width, tSize.Height, CR_SCREENCAP_CHANNEL_COUNT);
-		// if I use CRCreateFBmp it always crashes for some weired reason. but it works with malloc this means CRCreateFBmpNormal
+
+		//unlock
+		m_FrameLock.unlock();
 
 		/*
 		 * return
@@ -66,13 +93,61 @@ namespace cria_ai { namespace os {
 		return newTarget(target);
 	}
 
-	CR_FLOAT_BITMAP* CRScreenCapturer::getLastFrame()
+	/*
+	 * Capture thread
+	 */
+	crresult CRScreenCapturer::runCaptureThread()
 	{
-		return m_LastFrame;
+		if (isCaptureThreadRunnning())
+			return CRRES_OK_OS_THREAD_IS_ALLREADY_RUNNING;
+
+		m_ContinueCapture = true;
+		m_CaptureThread   = std::thread([this]()
+		{
+			crresult result;
+			while (this->m_ContinueCapture) {
+				result = this->grabFrame();
+				
+				if (CR_FAILED(result))
+				{
+					CRIA_ALERT_PRINTF("CRScreenCapturer: this->grabFrame() failed: %16i", result.Value);
+					
+					if (CR_SCREENCAP_THREAD_BREAK_ON_FAIL)
+					{
+						break;
+					}
+				}
+			}
+		});
+
+		CRIA_ALERT_PRINTF("CRScreenCapturer::runCaptureThread: started Thread!");
+
+		return CRRES_OK;
 	}
-	CR_FLOAT_BITMAP const* CRScreenCapturer::getLastFrame() const
+	crresult CRScreenCapturer::stopCaptureThread()
 	{
-		return m_LastFrame;
+		if (!isCaptureThreadRunnning())
+			return CRRES_OK_OS_THREAD_IS_ALLREADY_JOINED;
+
+		m_ContinueCapture = false;
+		m_CaptureThread.join();
+
+		return CRRES_OK;
+	}
+
+	bool CRScreenCapturer::isCaptureThreadRunnning() const
+	{
+		return m_ContinueCapture;
+	}
+
+	CR_FLOAT_BITMAP* CRScreenCapturer::getFrame()
+	{
+		m_FrameLock.lock();
+		CR_FLOAT_BITMAP* frame = m_Frame;
+		m_Frame = nullptr;
+		m_FrameLock.unlock();
+
+		return frame;
 	}
 
 }}

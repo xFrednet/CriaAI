@@ -25,7 +25,7 @@ namespace cria_ai { namespace os { namespace win {
 
 	public:
 		CRWinScreenCapturer();
-		crresult init(CRWindowPtr& target) override;
+		crresult init() override;
 		
 		~CRWinScreenCapturer();
 

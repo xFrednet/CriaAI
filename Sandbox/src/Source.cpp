@@ -22,10 +22,6 @@ using namespace cria_ai;
 using namespace bmp_renderer;
 using namespace network;
 
-static bool             s_Running = true;
-static std::mutex       s_FrameLock;
-static CR_FLOAT_BITMAP* s_Frame = nullptr;
-
 void setConCursorPos(COORD pos = {0, 0})
 {
 	HANDLE hCon = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -141,46 +137,6 @@ void printBOIOutput(CRNWMat const* mat)
 	}
 }
 
-void runScreenCap()
-{
-	//cudaSetDevice(0);
-
-	crresult result;
-	os::CRWindowPtr window = os::CRWindow::CreateInstance(BOI_TITLE, &result);
-	if (CR_FAILED(result)) {
-		printf(" [ERROR] os::CRWindow::CreateInstance failed!! Exit");
-		return;
-	}
-
-	os::CRScreenCapturer* capturer = os::CRScreenCapturer::CreateInstance(window, &result);
-	if (CR_FAILED(result)) {
-		printf(" [ERROR] os::CRScreenCapturer::CreateInstance failed !! Exit");
-		return;
-	}
-	
-	uint index = 0;
-	while (s_Running) 
-	{
-		capturer->grabFrame();
-		CR_FLOAT_BITMAP* frame = capturer->getLastFrame();
-		CR_FLOAT_BITMAP* newFrame = CRCreateFBmpNormal(BOI_BASE_WIDTH * BOI_SCALE, BOI_BASE_HEIGHT * BOI_SCALE, 4);
-		memcpy(newFrame->Data, frame->Data, sizeof(float) * newFrame->Width * newFrame->Height * newFrame->FloatsPerPixel);
-		
-		CR_FLOAT_BITMAP* oldFrame = nullptr;
-		{
-			s_FrameLock.lock();
-			oldFrame = s_Frame;
-			s_Frame = newFrame;
-			s_FrameLock.unlock();
-		}
-
-		if (oldFrame)
-			CRDeleteFBmpNormal(oldFrame);
-	}
-
-	delete capturer;
-
-}
 void testBOINetwork()
 {
 	std::cout << "> testBOINetwork" << std::endl;
@@ -198,13 +154,17 @@ void testBOINetwork()
 	}
 	window->setClientArea(CR_RECT{50, 100, BOI_BASE_WIDTH * BOI_SCALE, BOI_BASE_HEIGHT * BOI_SCALE});
 	
+	//Screen cap
+	os::CRScreenCapturer* capturer = os::CRScreenCapturer::CreateInstance(window, &result);
+	if (CR_FAILED(result)) {
+		printf(" [ERROR] os::CRScreenCapturer::CreateInstance failed !! Exit");
+		return;
+	}
+	capturer->runCaptureThread();
+
 	// network
 	CRNeuronLayerPtr outputLayer;
 	CRNeuronNetwork* network = createBOINetwork(outputLayer);
-	
-	// screen capturer
-
-	std::thread t(runScreenCap);
 
 	std::cout << " [INFO] = init finish" << std::endl;
 
@@ -219,14 +179,15 @@ void testBOINetwork()
 	uint frameNo = 0;
 	StopWatch timer;
 	uint iterations = 0;
-	while (s_Running)
+	bool running = true;
+	while (running)
 	{
 		/*
 		 * Exit check
 		 */
 		if (GetAsyncKeyState('X'))
 		{
-			s_Running = false;
+			running = false;
 			printf("\n [EXIT] exit because u wanted it \n\n");
 			break;
 		}
@@ -236,11 +197,7 @@ void testBOINetwork()
 		/*
 		 * Frame
 		 */
-		s_FrameLock.lock();
-		CR_FLOAT_BITMAP* frame = s_Frame;
-		s_Frame = nullptr;
-		s_FrameLock.unlock();
-		
+		CR_FLOAT_BITMAP* frame = capturer->getFrame();
 
 		if (!frame)
 		{
@@ -284,9 +241,10 @@ void testBOINetwork()
 		
 	}
 
-	t.join();
+	capturer->stopCaptureThread();
 
 	delete network;
+	delete capturer;
 
 	std::cout << "< testBOINetwork" << std::endl;
 }
