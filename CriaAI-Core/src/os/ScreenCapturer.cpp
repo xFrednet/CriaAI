@@ -120,7 +120,7 @@ namespace cria_ai { namespace os {
 			}
 		});
 
-		CRIA_ALERT_PRINTF("CRScreenCapturer::runCaptureThread: started Thread!");
+		CRIA_INFO_PRINTF("CRScreenCapturer::runCaptureThread: started Thread!");
 
 		return CRRES_OK;
 	}

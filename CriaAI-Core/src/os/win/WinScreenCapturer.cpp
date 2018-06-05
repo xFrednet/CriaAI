@@ -121,7 +121,8 @@ namespace cria_ai { namespace os { namespace win {
 		/*
 		 * Getting the Data
 		 */
-		CR_RECT area = m_FrameSize;
+		CR_RECT area = m_Target->getClientArea();
+		area.Size = m_FrameSize.Size;
 		if (!BitBlt(dstDC, 0, 0, area.Width, area.Height, srcDC, area.X, area.Y, SRCCOPY) || /* copy data to the win bmp */
 			GetDIBits(dstDC, m_WinBmp, 0, area.Height, m_BmpIntBuffer, &m_WinBmpInfo, DIB_RGB_COLORS) != (int)area.Height) /* copy from win bmp to the int buffer*/
 			return CRRES_ERR_WIN_UNKNOWN;
