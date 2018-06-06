@@ -99,10 +99,11 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
   <ItemGroup>
     <ClCompile Include="Dependencies\BmpRenderer\Dependencies\libbmpread\bmpread.c" />
     <ClCompile Include="Dependencies\BmpRenderer\src\API\ScreenDrawer.cpp" />
-    <ClCompile Include="Dependencies\BmpRenderer\src\Bitmap.cpp" />
+    <ClCompile Include="Dependencies\BmpRenderer\src\RendererBitmap.cpp" />
     <ClCompile Include="Dependencies\BmpRenderer\src\Renderer.cpp" />
     <ClCompile Include="src\network\NeuronLayer.cpp" />
     <ClCompile Include="src\paco\null\NuActivationFunctions.cpp" />
+    <ClCompile Include="src\paco\null\NuBitmapUtil.cpp" />
     <ClCompile Include="src\paco\null\NuContext.cpp" />
     <ClCompile Include="src\paco\PaCoContext.cpp" />
     <ClCompile Include="src\os\FileSystem.cpp" />
@@ -120,9 +121,11 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClCompile Include="src\maths\Matrixf.cpp" />
     <ClCompile Include="src\network\NeuronNetwork.cpp" />
     <CudaCompile Include="src\paco\cuda\CuActivationFunctions.cu" />
+    <CudaCompile Include="src\paco\cuda\CuBitmapUtil.cu" />
     <CudaCompile Include="src\util\FloatBitmap.cu">
       <FileType>Document</FileType>
     </CudaCompile>
+    <ClCompile Include="src\util\Bitmap.cpp" />
     <ClCompile Include="src\util\Clock.cpp" />
     <ClCompile Include="src\util\Random.cpp" />
   </ItemGroup>
@@ -131,9 +134,11 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="Dependencies\BmpRenderer\BmpRenderer.hpp" />
     <ClInclude Include="Dependencies\BmpRenderer\Dependencies\libbmpread\bmpread.h" />
     <ClInclude Include="Dependencies\BmpRenderer\src\API\ScreenDrawer.hpp" />
-    <ClInclude Include="Dependencies\BmpRenderer\src\Bitmap.hpp" />
+    <ClInclude Include="Dependencies\BmpRenderer\src\RendererBitmap.hpp" />
     <ClInclude Include="Dependencies\BmpRenderer\src\Common.h" />
     <ClInclude Include="Dependencies\BmpRenderer\src\Renderer.hpp" />
+    <ClInclude Include="src\paco\BitmapUtil.h" />
+    <ClInclude Include="src\paco\BitmapUtilMacros.h" />
     <ClInclude Include="src\paco\cuda\CuContext.cuh" />
     <ClInclude Include="src\paco\null\NuContext.h" />
     <ClInclude Include="src\paco\PaCoContext.h" />
@@ -161,6 +166,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="src\network\NetworkUtil.h" />
     <ClInclude Include="src\network\NeuronNetwork.h" />
     <ClInclude Include="src\Types.hpp" />
+    <ClInclude Include="src\util\Bitmap.h" />
     <ClInclude Include="src\util\Clock.h" />
     <ClInclude Include="src\util\CRResult.h" />
     <ClInclude Include="src\util\FloatBitmap.h" />

@@ -7,6 +7,9 @@
 #include <AsyncInfo.h>
 #include <cuda_runtime_api.h>
 
+#include "src/util/Bitmap.h"
+#include "src/paco/BitmapUtil.h"
+
 #define BOI_TITLE                      "Binding of Isaac: Afterbirth+"
 #define BOI_BASE_WIDTH                 512
 #define BOI_BASE_HEIGHT                288
@@ -220,7 +223,7 @@ void testBOINetwork()
 
 		// process data
 		network->process(data);
-		CRFreeMatrixf(data);
+		CRDeleteMatrixf(data);
 
 		// print result
 		printBOIOutput(outputLayer->getOutput());
@@ -263,6 +266,20 @@ int main(int argc, char* argv)
 	 */
 	r = os::CROSContext::InitInstance();
 	printf("os::CROSContext::InitInstance: %s \n", CRGetCRResultName(r).c_str());
+
+	{
+		CR_BMP* bmp = CRLoadBmp("bmptest/test.bmp");
+		CRSaveBmp(bmp, "bmptest/intbmp.bmp");
+		CR_BMP* bmp2 = paco::CRBmpScale(bmp, 0.5f);
+		CR_BMP* bmp3 = paco::CRBmpScale(bmp, 2.0f);
+		CRSaveBmp(bmp2, "bmptest/bmp2.bmp");
+		CRSaveBmp(bmp3, "bmptest/bmp3.bmp");
+
+		CRDeleteBmp(bmp);
+		CRDeleteBmp(bmp2);
+		CRDeleteBmp(bmp3);
+	}
+
 
 	std::cout << std::endl;
 	std::cout << "Press Y to skip" << std::endl;

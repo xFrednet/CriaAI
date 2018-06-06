@@ -41,10 +41,13 @@
 
 #include "../network/NetworkUtil.h"
 
-#define CRIA_SIGMOID_VALIDATION_CHECK(inMap, outMat) \
-if (input->Cols != output->Cols || \
-	input->Rows != output->Rows) { \
-	memset(output->Data, 0, sizeof(crnwdec) * output->Cols * output->Rows); \
+#define CRIA_SIGMOID_VALIDATION_CHECK(inMat, outMat) \
+if (!inMat || !outMat || \
+	inMat->Cols != outMat->Cols || \
+	inMat->Rows != outMat->Rows) \
+{ \
+	if (output)\
+		memset(outMat->Data, 0, sizeof(crnwdec) * output->Cols * output->Rows); \
 	return; \
 }
 

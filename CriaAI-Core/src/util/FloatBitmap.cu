@@ -370,7 +370,7 @@ namespace cria_ai
 		CRIA_AUTO_ASSERT(fileName, "CRSaveBitmap: The file name is invalid. The bitmap address is: %p", (bmp) ? bmp : 0);
 		CRIA_AUTO_ASSERT(bmp, "CRSaveBitmap: The bitmap is invalid. The file Name is: %s", fileName);
 		if (!bmp || !fileName)
-			return false; /* you broke it */
+			return false; /* you broke it, thanks :/ */
 
 		/*
 		 * making sure the directory exists. 

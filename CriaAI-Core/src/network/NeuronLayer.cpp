@@ -99,17 +99,17 @@ namespace cria_ai { namespace network {
 		 */
 		if (m_Output)
 		{
-			CRFreeMatrixf(m_Output);
+			CRDeleteMatrixf(m_Output);
 			m_Output = nullptr;
 		}
 		if (m_Weights)
 		{
-			CRFreeMatrixf(m_Weights);
+			CRDeleteMatrixf(m_Weights);
 			m_Weights = nullptr;
 		}
 		if (m_Bias)
 		{
-			CRFreeMatrixf(m_Bias);
+			CRDeleteMatrixf(m_Bias);
 			m_Bias = nullptr;
 		}
 
@@ -170,8 +170,8 @@ namespace cria_ai { namespace network {
 			timer.start();
 			m_ActivationFunc(biasOut, m_Output);
 
-			CRFreeMatrixf(weightOut);
-			CRFreeMatrixf(biasOut);
+			CRDeleteMatrixf(weightOut);
+			CRDeleteMatrixf(biasOut);
 		}
 		else
 		{

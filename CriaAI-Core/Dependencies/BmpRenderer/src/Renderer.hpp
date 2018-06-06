@@ -33,7 +33,7 @@
 
 #pragma once
 
-#include "Bitmap.hpp"
+#include "RendererBitmap.hpp"
 
 namespace bmp_renderer {
 

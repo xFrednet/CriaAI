@@ -4,6 +4,7 @@ Word                    Abbreviation
 -------------------- - --------------------
 Bitmap               - bmp
 Bounderies           - bounds
+Bytes Per Pixel      - bpp
 Callback             - cb
 Client area          - cArea
 Column               - col
@@ -23,6 +24,7 @@ Mouse button         - mButton
 Mouse movement       - mMove
 Mouse Wheel          - mWheel
 Network decimal      - nwdec
+Neural Network       - nn
 Number               - no
 Operating system     - os
 Parallel Computing   - paCo                      //I like this abbreviation

@@ -31,7 +31,7 @@ namespace cria_ai
 
 		return matrix;
 	}
-	void       CRFreeMatrixf(CRMatrixf* matrix)
+	void       CRDeleteMatrixf(CRMatrixf* matrix)
 	{
 		if (matrix)
 			paco::CRPaCoFree(matrix);
@@ -181,7 +181,7 @@ namespace cria_ai
 
 		fclose(file);
 		if (mat)
-			CRFreeMatrixf(mat);
+			CRDeleteMatrixf(mat);
 		return 0;
 	}
 
@@ -472,9 +472,9 @@ namespace cria_ai
 	{
 		CRIA_AUTO_ASSERT(b == 0, "Devision by 0 is undefined behavior");
 		if (b == 0)
-			return 0;
+			return nullptr;
 
-		return CRMul(a, 1 / b);
+		return CRMul(a, 1.0f / b);
 	}
 }
  
