@@ -7,7 +7,7 @@
 #include <AsyncInfo.h>
 #include <cuda_runtime_api.h>
 
-#include "src/util/Bitmap.h"
+#include "src/util/FBmpFile.h"
 #include "src/paco/BitmapUtil.h"
 
 #define BOI_TITLE                      "Binding of Isaac: Afterbirth+"
@@ -268,16 +268,18 @@ int main(int argc, char* argv)
 	printf("os::CROSContext::InitInstance: %s \n", CRGetCRResultName(r).c_str());
 
 	{
-		CR_BMP* bmp = CRLoadBmp("bmptest/test.bmp");
-		CRSaveBmp(bmp, "bmptest/intbmp.bmp");
-		CR_BMP* bmp2 = paco::CRBmpScale(bmp, 0.5f);
-		CR_BMP* bmp3 = paco::CRBmpScale(bmp, 2.0f);
-		CRSaveBmp(bmp2, "bmptest/bmp2.bmp");
-		CRSaveBmp(bmp3, "bmptest/bmp3.bmp");
+		CR_FBMP* bmp = CRFBmpLoad("bmptest/test.bmp");
+		CRFBmpSave(bmp, "bmptest/intbmp.bmp");
+		CR_FBMP* bmp2 = paco::CRFBmpScale(bmp, 0.5f);
+		CR_FBMP* bmp3 = paco::CRFBmpScale(bmp, 2.0f);
+		CRFBmpSave(bmp2, "bmptest/bmp2.bmp");
+		CRFBmpSave(bmp3, "bmptest/bmp3.bmp");
 
-		CRDeleteBmp(bmp);
-		CRDeleteBmp(bmp2);
-		CRDeleteBmp(bmp3);
+		CRFBmpDelete(bmp);
+		CRFBmpDelete(bmp2);
+		CRFBmpDelete(bmp3);
+
+		std::cin.get();
 	}
 
 

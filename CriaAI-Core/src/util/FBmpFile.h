@@ -35,46 +35,49 @@
 #include "../Types.hpp"
 #include "CRResult.h"
 
-#define CR_BMP_MAX_BPP                 4
-#define CR_BMP_DEFAULT_BPP             4
+#define CR_FBMP_MAX_FPP                 4
+#define CR_FBMP_DEFAULT_FPP             4
 
-#define CR_BMP_PX_INDEX(x, y, bmp)               (((x) + (y) * (bmp)->Width) * (bmp)->Bpp)
-#define CR_BMP_DATA_SIZE(bmp)                    ((bmp)->Width * (bmp)->Height * (bmp)->Bpp)
-#define CR_BMP_FILL_ZERO(bmp)                    (memset((bmp)->Data, 0, CR_BMP_DATA_SIZE(bmp)))
-#define CR_BMP_COPY_DATA(inBmp, outBmp)          (memcpy((outBmp)->Data, (inBmp)->Data, CR_BMP_DATA_SIZE(inBmp)))
-#define CR_BMP_VALUE_COUNT(bmp)                  ((bmp)->Width * (bmp)->Height * (bmp)->Bpp)
+#define CR_FBMP_VALUE_COUNT(fbmp)                ((fbmp)->Width * (fbmp)->Height * (fbmp)->Fpp)
+#define CR_FBMP_DATA_SIZE(fbmp)                  (sizeof(float) * CR_FBMP_VALUE_COUNT(fbmp))
+#define CR_FBMP_PX_INDEX(x, y, fbmp)             (((x) + (y) * (fbmp)->Width) * (fbmp)->Fpp)
+#define CR_FBMP_FILL_ZERO(fbmp)                  (memset((fbmp)->Data, 0, CR_FBMP_DATA_SIZE(fbmp)))
+#define CR_FBMP_COPY_DATA(inFbmp, outFbmp)       (memcpy((outFbmp)->Data, (inFbmp)->Data, CR_FBMP_DATA_SIZE(inFbmp)))
 
 
 namespace cria_ai
 {
-	typedef struct CR_BMP_ {
-		uint  Width;
-		uint  Height;
-		uint  Bpp;
-		byte* Data;          /* r, g, b, a*/
-	} CR_BMP;
+	typedef struct CR_FBMP_ {
+		uint   Width;
+		uint   Height;
+		uint   Fpp;
+		float* Data;          /* r, g, b, a*/
+	} CR_FBMP;
 
 	/*
-	 * CRCreateBmp
+	 * CRFBmpCreate
 	 */
-	CR_BMP* CRCreateBmpPACO(uint width, uint height, uint bpp = CR_BMP_DEFAULT_BPP);
-	CR_BMP* CRCreateBmpNormal(uint width, uint height, uint bpp = CR_BMP_DEFAULT_BPP);
-	inline CR_BMP* CRCreateBmp(uint width, uint height, uint bpp = CR_BMP_DEFAULT_BPP)
+	CR_FBMP*        CRFBmpCreatePACO(uint width, uint height, uint fpp = CR_FBMP_DEFAULT_FPP);
+	CR_FBMP*        CRFBmpCreateNormal(uint width, uint height, uint fpp = CR_FBMP_DEFAULT_FPP);
+	inline CR_FBMP* CRFBmpCreate(uint width, uint height, uint fpp = CR_FBMP_DEFAULT_FPP)
 	{
-		return CRCreateBmpPACO(width, height, bpp);
+		return CRFBmpCreatePACO(width, height, fpp);
 	}
 
 	/*
-	 * CRDeleteBmp
+	 * CRFBmpDelete
 	 */
-	void CRDeleteBmpPACO(CR_BMP* bmp);
-	void CRDeleteBmpNormal(CR_BMP* bmp);
-	inline void CRDeleteBmp(CR_BMP* bmp)
+	void            CRFBmpDeletePACO(CR_FBMP* fbmp);
+	void            CRFBmpDeleteNormal(CR_FBMP* fbmp);
+	inline void     CRFBmpDelete(CR_FBMP* fbmp)
 	{
-		CRDeleteBmpPACO(bmp);
+		CRFBmpDeletePACO(fbmp);
 	}
 
-	CR_BMP* CRLoadBmp(const String& file, crresult* result = nullptr);
-	CR_BMP* CRCreateCopyBmp(CR_BMP const* srcBmp);
-	crresult CRSaveBmp(CR_BMP const* bmp, const String& file);
+	/*
+	 * CRFBmp utility
+	 */
+	CR_FBMP*        CRFBmpLoad(const String& file, crresult* result = nullptr);
+	CR_FBMP*        CRFBmpCreateCopy(CR_FBMP const* srcBmp);
+	crresult        CRFBmpSave(CR_FBMP const* srcBmp, const String& file);
 }

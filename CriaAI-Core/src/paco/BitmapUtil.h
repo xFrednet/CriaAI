@@ -32,7 +32,7 @@
 ******************************************************************************/
 #pragma once
 
-#include "../util/Bitmap.h"
+#include "../util/FBmpFile.h"
 
 #include "../Common.hpp"
 
@@ -46,42 +46,45 @@
 */
 namespace cria_ai { namespace paco {
 
-	void           CRBmpConvertToBPP(CR_BMP const* inBmp, CR_BMP* outBmp);
-	inline CR_BMP* CRBmpConvertToBPP(CR_BMP const* inBmp, uint targetBpp)
+	void              CRFBmpConvertBMPToFBMPData(byte const* byteData, float* outFloatData, uint valueCount);
+	void              CRFBmpConvertFBMPToBMPData(float const* floatData, byte* outByteData, uint valueCount);
+
+	void              CRFBmpConvertToFPP(CR_FBMP const* inBmp, CR_FBMP* outBmp);
+	inline CR_FBMP*   CRFBmpConvertToFPP(CR_FBMP const* inBmp, uint targetFpp)
 	{
 		/*
 		 * Validation
 		 */
 		if (!inBmp)
 			return nullptr;
-		if (!(targetBpp == 1 || targetBpp == 3 || targetBpp == 4))
+		if (!(targetFpp == 1 || targetFpp == 3 || targetFpp == 4))
 			return nullptr; // unsupported target bpp
 
 		/*
 		 * Output creator
 		 */
-		CR_BMP* outBmp = CRCreateBmp(inBmp->Width, inBmp->Height, targetBpp);
-		CRIA_AUTO_ASSERT(outBmp, "paco::CRBmpConvertToBPP failed to create the output bitmap.");
+		CR_FBMP* outBmp = CRFBmpCreate(inBmp->Width, inBmp->Height, targetFpp);
+		CRIA_AUTO_ASSERT(outBmp, "paco::CRFBmpConvertToFPP failed to create the output bitmap.");
 		if (!outBmp)
 			return nullptr;
 
 		/*
 		 * Select the converter
 		 */
-		CRBmpConvertToBPP(inBmp, outBmp);
+		CRFBmpConvertToFPP(inBmp, outBmp);
 		return outBmp;
 	}
 
-	void           CRBmpScale(CR_BMP const* inBmp, CR_BMP* outBmp, float scale);
-	inline CR_BMP* CRBmpScale(CR_BMP const* inBmp, float scale)
+	void              CRFBmpScale(CR_FBMP const* inBmp, CR_FBMP* outBmp, float scale);
+	inline CR_FBMP*   CRFBmpScale(CR_FBMP const* inBmp, float scale)
 	{
 		/*
 		 * Validation
 		 */
-		CRIA_AUTO_ASSERT(inBmp, "CRBmpScale: The input bitmap is null");
+		CRIA_AUTO_ASSERT(inBmp, "CRFBmpScale: The input bitmap is null");
 		if (!inBmp)
 			return nullptr; //input is null bitmap
-		CRIA_AUTO_ASSERT(scale != 0, "CRBmpScale: The requested scale is, let's say stupid!");
+		CRIA_AUTO_ASSERT(scale != 0, "CRFBmpScale: The requested scale is, let's say stupid!");
 		if (scale == 0)
 			return nullptr; //invalid scale
 
@@ -90,20 +93,20 @@ namespace cria_ai { namespace paco {
 		 */
 		uint width = (uint)ceilf((float)inBmp->Width * scale);
 		uint height = (uint)ceilf((float)inBmp->Height * scale);
-		CR_BMP* outBmp = CRCreateBmp(width, height, inBmp->Bpp);
-		CRIA_AUTO_ASSERT(outBmp, "CRBmpScale: The Creation of the output bitmap failed");
+		CR_FBMP* outBmp = CRFBmpCreate(width, height, inBmp->Fpp);
+		CRIA_AUTO_ASSERT(outBmp, "CRFBmpScale: The Creation of the output bitmap failed");
 		if (!outBmp)
 			return nullptr;
 
 		/*
 		 * Scale and return
 		 */
-		paco::CRBmpScale(inBmp, outBmp, scale);
+		paco::CRFBmpScale(inBmp, outBmp, scale);
 		return outBmp;
 	}
 
-	void              CRBmpToMatf(CR_BMP const* inBmp, CRMatrixf* outMat);
-	inline CRMatrixf* CRBmpTo1DMatf(CR_BMP const* inBmp)
+	void              CRFBmpToMatf(CR_FBMP const* inBmp, CRMatrixf* outMat);
+	inline CRMatrixf* CRFBmpTo1DMatf(CR_FBMP const* inBmp)
 	{
 		/*
 		 * Validation
@@ -114,19 +117,19 @@ namespace cria_ai { namespace paco {
 		/*
 		 * Create output
 		 */
-		CRMatrixf* outMat = CRCreateMatrixf(1, inBmp->Width * inBmp->Height * inBmp->Bpp);
-		CRIA_AUTO_ASSERT(outMat, "CRBmpTo1DMatf: The Creation of the output matrix failed");
+		CRMatrixf* outMat = CRCreateMatrixf(1, inBmp->Width * inBmp->Height * inBmp->Fpp);
+		CRIA_AUTO_ASSERT(outMat, "CRFBmpTo1DMatf: The Creation of the output matrix failed");
 		if (!outMat)
 			return nullptr;
 
 		/*
 		 * Convert and return
 		 */
-		CRBmpToMatf(inBmp, outMat);
+		CRFBmpToMatf(inBmp, outMat);
 
 		return outMat;
 	}
-	inline CRMatrixf* CRBmpTo2DMatf(CR_BMP const* inBmp)
+	inline CRMatrixf* CRFBmpTo2DMatf(CR_FBMP const* inBmp)
 	{
 		/*
 		* Validation
@@ -137,15 +140,15 @@ namespace cria_ai { namespace paco {
 		/*
 		* Create output
 		*/
-		CRMatrixf* outMat = CRCreateMatrixf(inBmp->Width * inBmp->Bpp, inBmp->Height);
-		CRIA_AUTO_ASSERT(outMat, "CRBmpTo1DMatf: The Creation of the output matrix failed");
+		CRMatrixf* outMat = CRCreateMatrixf(inBmp->Width * inBmp->Fpp, inBmp->Height);
+		CRIA_AUTO_ASSERT(outMat, "CRFBmpTo1DMatf: The Creation of the output matrix failed");
 		if (!outMat)
 			return nullptr;
 
 		/*
 		* Convert and return
 		*/
-		CRBmpToMatf(inBmp, outMat);
+		CRFBmpToMatf(inBmp, outMat);
 
 		return outMat;
 	}

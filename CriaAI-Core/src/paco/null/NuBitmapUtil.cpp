@@ -37,25 +37,51 @@
 
 namespace cria_ai { namespace paco {
 	
-	void CRBmpConvertFrom3To1BPP(CR_BMP const* inBmp, CR_BMP* outBmp)
+	void            CRFBmpConvertBMPToFBMPData(byte const* byteData, float* outFloatData, uint valueCount)
 	{
-		CRIA_CRBMPCONVERTFROM_TO_BPP_VALIDATION_CHECK(inBmp, outBmp, 3, 1);
+		/*
+		* Validation
+		*/
+		CRIA_CRFBmpConvertBMPToFBMPData_VALIDATION_CHECK(byteData, outFloatData, valueCount);
+
+		/*
+		* convert
+		*/
+		for (uint index = 0; index < valueCount; index++) {
+			outFloatData[index] = (float)byteData[index] / 255.0f;
+		}
+	}
+	void            CRFBmpConvertFBMPToBMPData(float const* floatData, byte* outByteData, uint valueCount)
+	{
+		/*
+		* Validation
+		*/
+		CRIA_CRFBmpConvertFBMPToBMPData_VALIDATION_CHECK(floatData, outByteData, valueCount);
+
+		/*
+		* convert
+		*/
+		for (uint index = 0; index < valueCount; index++) {
+			outByteData[index] = (byte)rintf(floatData[index] * 255.0f);
+		}
+	}
+
+	void CRBmpConvertFrom3To1BPP(CR_FBMP const* inBmp, CR_FBMP* outBmp)
+	{
 		uint srcIndex = 0;
 		uint dstIndex = 0;
-		uint sum = 0;
+		float sum = 0;
 		for (uint pixel = 0; pixel < inBmp->Width * inBmp->Height; pixel++) 
 		{
 			sum  = inBmp->Data[srcIndex++];
 			sum += inBmp->Data[srcIndex++];
 			sum += inBmp->Data[srcIndex++];
 
-			outBmp->Data[dstIndex++] = (byte)roundf(sum / 3.0f);
+			outBmp->Data[dstIndex++] = sum / 3.0f;
 		}
 	}
-	void CRBmpConvertFrom4To1BPP(CR_BMP const* inBmp, CR_BMP* outBmp)
+	void CRBmpConvertFrom4To1BPP(CR_FBMP const* inBmp, CR_FBMP* outBmp)
 	{
-		CRIA_CRBMPCONVERTFROM_TO_BPP_VALIDATION_CHECK(inBmp, outBmp, 4, 1);
-
 		float sum;
 		uint srcIndex = 0;
 		uint dstIndex = 0;
@@ -66,13 +92,11 @@ namespace cria_ai { namespace paco {
 			sum += inBmp->Data[srcIndex++]; /* Blue  */
 			sum *= inBmp->Data[srcIndex++]; /* Alpha */
 
-			outBmp->Data[dstIndex++] = (byte)roundf(sum / 3.0f);
+			outBmp->Data[dstIndex++] = sum / 3.0f;
 		}
 	}
-	void CRBmpConvertFrom1To3BPP(CR_BMP const* inBmp, CR_BMP* outBmp)
+	void CRBmpConvertFrom1To3BPP(CR_FBMP const* inBmp, CR_FBMP* outBmp)
 	{
-		CRIA_CRBMPCONVERTFROM_TO_BPP_VALIDATION_CHECK(inBmp, outBmp, 1, 3);
-		
 		uint srcIndex = 0;
 		uint dstIndex = 0;
 		for (uint pixel = 0; pixel < inBmp->Width * inBmp->Height; pixel++)
@@ -83,26 +107,22 @@ namespace cria_ai { namespace paco {
 			srcIndex++;
 		}
 	}
-	void CRBmpConvertFrom4To3BPP(CR_BMP const* inBmp, CR_BMP* outBmp)
+	void CRBmpConvertFrom4To3BPP(CR_FBMP const* inBmp, CR_FBMP* outBmp)
 	{
-		CRIA_CRBMPCONVERTFROM_TO_BPP_VALIDATION_CHECK(inBmp, outBmp, 4, 3);
-
 		uint srcIndex = 0;
 		uint dstIndex = 0;
 		for (uint pixel = 0; pixel < inBmp->Width * inBmp->Height; pixel++) 
 		{
 			float alpha = inBmp->Data[srcIndex + 4];
 
-			outBmp->Data[dstIndex++] = (byte)floorf(inBmp->Data[srcIndex++] * alpha);
-			outBmp->Data[dstIndex++] = (byte)floorf(inBmp->Data[srcIndex++] * alpha);
-			outBmp->Data[dstIndex++] = (byte)floorf(inBmp->Data[srcIndex++] * alpha);
+			outBmp->Data[dstIndex++] = inBmp->Data[srcIndex++] * alpha;
+			outBmp->Data[dstIndex++] = inBmp->Data[srcIndex++] * alpha;
+			outBmp->Data[dstIndex++] = inBmp->Data[srcIndex++] * alpha;
 			srcIndex++;
 		}
 	}
-	void CRBmpConvertFrom1To4BPP(CR_BMP const* inBmp, CR_BMP* outBmp)
+	void CRBmpConvertFrom1To4BPP(CR_FBMP const* inBmp, CR_FBMP* outBmp)
 	{
-		CRIA_CRBMPCONVERTFROM_TO_BPP_VALIDATION_CHECK(inBmp, outBmp, 1, 4);
-
 		uint srcIndex = 0;
 		uint dstIndex = 0;
 		for (uint pixel = 0; pixel < inBmp->Width * inBmp->Height; pixel++) 
@@ -110,35 +130,33 @@ namespace cria_ai { namespace paco {
 			outBmp->Data[dstIndex++] = inBmp->Data[srcIndex];
 			outBmp->Data[dstIndex++] = inBmp->Data[srcIndex];
 			outBmp->Data[dstIndex++] = inBmp->Data[srcIndex];
-			outBmp->Data[dstIndex++] = 0xff; //100% alpha
+			outBmp->Data[dstIndex++] = 1.0f; //100% alpha
 			srcIndex++;
 		}
 	}
-	void CRBmpConvertFrom3To4BPP(CR_BMP const* inBmp, CR_BMP* outBmp)
+	void CRBmpConvertFrom3To4BPP(CR_FBMP const* inBmp, CR_FBMP* outBmp)
 	{
-		CRIA_CRBMPCONVERTFROM_TO_BPP_VALIDATION_CHECK(inBmp, outBmp, 3, 4);
-
 		uint srcIndex = 0;
 		uint dstIndex = 0;
 		for (uint pixel = 0; pixel < inBmp->Width * inBmp->Height; pixel++) {
 			outBmp->Data[dstIndex++] = inBmp->Data[srcIndex++];
 			outBmp->Data[dstIndex++] = inBmp->Data[srcIndex++];
 			outBmp->Data[dstIndex++] = inBmp->Data[srcIndex++];
-			outBmp->Data[dstIndex++] = 0xff; //100% alpha
+			outBmp->Data[dstIndex++] = 1.0f; //100% alpha
 			srcIndex++;
 		}
 	}
-	void    CRBmpConvertToBPP(CR_BMP const* inBmp, CR_BMP* outBmp)
+	void    CRFBmpConvertToFPP(CR_FBMP const* inBmp, CR_FBMP* outBmp)
 	{
 		/*
 		* Validation
 		*/
-		CRIA_CRBMPCONVERTTOBPP_VALIDATION_CHECK(inBmp, outBmp);
+		CRIA_CRFBmpConvertToFPP_VALIDATION_CHECK(inBmp, outBmp);
 
 		/*
 		* Select converter
 		*/
-		CRIA_CRBMPCONVERTTOBPP_IF_SAME_BPP(inBmp, outBmp);
+		CRIA_CRFBmpConvertToFPP_IF_SAME_BPP(inBmp, outBmp);
 
 		/*
 		* The first 4 bits indicates the input bitmap bpp and
@@ -151,7 +169,7 @@ namespace cria_ai { namespace paco {
 		* This is trashy yet genius                       ~xFrednet 06.06.2018
 		* Reworked, even more genius and less trashy!     ~xFrednet 06.06.2018
 		*/
-		byte coversion = (inBmp->Bpp << 4) | (outBmp->Bpp);
+		byte coversion = (inBmp->Fpp << 4) | (outBmp->Fpp);
 		switch (coversion) {
 			case 0x13: CRBmpConvertFrom1To3BPP(inBmp, outBmp); break;
 			case 0x14: CRBmpConvertFrom1To4BPP(inBmp, outBmp); break;
@@ -163,20 +181,20 @@ namespace cria_ai { namespace paco {
 			case 0x43: CRBmpConvertFrom4To3BPP(inBmp, outBmp); break;
 
 			default:
-				CRIA_AUTO_ASSERT(false, "The conversion failed: inBmp->Bpp: %u, outBmp->Bpp: %u ", inBmp->Bpp, outBmp->Bpp);
-				CR_BMP_FILL_ZERO(outBmp);;
+				CRIA_AUTO_ASSERT(false, "The conversion failed: inBmp->Fpp: %u, outBmp->Fpp: %u ", inBmp->Fpp, outBmp->Fpp);
+				CR_FBMP_FILL_ZERO(outBmp);;
 				break;
 		}
 	}
 
-	void CRBmpScale(CR_BMP const* inBmp, CR_BMP* outBmp, float scale)
+	void CRFBmpScale(CR_FBMP const* inBmp, CR_FBMP* outBmp, float scale)
 	{
 		/*
 		 * Validation
 		 */
-		CRIA_CRBMPSCALE_VALIDATION_CHECK(inBmp, outBmp, scale);
+		CRIA_CRFBmpScale_VALIDATION_CHECK(inBmp, outBmp, scale);
 
-		CRIA_CRBMPSCALE_IF_SCALE_1(inBmp, outBmp, scale);
+		CRIA_CRFBmpScale_IF_SCALE_1(inBmp, outBmp, scale);
 
 		float srcScale = 1 / scale;
 
@@ -187,10 +205,10 @@ namespace cria_ai { namespace paco {
 			srcX = 0.0f;
 			for (uint x = 0; x < outBmp->Width; x++)
 			{
-				void* src = &inBmp->Data[CR_BMP_PX_INDEX((uint)floor(srcX), (uint)floor(srcY), inBmp)];
-				void* dst = &outBmp->Data[CR_BMP_PX_INDEX(x, y, outBmp)];
+				void* src = &inBmp->Data[CR_FBMP_PX_INDEX((uint)floor(srcX), (uint)floor(srcY), inBmp)];
+				void* dst = &outBmp->Data[CR_FBMP_PX_INDEX(x, y, outBmp)];
 
-				memcpy(dst, src, inBmp->Bpp);
+				memcpy(dst, src, inBmp->Fpp);
 
 				srcX += srcScale;
 			}
@@ -198,12 +216,12 @@ namespace cria_ai { namespace paco {
 		}
 	}
 
-	void CRBmpToMatf(CR_BMP const* inBmp, CRMatrixf* outMat)
+	void CRFBmpToMatf(CR_FBMP const* inBmp, CRMatrixf* outMat)
 	{
 		/*
 		* Validation
 		*/
-		CRIA_CRBMPTOMATF_VALIDATION_CHECK(inBmp, outMat);
+		CRIA_CRFBmpToMatf_VALIDATION_CHECK(inBmp, outMat);
 
 		/*
 		* Convert

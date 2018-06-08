@@ -35,65 +35,72 @@
 #include "BitmapUtil.h"
 
 /*
- * CRBmpConvertToBPP
+ * CRFBmpConvertBMPToFBMPData
  */
-#define CRIA_CRBMPCONVERTFROM_TO_BPP_VALIDATION_CHECK(inBmp, outBmp, inBpp, outBpp)\
+#define CRIA_CRFBmpConvertBMPToFBMPData_VALIDATION_CHECK(byteData, outFloatData, valueCount)\
+if (!byteData || !outFloatData || valueCount == 0) \
 {\
-	if (!inBmp || !outBmp ||\
-		inBmp->Width  != outBmp->Width  ||\
-		inBmp->Height != outBmp->Height ||\
-		inBmp->Bpp    != inBpp ||\
-		outBmp->Bpp   != outBpp)\
-	{\
-		CR_BMP_FILL_ZERO(outBmp);\
-		return;\
-	}\
+	memset(outFloatData, 0, sizeof(float) * valueCount);\
+	return;\
 }
-#define CRIA_CRBMPCONVERTTOBPP_IF_SAME_BPP(inBmp, outBmp) \
-if (inBmp->Bpp == outBmp->Bpp)\
-{\
-	CR_BMP_COPY_DATA(inBmp, outBmp);\
-	return; /* done */\
-}
-#define CRIA_CRBMPCONVERTTOBPP_VALIDATION_CHECK(inBmp, outBmp)\
-{\
-	if (!inBmp || !outBmp ||\
-		outBmp->Width != inBmp->Width ||\
-		outBmp->Height != inBmp->Height)\
-	{\
-		CR_BMP_FILL_ZERO(outBmp);\
-		return;\
-	}\
-}
-
 /*
- * CRBmpScale
+ * CRFBmpConvertFBMPToBMPData
  */
-#define CRIA_CRBMPSCALE_VALIDATION_CHECK(inBmp, outBmp, scale)\
+#define CRIA_CRFBmpConvertFBMPToBMPData_VALIDATION_CHECK(floatData, outByteData, valueCount)\
+if (!floatData || !outByteData || valueCount == 0) \
 {\
-	uint outWidth = (uint)ceilf((float)inBmp->Width * scale);\
-	uint outHeight = (uint)ceilf((float)inBmp->Width * scale); \
-	if (!inBmp || !outBmp || \
-		outBmp->Width != outWidth || \
-		outBmp->Height != outHeight || \
-		scale == 0) \
-	{\
-		CR_BMP_FILL_ZERO(outBmp);\
-		return;\
-	}\
-}
-#define CRIA_CRBMPSCALE_IF_SCALE_1(inBmp, outBmp, scale)\
-if (scale == 1.0f) {\
-	CR_BMP_COPY_DATA(inBmp, outBmp);\
+	memset(outByteData, 0, sizeof(byte) * valueCount);\
 	return;\
 }
 
 /*
- * CRBmpToMatf
+ * CRFBmpConvertToFPP
  */
-#define CRIA_CRBMPTOMATF_VALIDATION_CHECK(inBmp, outMat) \
-if (!inBmp || !outMat ||\
-	CR_MATF_VALUE_COUNT(outMat) != CR_BMP_VALUE_COUNT(inBmp))\
+#define CRIA_CRFBmpConvertToFPP_VALIDATION_CHECK(inFBmp, outFBmp)\
+{\
+	if (!inFBmp || !outFBmp ||\
+		outFBmp->Width  != inFBmp->Width ||\
+		outFBmp->Height != inFBmp->Height)\
+	{\
+		CR_FBMP_FILL_ZERO(outFBmp);\
+		return;\
+	}\
+}
+#define CRIA_CRFBmpConvertToFPP_IF_SAME_BPP(inFBmp, outFBmp) \
+if (inFBmp->Fpp == outFBmp->Fpp)\
+{\
+	CR_FBMP_COPY_DATA(inFBmp, outFBmp);\
+	return; /* done */\
+}
+
+/*
+ * CRFBmpScale
+ */
+#define CRIA_CRFBmpScale_VALIDATION_CHECK(inFBmp, outFBmp, scale)\
+{\
+	uint outWidth = (uint)ceilf((float)inFBmp->Width * scale);\
+	uint outHeight = (uint)ceilf((float)inFBmp->Width * scale); \
+	if (!inFBmp || !outFBmp || \
+		outFBmp->Width != outWidth || \
+		outFBmp->Height != outHeight || \
+		scale == 0) \
+	{\
+		CR_FBMP_FILL_ZERO(outFBmp);\
+		return;\
+	}\
+}
+#define CRIA_CRFBmpScale_IF_SCALE_1(inFBmp, outFBmp, scale)\
+if (scale == 1.0f) {\
+	CR_FBMP_COPY_DATA(inFBmp, outFBmp);\
+	return;\
+}
+
+/*
+ * CRFBmpToMatf
+ */
+#define CRIA_CRFBmpToMatf_VALIDATION_CHECK(inFBmp, outMat) \
+if (!inFBmp || !outMat ||\
+	CR_MATF_VALUE_COUNT(outMat) != CR_FBMP_VALUE_COUNT(inFBmp))\
 {\
 	CR_MATF_FILL_ZERO(outMat);\
 	return;\

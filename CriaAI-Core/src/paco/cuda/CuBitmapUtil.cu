@@ -54,13 +54,57 @@
 
 namespace cria_ai { namespace paco {
 	
-	/*
-	* CRBmpConvertToBPP
-	*/
-	__global__ void CRCuBmpConvertFrom3To1BPP(CR_BMP const* inBmp, CR_BMP* outBmp)
+	__global__ void CRCuFBmpConvertBMPToFBMPData(byte const* byteData, float* outFloatData, uint valueCount)
 	{
-		CRIA_CRBMPCONVERTFROM_TO_BPP_VALIDATION_CHECK(inBmp, outBmp, 3, 1);
-		
+		int startIndex = blockIdx.x * blockDim.x + threadIdx.x;
+		int stride = blockDim.x * gridDim.x;
+
+		for (uint index = startIndex; index < valueCount; index += stride)
+		{
+			outFloatData[index] = (float)byteData[index] / 255.0f;
+		}
+	}
+	void            CRFBmpConvertBMPToFBMPData(byte const* byteData, float* outFloatData, uint valueCount)
+	{
+		/*
+		 * Validation
+		 */
+		CRIA_CRFBmpConvertBMPToFBMPData_VALIDATION_CHECK(byteData, outFloatData, valueCount);
+
+		/*
+		 * convert
+		 */
+		CRCuFBmpConvertBMPToFBMPData CRIA_CUDA_CALL(byteData, outFloatData, valueCount);
+		cudaDeviceSynchronize();
+	}
+	__global__ void CRCuFBmpConvertFBMPToBMPData(float const* floatData, byte* outByteData, uint valueCount)
+	{
+		int startIndex = blockIdx.x * blockDim.x + threadIdx.x;
+		int stride = blockDim.x * gridDim.x;
+
+		for (uint index = startIndex; index < valueCount; index += stride) {
+			outByteData[index] = (byte)rintf(floatData[index] * 255.0f);
+		}
+	}
+	void            CRFBmpConvertFBMPToBMPData(float const* floatData, byte* outByteData, uint valueCount)
+	{
+		/*
+		* Validation
+		*/
+		CRIA_CRFBmpConvertFBMPToBMPData_VALIDATION_CHECK(floatData, outByteData, valueCount);
+
+		/*
+		* convert
+		*/
+		CRCuFBmpConvertFBMPToBMPData CRIA_CUDA_CALL(floatData, outByteData, valueCount);
+		cudaDeviceSynchronize();
+	}
+
+	/*
+	* CRFBmpConvertToFPP
+	*/
+	__global__ void CRCuBmpConvertFrom3To1BPP(CR_FBMP const* inBmp, CR_FBMP* outBmp)
+	{
 		int startIndex = blockIdx.x * blockDim.x + threadIdx.x;
 		int stride = blockDim.x * gridDim.x;
 
@@ -74,13 +118,11 @@ namespace cria_ai { namespace paco {
 			sum += inBmp->Data[srcIndex++];
 			sum += inBmp->Data[srcIndex++];
 
-			outBmp->Data[dstIndex++] = (byte)rintf(sum / 3.0f);
+			outBmp->Data[dstIndex++] = sum / 3.0f;
 		}
 	}
-	__global__ void CRCuBmpConvertFrom4To1BPP(CR_BMP const* inBmp, CR_BMP* outBmp)
+	__global__ void CRCuBmpConvertFrom4To1BPP(CR_FBMP const* inBmp, CR_FBMP* outBmp)
 	{
-		CRIA_CRBMPCONVERTFROM_TO_BPP_VALIDATION_CHECK(inBmp, outBmp, 4, 1);
-
 		int startIndex = blockIdx.x * blockDim.x + threadIdx.x;
 		int stride = blockDim.x * gridDim.x;
 
@@ -95,13 +137,11 @@ namespace cria_ai { namespace paco {
 			sum *= inBmp->Data[srcIndex  ]; /* Alpha */
 			sum /= 3;
 
-			outBmp->Data[pixel] = (byte)rintf(sum / 3.0f);
+			outBmp->Data[pixel] = sum / 3.0f;
 		}
 	}
-	__global__ void CRCuBmpConvertFrom1To3BPP(CR_BMP const* inBmp, CR_BMP* outBmp)
+	__global__ void CRCuBmpConvertFrom1To3BPP(CR_FBMP const* inBmp, CR_FBMP* outBmp)
 	{
-		CRIA_CRBMPCONVERTFROM_TO_BPP_VALIDATION_CHECK(inBmp, outBmp, 1, 3);
-		
 		int startIndex = blockIdx.x * blockDim.x + threadIdx.x;
 		int stride = blockDim.x * gridDim.x;
 
@@ -114,10 +154,8 @@ namespace cria_ai { namespace paco {
 			outBmp->Data[dstIndex  ] = inBmp->Data[pixel];
 		}
 	}
-	__global__ void CRCuBmpConvertFrom4To3BPP(CR_BMP const* inBmp, CR_BMP* outBmp)
+	__global__ void CRCuBmpConvertFrom4To3BPP(CR_FBMP const* inBmp, CR_FBMP* outBmp)
 	{
-		CRIA_CRBMPCONVERTFROM_TO_BPP_VALIDATION_CHECK(inBmp, outBmp, 4, 3);
-
 		int startIndex = blockIdx.x * blockDim.x + threadIdx.x;
 		int stride     = blockDim.x * gridDim.x;
 
@@ -128,15 +166,13 @@ namespace cria_ai { namespace paco {
 
 			float alpha = inBmp->Data[srcIndex + 4];
 
-			outBmp->Data[dstIndex++] = (byte)floorf(inBmp->Data[srcIndex++] * alpha);
-			outBmp->Data[dstIndex++] = (byte)floorf(inBmp->Data[srcIndex++] * alpha);
-			outBmp->Data[dstIndex  ] = (byte)floorf(inBmp->Data[srcIndex  ] * alpha);
+			outBmp->Data[dstIndex++] = inBmp->Data[srcIndex++] * alpha;
+			outBmp->Data[dstIndex++] = inBmp->Data[srcIndex++] * alpha;
+			outBmp->Data[dstIndex  ] = inBmp->Data[srcIndex  ] * alpha;
 		}
 	}
-	__global__ void CRCuBmpConvertFrom1To4BPP(CR_BMP const* inBmp, CR_BMP* outBmp)
+	__global__ void CRCuBmpConvertFrom1To4BPP(CR_FBMP const* inBmp, CR_FBMP* outBmp)
 	{
-		CRIA_CRBMPCONVERTFROM_TO_BPP_VALIDATION_CHECK(inBmp, outBmp, 1, 4);
-
 		int startIndex = blockIdx.x * blockDim.x + threadIdx.x;
 		int stride = blockDim.x * gridDim.x;
 
@@ -147,13 +183,11 @@ namespace cria_ai { namespace paco {
 			outBmp->Data[dstIndex++] = inBmp->Data[pixel];
 			outBmp->Data[dstIndex++] = inBmp->Data[pixel];
 			outBmp->Data[dstIndex++] = inBmp->Data[pixel];
-			outBmp->Data[dstIndex  ] = 0xff; //100% alpha
+			outBmp->Data[dstIndex  ] = 1.0f; //100% alpha
 		}
 	}
-	__global__ void CRCuBmpConvertFrom3To4BPP(CR_BMP const* inBmp, CR_BMP* outBmp)
+	__global__ void CRCuBmpConvertFrom3To4BPP(CR_FBMP const* inBmp, CR_FBMP* outBmp)
 	{
-		CRIA_CRBMPCONVERTFROM_TO_BPP_VALIDATION_CHECK(inBmp, outBmp, 3, 4);
-
 		int startIndex = blockIdx.x * blockDim.x + threadIdx.x;
 		int stride = blockDim.x * gridDim.x;
 
@@ -165,20 +199,20 @@ namespace cria_ai { namespace paco {
 			outBmp->Data[dstIndex++] = inBmp->Data[srcIndex++];
 			outBmp->Data[dstIndex++] = inBmp->Data[srcIndex++];
 			outBmp->Data[dstIndex++] = inBmp->Data[srcIndex++];
-			outBmp->Data[dstIndex  ] = 0xff; //100% alpha
+			outBmp->Data[dstIndex  ] = 1.0f; //100% alpha
 		}
 	}
-	void    CRBmpConvertToBPP(CR_BMP const* inBmp, CR_BMP* outBmp)
+	void    CRFBmpConvertToFPP(CR_FBMP const* inBmp, CR_FBMP* outBmp)
 	{
 		/*
 		* Validation
 		*/
-		CRIA_CRBMPCONVERTTOBPP_VALIDATION_CHECK(inBmp, outBmp);
+		CRIA_CRFBmpConvertToFPP_VALIDATION_CHECK(inBmp, outBmp);
 		
 		/*
 		* Select converter
 		*/
-		CRIA_CRBMPCONVERTTOBPP_IF_SAME_BPP(inBmp, outBmp);
+		CRIA_CRFBmpConvertToFPP_IF_SAME_BPP(inBmp, outBmp);
 
 		/*
 		* The first 4 bits indicates the input bitmap bpp and
@@ -191,7 +225,7 @@ namespace cria_ai { namespace paco {
 		* This is trashy yet genius                       ~xFrednet 06.06.2018
 		* Reworked, even more genius and less trashy!     ~xFrednet 06.06.2018
 		*/
-		byte coversion = (inBmp->Bpp << 4) | (outBmp->Bpp);
+		byte coversion = (inBmp->Fpp << 4) | (outBmp->Fpp);
 		switch (coversion) {
 			case 0x13: 
 				CRCuBmpConvertFrom1To3BPP CRIA_CUDA_CALL (inBmp, outBmp);
@@ -215,55 +249,55 @@ namespace cria_ai { namespace paco {
 				break;
 
 			default:
-				CRIA_AUTO_ASSERT(false, "The conversion failed: inBmp->Bpp: %u, outBmp->Bpp: %u ", inBmp->Bpp, outBmp->Bpp);
-				CR_BMP_FILL_ZERO(outBmp);;
+				CRIA_AUTO_ASSERT(false, "The conversion failed: inBmp->Fpp: %u, outBmp->Fpp: %u ", inBmp->Fpp, outBmp->Fpp);
+				CR_FBMP_FILL_ZERO(outBmp);;
 				return;
 		}
 		cudaDeviceSynchronize();
 	}
 
 	/*
-	* CRBmpScale
+	* CRFBmpScale
 	*/
-	__global__ void CRCuBmpScale(CR_BMP const* inBmp, CR_BMP* outBmp, float srcScale)
+	__global__ void CRCuBmpScale(CR_FBMP const* inBmp, CR_FBMP* outBmp, float srcScale)
 	{
 		int startIndex = blockIdx.x * blockDim.x + threadIdx.x;
 		int stride = blockDim.x * gridDim.x;
 
 		for (uint pixel = startIndex; pixel < outBmp->Width * outBmp->Height; pixel += stride)
 		{
-			uint dstX = pixel % outBmp->Width;
-			uint dstY = pixel / outBmp->Width;
-			uint dstIndex = CR_BMP_PX_INDEX(dstX, dstY, outBmp);
-			uint srcIndex = CR_BMP_PX_INDEX((uint)floorf(dstX * srcScale), (uint)floorf(dstY * srcScale), outBmp);
+			uint dstX = uint(pixel % outBmp->Width);
+			uint dstY = uint(pixel / outBmp->Width);
+			uint dstIndex = CR_FBMP_PX_INDEX(dstX, dstY, outBmp);
+			uint srcIndex = CR_FBMP_PX_INDEX((uint)floorf(dstX * srcScale), (uint)floorf(dstY * srcScale), inBmp);
 
-			for (uint byteNo = 0; byteNo < outBmp->Bpp; byteNo++) 
+			for (uint byteNo = 0; byteNo < outBmp->Fpp; byteNo++) 
 			{
 				outBmp->Data[dstIndex + byteNo] = inBmp->Data[srcIndex + byteNo];
 			}
 		}
 
 	}
-	void CRBmpScale(CR_BMP const* inBmp, CR_BMP* outBmp, float scale)
+	void CRFBmpScale(CR_FBMP const* inBmp, CR_FBMP* outBmp, float scale)
 	{
 		/*
 		 * Validation
 		 */
-		CRIA_CRBMPSCALE_VALIDATION_CHECK(inBmp, outBmp, scale);
+		CRIA_CRFBmpScale_VALIDATION_CHECK(inBmp, outBmp, scale);
 
 		/*
 		 * Scaling
 		 */
-		CRIA_CRBMPSCALE_IF_SCALE_1(inBmp, outBmp, scale);
+		CRIA_CRFBmpScale_IF_SCALE_1(inBmp, outBmp, scale);
 
 		CRCuBmpScale CRIA_CUDA_CALL (inBmp, outBmp, 1.0f / scale);
 		cudaDeviceSynchronize();
 	}
 
 	/*
-	 * CRBmpToMatf
+	 * CRFBmpToMatf
 	 */
-	__global__ void CRCuBmpToMatf(CR_BMP const* inBmp, CRMatrixf* outMat)
+	__global__ void CRCuBmpToMatf(CR_FBMP const* inBmp, CRMatrixf* outMat)
 	{
 		int startIndex = blockIdx.x * blockDim.x + threadIdx.x;
 		int stride = blockDim.x * gridDim.x;
@@ -273,12 +307,12 @@ namespace cria_ai { namespace paco {
 			outMat->Data[index] = (float)inBmp->Data[index] / 255.0f;
 		}
 	}
-	void CRBmpToMatf(CR_BMP const* inBmp, CRMatrixf* outMat)
+	void CRFBmpToMatf(CR_FBMP const* inBmp, CRMatrixf* outMat)
 	{
 		/*
 		* Validation
 		*/
-		CRIA_CRBMPTOMATF_VALIDATION_CHECK(inBmp, outMat);
+		CRIA_CRFBmpToMatf_VALIDATION_CHECK(inBmp, outMat);
 
 		/*
 		 * Convert
