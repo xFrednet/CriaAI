@@ -45,6 +45,7 @@
 #include "util/Random.h"
 #include "util/Clock.h"
 #include "util/FloatBitmap.h"
+#include "util/FloatBitmap.h"
 
 /*
  * Maths
@@ -60,3 +61,4 @@
 #include <fstream>
 #include <memory>
 #include <chrono>
+#include <mutex>

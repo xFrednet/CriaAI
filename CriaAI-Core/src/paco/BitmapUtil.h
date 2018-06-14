@@ -32,7 +32,7 @@
 ******************************************************************************/
 #pragma once
 
-#include "../util/FBmpFile.h"
+#include "../util/FloatBitmap.h"
 
 #include "../Common.hpp"
 
@@ -46,9 +46,15 @@
 */
 namespace cria_ai { namespace paco {
 
+	/* ###################################################################################### */
+	// # CRFBmpConvertBMPToFBMPData #
+	/* ###################################################################################### */
 	void              CRFBmpConvertBMPToFBMPData(byte const* byteData, float* outFloatData, uint valueCount);
 	void              CRFBmpConvertFBMPToBMPData(float const* floatData, byte* outByteData, uint valueCount);
 
+	/* ###################################################################################### */
+	// # CRFBmpConvertToFPP #
+	/* ###################################################################################### */
 	void              CRFBmpConvertToFPP(CR_FBMP const* inBmp, CR_FBMP* outBmp);
 	inline CR_FBMP*   CRFBmpConvertToFPP(CR_FBMP const* inBmp, uint targetFpp)
 	{
@@ -75,6 +81,9 @@ namespace cria_ai { namespace paco {
 		return outBmp;
 	}
 
+	/* ###################################################################################### */
+	// # CRFBmpScale #
+	/* ###################################################################################### */
 	void              CRFBmpScale(CR_FBMP const* inBmp, CR_FBMP* outBmp, float scale);
 	inline CR_FBMP*   CRFBmpScale(CR_FBMP const* inBmp, float scale)
 	{
@@ -105,6 +114,9 @@ namespace cria_ai { namespace paco {
 		return outBmp;
 	}
 
+	/* ###################################################################################### */
+	// # CRFBmpToMatf #
+	/* ###################################################################################### */
 	void              CRFBmpToMatf(CR_FBMP const* inBmp, CRMatrixf* outMat);
 	inline CRMatrixf* CRFBmpTo1DMatf(CR_FBMP const* inBmp)
 	{
@@ -151,5 +163,69 @@ namespace cria_ai { namespace paco {
 		CRFBmpToMatf(inBmp, outMat);
 
 		return outMat;
+	}
+
+	/* ###################################################################################### */
+	// # CRFBmpCalculateFeatureMap #
+	/* ###################################################################################### */
+	//TODO void            CRFBmpCalculateFeatureMap(CR_FBMP const* inBmp, CR_FBMP* outBmp, CR_FBMP const* feature);
+	//TODO inline CR_FBMP* CRFBmpCalculateFeatureMap(CR_FBMP const* inBmp, CR_FBMP const* feature);
+
+	/* ###################################################################################### */
+	// # CRFBmpPool #
+	/* ###################################################################################### */
+	void            CRFBmpPool(CR_FBMP const* inBmp, CR_FBMP* outBmp, uint poolSize);
+	inline CR_FBMP* CRFBmpPool(CR_FBMP const* inBmp, uint poolSize)
+	{
+		/*
+		 * Validation
+		 */
+		if (!inBmp || poolSize == 0)
+		{
+			return nullptr;
+		}
+
+		/*
+		 * Create output
+		 */
+		uint outWidth  = (inBmp->Width  / poolSize) + ((inBmp->Width  % poolSize != 0) ? 1 : 0);
+		uint outHeight = (inBmp->Height / poolSize) + ((inBmp->Height % poolSize != 0) ? 1 : 0);
+		CR_FBMP* outBmp = CRFBmpCreate(outWidth, outHeight, inBmp->Fpp);
+		if (!outBmp)
+			return nullptr;
+		
+		/*
+		 * Pool and return
+		 */
+		CRFBmpPool(inBmp, outBmp, poolSize);
+
+		return outBmp;
+	}
+
+	/* ###################################################################################### */
+	// # CRFBmpNormalize #
+	/* ###################################################################################### */
+	void            CRFBmpNormalize(CR_FBMP const* inBmp, CR_FBMP const* outBmp);
+	inline CR_FBMP* CRFBmpNormalize(CR_FBMP* inBmp)
+	{
+		/*
+		 * Validation
+		 */
+		if (!inBmp)
+			return nullptr;
+
+		/*
+		 * Create output
+		 */
+		CR_FBMP* outBmp = CRFBmpCreate(inBmp->Width, inBmp->Height, inBmp->Fpp);
+		if (!outBmp)
+			return nullptr;
+
+		/*
+		 * Normalize and return
+		 */
+		CRFBmpNormalize(inBmp, outBmp);
+
+		return outBmp;
 	}
 }}

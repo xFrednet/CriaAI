@@ -36,6 +36,10 @@
 #	include "cuda/CuContext.cuh"
 #endif
 
+#ifdef CRIA_PACO_NULL
+#	include "null/NuContext.h"
+#endif
+
 namespace cria_ai { namespace paco {
 	
 	CRPaCoContext* CRPaCoContext::s_Instance = nullptr;
@@ -46,6 +50,8 @@ namespace cria_ai { namespace paco {
 
 #ifdef CRIA_PACO_CUDA
 		instance = new cu::CRCuContext();
+#elif defined(CRIA_PACO_NULL)
+		instance = new null::CRNuContext();
 #endif
 
 		if (!instance)
@@ -76,6 +82,8 @@ namespace cria_ai { namespace paco {
 	{
 #ifdef CRIA_PACO_CUDA
 		return cu::CRCuMalloc(size);
+#elif defined(CRIA_PACO_NULL)
+		return null::CRNuMalloc(size);
 #else
 #		error CRPaCoMalloc is not implementet for the current parallel computing API
 		return nullptr;
@@ -85,6 +93,8 @@ namespace cria_ai { namespace paco {
 	{
 #ifdef CRIA_PACO_CUDA
 		return cu::CRCuFree(mem);
+#elif defined(CRIA_PACO_NULL)
+		return null::CRNuFree(mem);
 #else
 #		error CRPaCoFree is not implementet for the current parallel computing API
 		return nullptr;

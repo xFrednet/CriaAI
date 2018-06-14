@@ -2,7 +2,6 @@
 
 #include "../Common.hpp"
 #include "Window.h"
-#include <mutex>
 
 #define CR_SCREENCAP_CHANNEL_COUNT     4
 
@@ -24,7 +23,7 @@ namespace cria_ai { namespace os {
 		CRWindowPtr m_Target;
 
 		std::mutex       m_FrameLock;
-		CR_FLOAT_BITMAP* m_Frame;
+		CR_FBMP*         m_Frame;
 		CR_RECT          m_FrameSize;
 		bool             m_ContinueCapture;
 
@@ -54,7 +53,7 @@ namespace cria_ai { namespace os {
 		 * \return This returns a bitmap that has to be requested has to be 
 		 * deleted by the requester using "CRDeleteFBmpNormal"
 		 */
-		CR_FLOAT_BITMAP* getFrame();
+		CR_FBMP* getFrame();
 	};
 
 }}

@@ -139,7 +139,7 @@ namespace cria_ai { namespace os { namespace win {
 		 */
 		std::lock_guard<std::mutex> lock(m_FrameLock);
 		if (!m_Frame) {
-			m_Frame = CRCreateFBmpNormal(m_FrameSize.Width, m_FrameSize.Height, CR_SCREENCAP_CHANNEL_COUNT);
+			m_Frame = CRFBmpCreateNormal(m_FrameSize.Width, m_FrameSize.Height, CR_SCREENCAP_CHANNEL_COUNT);
 			if (!m_Frame)
 				return CRRES_ERR_UTILS_FAILED_TO_CREATE_FBMP;
 		}
@@ -154,7 +154,6 @@ namespace cria_ai { namespace os { namespace win {
 			m_Frame->Data[pxNo + 2] = ((float)m_BmpIntBuffer[pxNo + 0]) / 255.0f; /* B */
 			m_Frame->Data[pxNo + 3] = 1.0f; /* A */
 		}
-
 
 		/*
 		* Returning de la output

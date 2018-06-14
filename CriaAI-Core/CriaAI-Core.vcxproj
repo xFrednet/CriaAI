@@ -56,7 +56,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>CR_CUDA;CRIA_DEBUG_ENABLE_INFO;_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>CRIA_DEBUG_ENABLE_INFO;_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>C:\Program Files %28x86%29\NVIDIA Corporation\NVIDIA Capture SDK\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -78,7 +78,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>CR_CUDA;_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>C:\Program Files %28x86%29\NVIDIA Corporation\NVIDIA Capture SDK\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -122,10 +122,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClCompile Include="src\network\NeuronNetwork.cpp" />
     <CudaCompile Include="src\paco\cuda\CuActivationFunctions.cu" />
     <CudaCompile Include="src\paco\cuda\CuBitmapUtil.cu" />
-    <CudaCompile Include="src\util\FloatBitmap.cu">
-      <FileType>Document</FileType>
-    </CudaCompile>
-    <ClCompile Include="src\util\FBmpFile.cpp" />
+    <ClCompile Include="src\util\FloatBitmap.cpp" />
     <ClCompile Include="src\util\Clock.cpp" />
     <ClCompile Include="src\util\Random.cpp" />
   </ItemGroup>
@@ -166,10 +163,9 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="src\network\NetworkUtil.h" />
     <ClInclude Include="src\network\NeuronNetwork.h" />
     <ClInclude Include="src\Types.hpp" />
-    <ClInclude Include="src\util\FBmpFile.h" />
+    <ClInclude Include="src\util\FloatBitmap.h" />
     <ClInclude Include="src\util\Clock.h" />
     <ClInclude Include="src\util\CRResult.h" />
-    <ClInclude Include="src\util\FloatBitmap.h" />
     <ClInclude Include="src\util\Random.h" />
   </ItemGroup>
   <ItemGroup>

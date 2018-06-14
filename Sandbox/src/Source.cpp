@@ -1,5 +1,4 @@
 #include <Cria.hpp>
-#include "src/util/FloatBitmap.h"
 
 #include <thread>
 
@@ -7,7 +6,6 @@
 #include <AsyncInfo.h>
 #include <cuda_runtime_api.h>
 
-#include "src/util/FBmpFile.h"
 #include "src/paco/BitmapUtil.h"
 
 #define BOI_TITLE                      "Binding of Isaac: Afterbirth+"
@@ -18,11 +16,10 @@
 
 #define CON_TITLE "C:\\Users\\xFrednet\\My Projects\\VS Projects\\CriaAI\\bin\\Debug\\Sandbox.exe"
 
-//#define LOG_TIME
+#define LOG_TIME
 
 using namespace std;
 using namespace cria_ai;
-using namespace bmp_renderer;
 using namespace network;
 
 void setConCursorPos(COORD pos = {0, 0})
@@ -43,14 +40,11 @@ COORD getConCursorPos()
 	return csbi.dwCursorPosition;
 }
 
-CRMatrixf* bmpToMat(CR_FLOAT_BITMAP* bmp)
-{
-	CRMatrixf* mat = CRCreateMatrixf(1, bmp->Width * bmp->Height);
-	memcpy(mat->Data, bmp->Data, sizeof(float) * mat->Rows);
+CR_FBMP* g_Fpp1Out = CRFBmpCreate(BOI_BASE_WIDTH * BOI_SCALE, BOI_BASE_HEIGHT * BOI_SCALE, 1);
+CR_FBMP* g_ScaleOut = CRFBmpCreate(BOI_BASE_WIDTH / BOI_SAMPLE_SIZE, BOI_BASE_HEIGHT / BOI_SAMPLE_SIZE, 1);
+CRMatrixf* g_MatOut = CRCreateMatrixf(1, (BOI_BASE_WIDTH / BOI_SAMPLE_SIZE) * (BOI_BASE_HEIGHT / BOI_SAMPLE_SIZE));
 
-	return mat;
-}
-CRMatrixf* processBOIFrame(CR_FLOAT_BITMAP* inFrame)
+CRMatrixf* processBOIFrame(CR_FBMP* inFrame)
 {
 	if (!inFrame || inFrame->Width != BOI_BASE_WIDTH * BOI_SCALE || inFrame->Height != BOI_BASE_HEIGHT * BOI_SCALE)
 	{
@@ -61,31 +55,28 @@ CRMatrixf* processBOIFrame(CR_FLOAT_BITMAP* inFrame)
 #ifdef LOG_TIME
 	StopWatch timer;
 #endif
-	CR_FLOAT_BITMAP* fpp1Out = CRConvertToFloatsPerPixel(inFrame, 1);
+	paco::CRFBmpConvertToFPP(inFrame, g_Fpp1Out);
 #ifdef LOG_TIME
-	std::cout << "    [INFO] fpp1Out      : " << timer.getTimeMSSinceStart() << std::endl;,1,0,1
+	std::cout << "    [INFO] fpp1Out      : " << timer.getTimeMSSinceStart() << "    "<< std::endl;
 	timer.start();
 #endif
 
-	CR_FLOAT_BITMAP* scaleOut = CRScaleFBmpDown(fpp1Out, BOI_SCALE);
+	paco::CRFBmpScale(g_Fpp1Out, g_ScaleOut, 1.0f / (BOI_SCALE * BOI_SAMPLE_SIZE));
 #ifdef LOG_TIME
-	std::cout << "    [INFO] scaleOut     : " << timer.getTimeMSSinceStart() << std::endl;
+	std::cout << "    [INFO] scaleOut     : " << timer.getTimeMSSinceStart() << "    " << std::endl;
 	timer.start();
 #endif
 
-	CR_FLOAT_BITMAP* poolOut = CRPoolBitmap(scaleOut, BOI_SAMPLE_SIZE);
-#ifdef LOG_TIME
-	std::cout << "    [INFO] poolOut      : " << timer.getTimeMSSinceStart() << std::endl;
-	timer.start();
-#endif
+	paco::CRFBmpToMatf(g_ScaleOut, g_MatOut);
 
-	CRMatrixf* mat = bmpToMat(poolOut);
-
-	CRDeleteFBmp(fpp1Out);
-	CRDeleteFBmp(scaleOut);
-	CRDeleteFBmp(poolOut);
-
-	return mat;
+	if (GetAsyncKeyState('O')) {
+		if (GetAsyncKeyState('2'))
+			CRFBmpSave(g_Fpp1Out, "frame/fpp1Out.bmp");
+		if (GetAsyncKeyState('3'))
+			CRFBmpSave(g_ScaleOut, "frame/scaleOut.bmp");
+	}
+	  
+	return g_MatOut;
 }
 CRNeuronNetwork* createBOINetwork(CRNeuronLayerPtr& outputLayer)
 {
@@ -200,17 +191,17 @@ void testBOINetwork()
 		/*
 		 * Frame
 		 */
-		CR_FLOAT_BITMAP* frame = capturer->getFrame();
+		CR_FBMP* frame = capturer->getFrame();
 
 		if (!frame)
 		{
 			continue;
 		}
 
-		if (GetAsyncKeyState('O'))
+		if (GetAsyncKeyState('O') && GetAsyncKeyState('1'))
 		{
 			String frameName = String("frame/frame") + std::to_string(frameNo++) + String(".bmp");
-			CRSaveBitmap(frame, frameName.c_str());
+			CRFBmpSave(frame, frameName.c_str());
 		}
 
 		/*
@@ -219,11 +210,14 @@ void testBOINetwork()
 
 		// frame processing
 		CRMatrixf* data = processBOIFrame(frame);
-		CRDeleteFBmpNormal(frame);
+		//CRMatrixf* data = nullptr;
+		CRFBmpDelete(frame);
+		if (!data)
+			continue;
 
 		// process data
 		network->process(data);
-		CRDeleteMatrixf(data);
+		//CRDeleteMatrixf(data);
 
 		// print result
 		printBOIOutput(outputLayer->getOutput());
@@ -267,22 +261,6 @@ int main(int argc, char* argv)
 	r = os::CROSContext::InitInstance();
 	printf("os::CROSContext::InitInstance: %s \n", CRGetCRResultName(r).c_str());
 
-	{
-		CR_FBMP* bmp = CRFBmpLoad("bmptest/test.bmp");
-		CRFBmpSave(bmp, "bmptest/intbmp.bmp");
-		CR_FBMP* bmp2 = paco::CRFBmpScale(bmp, 0.5f);
-		CR_FBMP* bmp3 = paco::CRFBmpScale(bmp, 2.0f);
-		CRFBmpSave(bmp2, "bmptest/bmp2.bmp");
-		CRFBmpSave(bmp3, "bmptest/bmp3.bmp");
-
-		CRFBmpDelete(bmp);
-		CRFBmpDelete(bmp2);
-		CRFBmpDelete(bmp3);
-
-		std::cin.get();
-	}
-
-
 	std::cout << std::endl;
 	std::cout << "Press Y to skip" << std::endl;
 	std::cout << std::endl;
@@ -290,6 +268,9 @@ int main(int argc, char* argv)
 	COORD conCursorPos = getConCursorPos();
 	for (uint sleep = 10; sleep > 0; sleep--)
 	{
+		if (GetAsyncKeyState('X')) {
+			break;
+		}
 		if (GetAsyncKeyState('Y')) 
 		{
 			setConCursorPos(conCursorPos);
@@ -304,7 +285,9 @@ int main(int argc, char* argv)
 	/*
 	 * Network test
 	 */
-	testBOINetwork();
+	if (!GetAsyncKeyState('X')) {
+		testBOINetwork();
+	}
 
 	/*
 	 * cleanup

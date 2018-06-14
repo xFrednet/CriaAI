@@ -62,7 +62,7 @@ if (!floatData || !outByteData || valueCount == 0) \
 		outFBmp->Width  != inFBmp->Width ||\
 		outFBmp->Height != inFBmp->Height)\
 	{\
-		CR_FBMP_FILL_ZERO(outFBmp);\
+		CR_FBMP_FILL_ZERO_IF_VALID(outFBmp);\
 		return;\
 	}\
 }
@@ -79,13 +79,13 @@ if (inFBmp->Fpp == outFBmp->Fpp)\
 #define CRIA_CRFBmpScale_VALIDATION_CHECK(inFBmp, outFBmp, scale)\
 {\
 	uint outWidth = (uint)ceilf((float)inFBmp->Width * scale);\
-	uint outHeight = (uint)ceilf((float)inFBmp->Width * scale); \
+	uint outHeight = (uint)ceilf((float)inFBmp->Height * scale); \
 	if (!inFBmp || !outFBmp || \
 		outFBmp->Width != outWidth || \
 		outFBmp->Height != outHeight || \
 		scale == 0) \
 	{\
-		CR_FBMP_FILL_ZERO(outFBmp);\
+		CR_FBMP_FILL_ZERO_IF_VALID(outFBmp);\
 		return;\
 	}\
 }
@@ -102,7 +102,49 @@ if (scale == 1.0f) {\
 if (!inFBmp || !outMat ||\
 	CR_MATF_VALUE_COUNT(outMat) != CR_FBMP_VALUE_COUNT(inFBmp))\
 {\
-	CR_MATF_FILL_ZERO(outMat);\
+	CR_MATF_FILL_ZERO_IF_VALID(outMat);\
 	return;\
 }
 
+/*
+ * CRFBmpPool
+ */
+#define CRIA_CRFBmpPool_VALIDATION_CHECK(inBmp, outBmp, poolSize)\
+{\
+	uint outWidth = (inBmp->Width / poolSize) + ((inBmp->Width  % poolSize != 0) ? 1 : 0);\
+	uint outHeight = (inBmp->Height / poolSize) + ((inBmp->Height % poolSize != 0) ? 1 : 0);\
+	if (!inBmp || !outBmp ||\
+		outBmp->Width != outWidth ||\
+		outBmp->Height != outHeight ||\
+		inBmp->Fpp != outBmp->Fpp ||\
+		poolSize == 0)\
+	{\
+		CR_FBMP_FILL_ZERO_IF_VALID(outBmp);\
+		return;\
+	}\
+}
+#define CRIA_CRFBmpPool_IS_POOLSIZE_1(inBmp, outBmp, poolSize)\
+if (poolSize == 1)\
+{\
+	CR_FBMP_COPY_DATA(inBmp, outBmp);\
+	return;\
+}
+
+/*
+ * CRFBmpNormalize
+ */
+#define CRIA_CRFBmpNormalize_IS_VALID(inBmp, outBmp)\
+if (!inBmp || !outBmp ||\
+	inBmp->Width != outBmp->Width ||\
+	inBmp->Height != outBmp->Height||\
+	inBmp->Fpp != outBmp->Fpp)\
+{\
+	CR_FBMP_FILL_ZERO_IF_VALID(outBmp); \
+	return; \
+}
+#define CRIA_CRFBmpNormalize_IF_1_FPP(inBmp, outBmp)\
+if (inBmp->Fpp == 1)\
+{\
+	CR_FBMP_COPY_DATA(inBmp, outBmp);\
+	return;\
+}

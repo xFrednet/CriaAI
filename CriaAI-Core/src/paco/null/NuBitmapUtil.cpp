@@ -194,9 +194,12 @@ namespace cria_ai { namespace paco {
 		 */
 		CRIA_CRFBmpScale_VALIDATION_CHECK(inBmp, outBmp, scale);
 
+		/*
+		 * Scaling
+		 */
 		CRIA_CRFBmpScale_IF_SCALE_1(inBmp, outBmp, scale);
 
-		float srcScale = 1 / scale;
+		float srcScale = 1.0f / scale;
 
 		float srcX = 0.0f;
 		float srcY = 0.0f;
@@ -208,7 +211,7 @@ namespace cria_ai { namespace paco {
 				void* src = &inBmp->Data[CR_FBMP_PX_INDEX((uint)floor(srcX), (uint)floor(srcY), inBmp)];
 				void* dst = &outBmp->Data[CR_FBMP_PX_INDEX(x, y, outBmp)];
 
-				memcpy(dst, src, inBmp->Fpp);
+				memcpy(dst, src, sizeof(float) * inBmp->Fpp);
 
 				srcX += srcScale;
 			}
@@ -231,6 +234,108 @@ namespace cria_ai { namespace paco {
 		}
 	}
 
+	void CRFBmpPool(CR_FBMP const* inBmp, CR_FBMP* outBmp, uint poolSize)
+	{
+		/*
+		* Validation
+		*/
+		CRIA_CRFBmpPool_VALIDATION_CHECK(inBmp, outBmp, poolSize);
+
+		/*
+		* Pooling
+		*/
+		CRIA_CRFBmpPool_IS_POOLSIZE_1(inBmp, outBmp, poolSize);
+
+		uint poolCount = outBmp->Width * outBmp->Height;
+		for (uint poolNo = 0; poolNo < poolCount; poolNo++) {
+			uint poolX = poolNo % outBmp->Width;
+			uint poolY = poolNo / outBmp->Height;
+
+			/*
+			* Save first pool Value
+			*/
+			uint xa = poolX * poolSize;
+			uint ya = poolY * poolSize;
+			float maxValues[4];
+			for (uint channel = 0; channel < inBmp->Fpp; channel++)
+				maxValues[channel] = inBmp->Data[CR_FBMP_PX_INDEX(xa, ya, inBmp) + channel];
+
+			/*
+			* scanning the pool
+			*/
+			for (uint y = 0; y < poolSize && ya < inBmp->Height; y++, ya++) {
+				xa = poolX * poolSize;
+
+				for (uint x = 0; x < poolSize && xa < inBmp->Width; x++, xa++) {
+
+					for (uint channel = 0; channel < inBmp->Fpp; channel++) {
+						uint index = CR_FBMP_PX_INDEX(xa, ya, inBmp);
+
+						if (maxValues[channel] < inBmp->Data[index + channel])
+							maxValues[channel] = inBmp->Data[index + channel];
+					}
+
+				}
+			}
+
+			/*
+			* saving the result
+			*/
+			for (uint channel = 0; channel < inBmp->Fpp; channel++)
+				outBmp->Data[CR_FBMP_PX_INDEX(poolX, poolY, outBmp) + channel] = maxValues[channel];
+		}
+	}
+
+	void CRFBmpNormalize(CR_FBMP const* inBmp, CR_FBMP const* outBmp)
+	{
+		/*
+		* Validation
+		*/
+		CRIA_CRFBmpNormalize_IS_VALID(inBmp, outBmp);
+
+		/*
+		* Normalizing
+		*/
+		CRIA_CRFBmpNormalize_IF_1_FPP(inBmp, outBmp);
+
+		/*
+		* Note only the RGB channels are normalized.
+		* The alpha value will just be copied.
+		*
+		* Only 3 and 4 Fpp Bitmaps are passed into this function(If not hot fix it!)
+		*/
+		for (uint index = 0; index < inBmp->Width * inBmp->Height; index++) {
+			uint pxIndex = index = inBmp->Fpp;
+
+			float total = 0.0f;
+			for (uint fNo = 0; fNo < 3; fNo++) {
+				total += inBmp->Data[pxIndex + fNo];
+			}
+
+			/*
+			* Copy the alpha channel because it not normalized.
+			* Ff the bitmap has only 3 floats per pixel it will be overridden
+			* in the next step anyways
+			*/
+			outBmp->Data[pxIndex + inBmp->Fpp - 1] = inBmp->Data[pxIndex + inBmp->Fpp - 1];
+
+			/*
+			* Set data to 0 if total is 0
+			* Normalize if total is not 0
+			*/
+			if (total == 0.0f) {
+				for (uint fNo = 0; fNo < inBmp->Fpp; fNo++) {
+					outBmp->Data[pxIndex + fNo] = 0;
+				}
+			}
+			else {
+				for (uint fNo = 0; fNo < 3; fNo++) {
+					outBmp->Data[pxIndex + fNo] = inBmp->Data[pxIndex + fNo] / total;
+				}
+			}
+
+		}
+	}
 }}
 
 #endif CRIA_PACO_NULL

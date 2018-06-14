@@ -30,13 +30,14 @@
 *       distribution.                                                         *
 *                                                                             *
 ******************************************************************************/
-#include "FBmpFile.h"
+#include "FloatBitmap.h"
 
 #include "../paco/PaCoContext.h"
 #include "../paco/BitmapUtil.h"
 
 #include "../../Dependencies/BmpRenderer/Dependencies/libbmpread/bmpread.h"
 #include "../os/FileSystem.h"
+#include "../../Dependencies/BmpRenderer/src/RendererBitmap.hpp"
 
 namespace cria_ai {
 	/*
@@ -53,6 +54,9 @@ memset(bmp->Data, 0, CR_FBMP_DATA_SIZE(bmp));
 
 	CR_FBMP* CRFBmpCreatePACO(uint width, uint height, uint fpp)
 	{
+		static std::mutex hello;
+		std::lock_guard<std::mutex> helloFromTheOtherSide(hello);
+
 		/*
 		 * Validation
 		 */
@@ -105,15 +109,15 @@ memset(bmp->Data, 0, CR_FBMP_DATA_SIZE(bmp));
 	/*
 	* CRFBmpDelete
 	*/
-	void     CRFBmpDeletePACO(CR_FBMP* bmp)
+	void     CRFBmpDeletePACO(CR_FBMP* fbmp)
 	{
-		if (bmp)
-			paco::CRPaCoFree(bmp);
+		if (fbmp)
+			paco::CRPaCoFree(fbmp);
 	}
-	void     CRFBmpDeleteNormal(CR_FBMP* bmp)
+	void     CRFBmpDeleteNormal(CR_FBMP* fbmp)
 	{
-		if (bmp)
-			free(bmp);
+		if (fbmp)
+			free(fbmp);
 	}
 
 	CR_FBMP* CRFBmpLoad(const String& file, crresult* result)

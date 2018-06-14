@@ -34,7 +34,7 @@
 
 #ifdef CRIA_PACO_NULL
 
-namespace cria_ai { namespace paco { namespace null {
+namespace cria_ai { namespace paco {
 	
 	void CRSigmoid(CRNWMat const* input, CRNWMat* output)
 	{
@@ -59,6 +59,6 @@ namespace cria_ai { namespace paco { namespace null {
 		}
 	}
 
-}}}
+}}
 
 #endif // CRIA_PACO_NULL

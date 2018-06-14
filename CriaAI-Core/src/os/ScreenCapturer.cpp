@@ -55,7 +55,7 @@ namespace cria_ai { namespace os {
 
 		m_FrameLock.lock();
 		if (m_Frame) {
-			CRDeleteFBmpNormal(m_Frame);
+			CRFBmpDeleteNormal(m_Frame);
 			m_Frame = nullptr;
 		}
 		m_FrameLock.unlock();
@@ -71,12 +71,14 @@ namespace cria_ai { namespace os {
 		 * Create new bmp
 		 */
 		m_FrameLock.lock();
+		
 		// delete old frame
 		if (m_Frame)
 		{
-			CRDeleteFBmpNormal(m_Frame);
+			CRFBmpDeleteNormal(m_Frame);
 			m_Frame = nullptr;
 		}
+		
 		// Frame size
 		m_FrameSize.Width = area.Width;
 		m_FrameSize.Height = area.Height;
@@ -140,14 +142,16 @@ namespace cria_ai { namespace os {
 		return m_ContinueCapture;
 	}
 
-	CR_FLOAT_BITMAP* CRScreenCapturer::getFrame()
+	CR_FBMP* CRScreenCapturer::getFrame()
 	{
+		CR_FBMP* outBmp = CRFBmpCreate(m_FrameSize.Width, m_FrameSize.Height, CR_SCREENCAP_CHANNEL_COUNT);
+
 		m_FrameLock.lock();
-		CR_FLOAT_BITMAP* frame = m_Frame;
-		m_Frame = nullptr;
+		//CR_FBMP* frame = m_Frame;
+		CR_FBMP_COPY_DATA(m_Frame, outBmp);
 		m_FrameLock.unlock();
 
-		return frame;
+		return outBmp;
 	}
 
 }}

@@ -1,9 +1,10 @@
 #pragma once
 #include "../Types.hpp"
 
-#define CR_MATF_DATA_SIZE(mat)         (sizeof(float) * (mat)->Cols * (mat)->Rows)
-#define CR_MATF_FILL_ZERO(mat)         (memset((mat)->Data, 0, CR_MATF_DATA_SIZE(mat)))
-#define CR_MATF_VALUE_COUNT(mat)       ((mat)->Cols * (mat)->Rows)
+#define CR_MATF_DATA_SIZE(mat)                   (sizeof(float) * (mat)->Cols * (mat)->Rows)
+#define CR_MATF_FILL_ZERO(mat)                   (memset((mat)->Data, 0, CR_MATF_DATA_SIZE(mat)))
+#define CR_MATF_FILL_ZERO_IF_VALID(mat)          if (mat) {CR_MATF_FILL_ZERO(mat);}
+#define CR_MATF_VALUE_COUNT(mat)                 ((mat)->Cols * (mat)->Rows)
 
 namespace cria_ai
 {
