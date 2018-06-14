@@ -1,12 +1,8 @@
 #include <Cria.hpp>
 
-#include <thread>
+#include <AsyncInfo.h>
 
 #include "tests/MathTests.h"
-#include <AsyncInfo.h>
-#include <cuda_runtime_api.h>
-
-#include "src/paco/BitmapUtil.h"
 
 #define BOI_TITLE                      "Binding of Isaac: Afterbirth+"
 #define BOI_BASE_WIDTH                 512

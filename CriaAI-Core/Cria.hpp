@@ -34,15 +34,41 @@
 
 #include "src/Common.hpp"
 
-#include "src/maths/Matrixf.hpp"
-
+/*
+ * Util
+ */
+#include "src/util/Clock.h"
+#include "src/util/CRResult.h"
 #include "src/util/FloatBitmap.h"
+#include "src/util/Random.h"
 
-#include "src/os/OSContext.h"
-#include "src/os/Window.h"
-#include "src/os/ScreenCapturer.h"
-#include "src/os/InputSimulator.h"
-#include "src/os/InputLogger.h"
+/*
+ * Maths
+ */
+#include "src/maths/Maths.h"
+
+/*
+ * Operation System
+ */
 #include "src/os/FileSystem.h"
+#include "src/os/InputUtil.h"
+#include "src/os/InputLogger.h"
+#include "src/os/InputSimulator.h"
+#include "src/os/OSContext.h"
+#include "src/os/ScreenCapturer.h"
+#include "src/os/Window.h"
 
+/*
+ * Paco
+ */
+#include "src/paco/BitmapUtil.h"
+#include "src/paco/ActivationFunctions.h"
+#include "src/paco/PaCoContext.h"
+
+/*
+ * Network
+ */
+#include "src/network/NetworkUtil.h"
+#include "src/network/NeuronLayer.h"
 #include "src/network/NeuronNetwork.h"
+
