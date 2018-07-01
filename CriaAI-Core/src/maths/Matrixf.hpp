@@ -4,6 +4,8 @@
 #define CR_MATF_DATA_SIZE(mat)                   (sizeof(float) * (mat)->Cols * (mat)->Rows)
 #define CR_MATF_FILL_ZERO(mat)                   (memset((mat)->Data, 0, CR_MATF_DATA_SIZE(mat)))
 #define CR_MATF_FILL_ZERO_IF_VALID(mat)          if (mat) {CR_MATF_FILL_ZERO(mat);}
+#define CR_MATF_COPY_DATA(dst, src)              memcpy((dst)->Data, (src)->Data, CR_MATF_DATA_SIZE(src))
+#define CR_MATF_VALUE_INDEX(col, row, mat)       ((col) + (row) * (mat)->Cols)
 #define CR_MATF_VALUE_COUNT(mat)                 ((mat)->Cols * (mat)->Rows)
 
 namespace cria_ai

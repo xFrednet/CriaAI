@@ -5,6 +5,7 @@
 #include "NetworkUtil.h"
 
 #include "NeuronLayer.h"
+#include "Backprop.h"
 
 namespace cria_ai { namespace network {
 	
@@ -20,7 +21,11 @@ namespace cria_ai { namespace network {
 
 		void initRandom();
 
-		void process(CRMatrixf const* data);
+		void process(CRMatrixf const* data, CR_NN_BP_LAYER_OUTPUTS* outputs = nullptr);
+
+		uint getLayerCount() const;
+		std::list<CRNeuronLayer*> getLayers();
+		std::list<CRNeuronLayer const*> getLayers() const;
 	};
 
 }}

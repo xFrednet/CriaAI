@@ -226,6 +226,7 @@ namespace cria_ai
 		file.close();
 		return true;
 	}
+
 	bool       CRWriteMatrixfBmp(CRMatrixf* mat, char const* fileName)
 	{
 		using namespace bmp_renderer;

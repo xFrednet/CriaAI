@@ -4,6 +4,7 @@ Word                    Abbreviation
 -------------------- - --------------------
 Bitmap               - bmp
 Bounderies           - bounds
+Backpropagation      - bp | backprop
 Bytes Per Pixel      - bpp
 Callback             - cb
 Client area          - cArea

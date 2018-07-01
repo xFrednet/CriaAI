@@ -32,83 +32,53 @@
 ******************************************************************************/
 #pragma once
 
-#include "NetworkUtil.h"
-
-#include "../maths/Matrixf.hpp"
-
-#include "../paco/ActivationFunctions.h"
+#include "../Common.hpp"
 
 namespace cria_ai { namespace network {
-
 	
-	/**
-	 * \brief 
-	 * 
-	 * Structure:
-	 * 
-	 * [CRNeuronLayer]
-	 * 
-	 * m_ActivationFunc([input] * [m_Weights] - [m_Bias]) -> [m_Output]
-	 * 
+	class CRNeuronNetwork;
+
+	/* //////////////////////////////////////////////////////////////////////////////// */
+	// // CR_NN_BP_INFO //
+	/* //////////////////////////////////////////////////////////////////////////////// */
+	typedef struct CR_NN_BP_INFO_ {
+
+		// Struct info
+		uint LayerCount;
+		uint BatchSize;
+		uint TotalBPsCount;
+
+		// bp info
+		float       AverageCost;
+		CRMatrixf** BiasChanges;
+		CRMatrixf** WeightChanges;
+
+	} CR_NN_BP_INFO;
+
+	CR_NN_BP_INFO* CRCreateBPInfo(CRNeuronNetwork const* targetNN, uint batchSize);
+	void CRDeleteBPInfo(CR_NN_BP_INFO* bpInfo);
+
+	void CRResetBPInfo(CR_NN_BP_INFO* bpInfo);
+
+	/* //////////////////////////////////////////////////////////////////////////////// */
+	// // CR_NN_BP_LAYER_OUTPUTS //
+	/* //////////////////////////////////////////////////////////////////////////////// */
+	typedef struct CR_NN_BP_LAYER_OUTPUTS_ {
+		uint LayerCount; 
+		CRMatrixf** LayerOutputs; /* [input layer] + [hidden layers] + [output layer] */
+	} CR_NN_BP_LAYER_OUTPUTS;
+
+	CR_NN_BP_LAYER_OUTPUTS* CRCreateBPLayerOut(CRNeuronNetwork const* targetNN);
+	void CRDeleteBPLayerOut(CR_NN_BP_LAYER_OUTPUTS* lOutInfo);
+
+	/*
+	 * Can run in a different thread
 	 */
-	class CRNeuronLayer
-	{
-	protected:
-		CRNeuronLayer const* m_PrevLayer;
+	void CRBackprop(CR_NN_BP_INFO* bpInfo, CRMatrixf const* expectedOutput, 
+		CR_NN_BP_LAYER_OUTPUTS const* layerOutputs, CRNeuronNetwork const* network);
 
-		CRNWMat* m_Output;
-
-		CRNWMat* m_Weights;
-		CRNWMat* m_Bias;
-
-		uint m_NeuronCount;
-
-		paco::cr_activation_func     m_ActivationFunc;
-		paco::cr_activation_func_inv m_ActivationFuncInv;
-
-		bool m_IsOperational;
-
-		crresult initMatrices();
-		void updateIsOperational();
-	public:
-		/**
-		 * \brief 
-		 * 
-		 * \param prevLayer This is a pointer to the previous layer, this may only
-		 * be null if the created Layer is the first layer. In all other 
-		 * circumstances this pointer has to be valid.
-		 * 
-		 * \param neuronCount The amount of neurons in this layer.
-		 * 
-		 * \param result This is a pointer to retrieve the result of the creation operations.
-		 */
-		CRNeuronLayer(CRNeuronLayer const* prevLayer, uint neuronCount, crresult* result = nullptr);
-		~CRNeuronLayer();
-
-		void intiRandom();
-
-		void setActivationFunc(paco::cr_activation_func activationFunc, paco::cr_activation_func_inv activationFuncInv);
-
-		void processData(CRMatrixf const* inputData);
-
-		void applyBackpropagation(CRMatrixf const* weightChange, CRMatrixf const* biasChange);
-
-		/*
-		 * getters
-		 */
-		CRNWMat* getOutput();
-		CRNWMat const* getOutput() const;
-		CRNWMat* getWeights();
-		CRNWMat const* getWeights() const;
-		CRNWMat* getBias();
-		CRNWMat const* getBias() const;
-
-		paco::cr_activation_func getActivationFunc() const;
-		paco::cr_activation_func_inv getActivationFuncInv() const;
-
-		uint getNeuronCount() const;
-	};
-
-	typedef cr_ptr<CRNeuronLayer> CRNeuronLayerPtr;
-
+	/*
+	 * Run this on the main network thread
+	 */
+	void CRApplyBackprop(CRNeuronNetwork* network, CR_NN_BP_INFO const* bpInfo);
 }}

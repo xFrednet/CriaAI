@@ -180,6 +180,19 @@ namespace cria_ai { namespace network {
 
 	}
 
+	void CRNeuronLayer::applyBackpropagation(CRMatrixf const* weightChange, CRMatrixf const* biasChange)
+	{
+		if (!weightChange || !biasChange)
+			return;
+
+		CRMatrixf* newBias = CRAdd(m_Bias, biasChange);
+		CRMatrixf* newWeights = CRAdd(m_Weights, weightChange);
+		CRDeleteMatrixf(m_Bias);
+		CRDeleteMatrixf(m_Weights);
+		m_Bias = newBias;
+		m_Weights = newWeights;
+	}
+
 	/*
 	* getters
 	*/
@@ -207,6 +220,16 @@ namespace cria_ai { namespace network {
 	{
 		return m_Bias;
 	}
+
+	paco::cr_activation_func CRNeuronLayer::getActivationFunc() const
+	{
+		return m_ActivationFunc;
+	}
+	paco::cr_activation_func_inv CRNeuronLayer::getActivationFuncInv() const
+	{
+		return m_ActivationFuncInv;
+	}
+
 	uint CRNeuronLayer::getNeuronCount() const
 	{
 		return m_NeuronCount;

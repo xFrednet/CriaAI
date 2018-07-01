@@ -3,12 +3,14 @@
 #include <AsyncInfo.h>
 
 #include "tests/MathTests.h"
+#include "src/network/Backprop.h"
 
 #define BOI_TITLE                      "Binding of Isaac: Afterbirth+"
 #define BOI_BASE_WIDTH                 512
 #define BOI_BASE_HEIGHT                288
 #define BOI_SCALE                      2
 #define BOI_SAMPLE_SIZE                2
+#define BOI_BATCH_SIZE                 10000
 
 #define CON_TITLE "C:\\Users\\xFrednet\\My Projects\\VS Projects\\CriaAI\\bin\\Debug\\Sandbox.exe"
 
@@ -36,44 +38,9 @@ COORD getConCursorPos()
 	return csbi.dwCursorPosition;
 }
 
-CR_FBMP* g_Fpp1Out = CRFBmpCreate(BOI_BASE_WIDTH * BOI_SCALE, BOI_BASE_HEIGHT * BOI_SCALE, 1);
-CR_FBMP* g_ScaleOut = CRFBmpCreate(BOI_BASE_WIDTH / BOI_SAMPLE_SIZE, BOI_BASE_HEIGHT / BOI_SAMPLE_SIZE, 1);
-CRMatrixf* g_MatOut = CRCreateMatrixf(1, (BOI_BASE_WIDTH / BOI_SAMPLE_SIZE) * (BOI_BASE_HEIGHT / BOI_SAMPLE_SIZE));
-
-CRMatrixf* processBOIFrame(CR_FBMP* inFrame)
-{
-	if (!inFrame || inFrame->Width != BOI_BASE_WIDTH * BOI_SCALE || inFrame->Height != BOI_BASE_HEIGHT * BOI_SCALE)
-	{
-		std::cout << "    [INFO] processBOIFrame: something is wrong" << std::endl;
-		return nullptr;
-	}
-
-#ifdef LOG_TIME
-	StopWatch timer;
-#endif
-	paco::CRFBmpConvertToFPP(inFrame, g_Fpp1Out);
-#ifdef LOG_TIME
-	std::cout << "    [INFO] fpp1Out      : " << timer.getTimeMSSinceStart() << "    "<< std::endl;
-	timer.start();
-#endif
-
-	paco::CRFBmpScale(g_Fpp1Out, g_ScaleOut, 1.0f / (BOI_SCALE * BOI_SAMPLE_SIZE));
-#ifdef LOG_TIME
-	std::cout << "    [INFO] scaleOut     : " << timer.getTimeMSSinceStart() << "    " << std::endl;
-	timer.start();
-#endif
-
-	paco::CRFBmpToMatf(g_ScaleOut, g_MatOut);
-
-	if (GetAsyncKeyState('O')) {
-		if (GetAsyncKeyState('2'))
-			CRFBmpSave(g_Fpp1Out, "frame/fpp1Out.bmp");
-		if (GetAsyncKeyState('3'))
-			CRFBmpSave(g_ScaleOut, "frame/scaleOut.bmp");
-	}
-	  
-	return g_MatOut;
-}
+/*
+ * BOI network
+ */
 CRNeuronNetwork* createBOINetwork(CRNeuronLayerPtr& outputLayer)
 {
 	std::cout << " > createBOINetwork" << std::endl;
@@ -115,6 +82,56 @@ CRNeuronNetwork* createBOINetwork(CRNeuronLayerPtr& outputLayer)
 	std::cout << " < createBOINetwork" << std::endl;
 	return network;
 }
+
+CR_FBMP* g_Fpp1Out = CRFBmpCreate(BOI_BASE_WIDTH * BOI_SCALE, BOI_BASE_HEIGHT * BOI_SCALE, 1);
+CR_FBMP* g_ScaleOut = CRFBmpCreate(BOI_BASE_WIDTH / BOI_SAMPLE_SIZE, BOI_BASE_HEIGHT / BOI_SAMPLE_SIZE, 1);
+CRMatrixf* g_MatOut = CRCreateMatrixf(1, (BOI_BASE_WIDTH / BOI_SAMPLE_SIZE) * (BOI_BASE_HEIGHT / BOI_SAMPLE_SIZE));
+CRMatrixf* processBOIFrame(CR_FBMP* inFrame)
+{
+	if (!inFrame || inFrame->Width != BOI_BASE_WIDTH * BOI_SCALE || inFrame->Height != BOI_BASE_HEIGHT * BOI_SCALE)
+	{
+		std::cout << "    [INFO] processBOIFrame: something is wrong" << std::endl;
+		return nullptr;
+	}
+
+#ifdef LOG_TIME
+	StopWatch timer;
+#endif
+	paco::CRFBmpConvertToFPP(inFrame, g_Fpp1Out);
+#ifdef LOG_TIME
+	std::cout << "    [INFO] fpp1Out      : " << timer.getTimeMSSinceStart() << "    "<< std::endl;
+	timer.start();
+#endif
+
+	paco::CRFBmpScale(g_Fpp1Out, g_ScaleOut, 1.0f / (BOI_SCALE * BOI_SAMPLE_SIZE));
+#ifdef LOG_TIME
+	std::cout << "    [INFO] scaleOut     : " << timer.getTimeMSSinceStart() << "    " << std::endl;
+	timer.start();
+#endif
+
+	paco::CRFBmpToMatf(g_ScaleOut, g_MatOut);
+
+	if (GetAsyncKeyState('O')) {
+		if (GetAsyncKeyState('2'))
+			CRFBmpSave(g_Fpp1Out, "frame/fpp1Out.bmp");
+		if (GetAsyncKeyState('3'))
+			CRFBmpSave(g_ScaleOut, "frame/scaleOut.bmp");
+	}
+	  
+	return g_MatOut;
+}
+
+CRMatrixf* g_CurrentInput = CRCreateMatrixf(12, 1);
+CRMatrixf* getCurrentInput()
+{
+	short buttons[12] = {'W', 'A', 'S', 'D', VK_UP, VK_DOWN, VK_LEFT, VK_RIGHT, ' ', VK_LCONTROL, 'E', 'Q'};
+	for (uint index = 0; index < 12; index++)
+	{
+		g_CurrentInput->Data[index] = (GetAsyncKeyState(buttons[index]) == 0) ? 0.0f : 1.0f;
+	}
+
+	return g_CurrentInput;
+}
 void printBOIOutput(CRNWMat const* mat)
 {
 	if (mat->Cols != 1 || mat->Rows != 12)
@@ -123,7 +140,7 @@ void printBOIOutput(CRNWMat const* mat)
 
 	for (uint index = 0; index < 12; index++)
 	{
-		printf("BOI Button: [%5s] [%3f]\n", buttons[index].c_str(), mat->Data[index]);
+		printf("BOI Button: [%5s] [%3f]; y: [%3f]\n", buttons[index].c_str(), mat->Data[index], g_CurrentInput->Data[index]);
 	}
 }
 
@@ -155,6 +172,8 @@ void testBOINetwork()
 	// network
 	CRNeuronLayerPtr outputLayer;
 	CRNeuronNetwork* network = createBOINetwork(outputLayer);
+	CR_NN_BP_LAYER_OUTPUTS* outputs = CRCreateBPLayerOut(network);
+	CR_NN_BP_INFO* bpInfo = CRCreateBPInfo(network, BOI_BATCH_SIZE);
 
 	std::cout << " [INFO] = init finish" << std::endl;
 
@@ -212,7 +231,20 @@ void testBOINetwork()
 			continue;
 
 		// process data
-		network->process(data);
+		network->process(data, outputs);
+		if (bpInfo->TotalBPsCount == bpInfo->BatchSize)
+		{
+			printf("[INFO] Press P to apply backpropagation\n");
+			if (GetAsyncKeyState('P'))
+			{
+				CRApplyBackprop(network, bpInfo);
+				CRResetBPInfo(bpInfo);
+			}
+		} else
+		{
+			printf("                                          \n");
+			CRBackprop(bpInfo, getCurrentInput(), outputs, network);
+		}
 		//CRDeleteMatrixf(data);
 
 		// print result
