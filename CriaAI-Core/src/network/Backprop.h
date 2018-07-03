@@ -54,7 +54,7 @@ namespace cria_ai { namespace network {
 
 		// bp info
 		float       TotalCost;
-		CRMatrixf*** IdealOutputs;
+		CRMatrixf** ErrorBlame;
 		CRMatrixf** BiasChanges;
 		CRMatrixf** WeightChanges;
 
@@ -71,10 +71,10 @@ namespace cria_ai { namespace network {
 	typedef struct CR_NN_BP_LAYER_OUTPUTS_ {
 		uint LayerCount; 
 		uint BatchSize;
-		CRMatrixf*** LayerOutputs; /* [input layer] + [hidden layers] + [output layer] */
+		CRMatrixf** LayerOutputs; /* [input layer] + [hidden layers] + [output layer] */
 	} CR_NN_BP_LAYER_OUTPUTS;
 
-	CR_NN_BP_LAYER_OUTPUTS* CRCreateBPLayerOut(CRNeuronNetwork const* targetNN, uint batchSize);
+	CR_NN_BP_LAYER_OUTPUTS* CRCreateBPLayerOut(CRNeuronNetwork const* targetNN);
 	void CRDeleteBPLayerOut(CR_NN_BP_LAYER_OUTPUTS* lOutInfo);
 
 	float CRGetCost(CRMatrixf const* actualOutput, CRMatrixf const* idealOutput);

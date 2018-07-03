@@ -428,7 +428,7 @@ namespace cria_ai
 		 * a : move along cols (starts at result row)
 		 * b : move along rows (starts at result column)
 		 */
-		uint calCount = a->Cols;
+		uint calCount = a->Rows;
 		for (uint index = 0; index < mat->Cols * mat->Rows; index++)
 		{
 			uint matAIndex = index / mat->Rows;

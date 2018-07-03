@@ -163,11 +163,9 @@ namespace cria_ai { namespace network {
 				return;
 			}
 
-			StopWatch timer;
 			CRMatrixf* weightOut = CRMul(inputData, m_Weights);
 			CRMatrixf* biasOut   = CRSub(weightOut, m_Bias);
 
-			timer.start();
 			m_ActivationFunc(biasOut, m_Output);
 
 			CRDeleteMatrixf(weightOut);

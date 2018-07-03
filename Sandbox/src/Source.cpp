@@ -172,7 +172,7 @@ void testBOINetwork()
 	// network
 	CRNeuronLayerPtr outputLayer;
 	CRNeuronNetwork* network = createBOINetwork(outputLayer);
-	CR_NN_BP_LAYER_OUTPUTS* outputs = CRCreateBPLayerOut(network, );
+	CR_NN_BP_LAYER_OUTPUTS* outputs = CRCreateBPLayerOut(network);
 	CR_NN_BP_INFO* bpInfo = CRCreateBPInfo(network, BOI_BATCH_SIZE);
 
 	std::cout << " [INFO] = init finish" << std::endl;

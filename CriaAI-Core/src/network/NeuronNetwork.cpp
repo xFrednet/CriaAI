@@ -7,11 +7,6 @@ namespace cria_ai { namespace network {
 		if (layer.get())
 			m_LayerList.push_back(layer);
 	}
-	void CRNeuronNetwork::removeLayer(const CRNeuronLayerPtr& layer)
-	{
-		if (layer.get())
-			m_LayerList.remove(layer);
-	}
 	void CRNeuronNetwork::initRandom()
 	{
 		for (CRNeuronLayerPtr& ptr : m_LayerList) {
@@ -28,6 +23,7 @@ namespace cria_ai { namespace network {
 		{
 			ptr->processData(processData);
 			processData = ptr->getOutput();
+
 
 			if (outputs)
 				CR_MATF_COPY_DATA(outputs->LayerOutputs[outputNo], processData);
