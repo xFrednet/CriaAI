@@ -45,6 +45,7 @@ namespace cria_ai
 	float      CRGetMaxValue(CRMatrixf const* mat);
 	float      CRGetMinValue(CRMatrixf const* mat);
 	CRMatrixf* CRClamp(CRMatrixf const* mat, float min, float max);
+	float      CRMatFSum(CRMatrixf const* mat);
 
 	CRMatrixf* CRAdd(CRMatrixf const* a, CRMatrixf const* b);
 	CRMatrixf* CRSub(CRMatrixf const* a, CRMatrixf const* b);

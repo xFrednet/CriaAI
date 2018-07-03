@@ -53,7 +53,7 @@ namespace cria_ai { namespace network {
 		uint TotalBPsCount;
 
 		// bp info
-		float       TotalCost;
+		float       AverageCost;
 		CRMatrixf** ErrorBlame;
 		CRMatrixf** BiasChanges;
 		CRMatrixf** WeightChanges;

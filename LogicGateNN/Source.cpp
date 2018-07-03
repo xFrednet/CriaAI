@@ -7,7 +7,7 @@
 using namespace cria_ai;
 using namespace network;
 
-#define BATCH_SIZE                               1000
+#define BATCH_SIZE                               100
 
 #define LG_OR_EXPECTED(in1, in2)                 (in1 != 0 || in2 != 0)
 #define LG_XOR_EXPECTED(in1, in2)                (in1 != in2)
@@ -117,7 +117,7 @@ int main()
 		CRBackprop(bpInfo, expectedOutput, outputs, network);
 		printf(", backpropagation: %5i / %5i\n", bpInfo->TotalBPsCount, BATCH_SIZE);
 		if (bpInfo->TotalBPsCount == bpInfo->BatchSize) {
-			epochCost = bpInfo->TotalCost;
+			epochCost = bpInfo->AverageCost;
 			CRApplyBackprop(network, bpInfo);
 			CRResetBPInfo(bpInfo);
 			epochNo++;

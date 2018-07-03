@@ -355,6 +355,25 @@ namespace cria_ai
 
 		return dstMat;
 	}
+	float CRMatFSum(CRMatrixf const* mat)
+	{
+		/*
+		 * Validation
+		 */
+		if (!mat)
+			return 0;
+
+		/*
+		 * Add all values together aka sum
+		 */
+		float sum = 0.0f;
+		for (uint index = 0; index < CR_MATF_VALUE_COUNT(mat); index++)
+		{
+			sum += mat->Data[index];
+		}
+
+		return sum;
+	}
 
 	CRMatrixf* CRAdd(CRMatrixf const* a, CRMatrixf const* b)
 	{

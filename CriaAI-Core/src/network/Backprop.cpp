@@ -79,7 +79,7 @@ namespace cria_ai { namespace network {
 			bpInfo->LayerCount = (uint)layers.size();
 			bpInfo->BatchSize = batchSize;
 			bpInfo->TotalBPsCount = 0;
-			bpInfo->TotalCost = 0;
+			bpInfo->AverageCost = 0;
 
 			// bpInfo->ErrorBlame
 			bpInfo->ErrorBlame = new CRMatrixf*[bpInfo->LayerCount];
@@ -209,7 +209,7 @@ namespace cria_ai { namespace network {
 			return;
 
 		bpInfo->TotalBPsCount = 0;
-		bpInfo->TotalCost = 0.0f;
+		bpInfo->AverageCost = 0.0f;
 		for (uint layerNo = 1; layerNo < bpInfo->LayerCount; layerNo++) 
 		{
 			CR_MATF_FILL_ZERO(bpInfo->BiasChanges[layerNo]);
@@ -372,18 +372,26 @@ namespace cria_ai { namespace network {
 			return;
 
 		/*
-		 * reset and init error blame
+		 * Util values
 		 */
-		for (uint layerNo = 1; layerNo < bpInfo->LayerCount; layerNo++)
+		const uint layerCount = bpInfo->LayerCount;
+		const std::vector<CRNeuronLayer const*> layers = network->getLayers();
+		if (layers.empty())
+			return;
+
+		/*
+		 * Error / blame
+		 */
+		for (uint layerNo = 1; layerNo < layerCount; layerNo++)
 		{
-			if (layerNo == bpInfo->LayerCount - 1)
+			if (layerNo == layerCount - 1)
 			{
 				CR_MATF_COPY_DATA(bpInfo->ErrorBlame[layerNo], expectedOutput);
 				CRMatrixf* layerOut = layerOutputs->LayerOutputs[layerOutputs->LayerCount - 1];
 				for (uint outputNo = 0; outputNo < CR_MATF_VALUE_COUNT(expectedOutput); outputNo++)
 				{
-					float outputError = -(expectedOutput->Data[outputNo] - layerOut->Data[outputNo]);
-					bpInfo->ErrorBlame[layerNo]->Data[outputNo] = outputError;
+					float outputError = (expectedOutput->Data[outputNo] - layerOut->Data[outputNo]);
+					bpInfo->ErrorBlame[layerNo]->Data[outputNo] = outputError * outputError;
 				}
 			}
 			else
@@ -391,16 +399,13 @@ namespace cria_ai { namespace network {
 				CR_MATF_FILL_ZERO(bpInfo->ErrorBlame[layerNo]);
 			}
 		}
-
-		/*
-		 * Total cost
-		 */
-		bpInfo->TotalCost += CRGetCost(layerOutputs->LayerOutputs[layerOutputs->LayerCount - 1], expectedOutput);
+		const float e_total = CRMatFSum(bpInfo->ErrorBlame[layerCount - 1]);
+		bpInfo->AverageCost += e_total / bpInfo->BatchSize;
 		
 		/*
 		 * Backprop
 		 */
-		for (uint layerNo = bpInfo->LayerCount - 1; layerNo > 0; layerNo--)
+		for (uint layerNo = layerCount - 1; layerNo > 0; layerNo--)
 		{
 			CRBackpropLayer(bpInfo, layerOutputs, network, layerNo);
 		}
