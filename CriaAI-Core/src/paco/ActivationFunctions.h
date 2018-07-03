@@ -53,8 +53,8 @@ if (!inMat || !outMat || \
 
 namespace cria_ai { namespace paco {
 	
-	typedef void(*cr_activation_func) (CRNWMat const* input, CRNWMat* output);
-	typedef void(*cr_activation_func_inv) (CRNWMat const* input, CRNWMat* output);
+	typedef void(*cr_activation_func) (CRMatrixf const* input, CRMatrixf* output);
+	typedef void(*cr_activation_func_inv) (CRMatrixf const* input, CRMatrixf* output);
 
 	/**
 	 * \brief A activation function
@@ -65,7 +65,7 @@ namespace cria_ai { namespace paco {
 	 * \param input  A matrix containing values for processing.
 	 * \param output A matrix that holds the output values.
 	 */
-	void CRSigmoid(CRNWMat const* input, CRNWMat* output);
+	void CRSigmoid(CRMatrixf const* input, CRMatrixf* output);
 	/**
 	* \brief A inverse activation function
 	*
@@ -75,6 +75,6 @@ namespace cria_ai { namespace paco {
 	* \param input  A matrix containing values for processing.
 	* \param output A matrix that holds the output values.
 	*/
-	void CRSigmoidInv(CRNWMat const* input, CRNWMat* output);
+	void CRSigmoidInv(CRMatrixf const* input, CRMatrixf* output);
 
 }}

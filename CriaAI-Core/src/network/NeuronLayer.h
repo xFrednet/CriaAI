@@ -56,10 +56,10 @@ namespace cria_ai { namespace network {
 	protected:
 		CRNeuronLayer const* m_PrevLayer;
 
-		CRNWMat* m_Output;
+		CRMatrixf* m_Output;
 
-		CRNWMat* m_Weights;
-		CRNWMat* m_Bias;
+		CRMatrixf* m_Weights;
+		CRMatrixf* m_Bias;
 
 		uint m_NeuronCount;
 
@@ -96,12 +96,12 @@ namespace cria_ai { namespace network {
 		/*
 		 * getters
 		 */
-		CRNWMat* getOutput();
-		CRNWMat const* getOutput() const;
-		CRNWMat* getWeights();
-		CRNWMat const* getWeights() const;
-		CRNWMat* getBias();
-		CRNWMat const* getBias() const;
+		CRMatrixf* getOutput();
+		CRMatrixf const* getOutput() const;
+		CRMatrixf* getWeights();
+		CRMatrixf const* getWeights() const;
+		CRMatrixf* getBias();
+		CRMatrixf const* getBias() const;
 
 		paco::cr_activation_func getActivationFunc() const;
 		paco::cr_activation_func_inv getActivationFuncInv() const;

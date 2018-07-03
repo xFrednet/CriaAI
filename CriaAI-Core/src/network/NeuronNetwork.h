@@ -24,8 +24,8 @@ namespace cria_ai { namespace network {
 		void process(CRMatrixf const* data, CR_NN_BP_LAYER_OUTPUTS* outputs = nullptr);
 
 		uint getLayerCount() const;
-		std::list<CRNeuronLayer*> getLayers();
-		std::list<CRNeuronLayer const*> getLayers() const;
+		std::vector<CRNeuronLayer*> getLayers();
+		std::vector<CRNeuronLayer const*> getLayers() const;
 	};
 
 }}

@@ -18,15 +18,15 @@ namespace cria_ai { namespace paco {
 	* \param input  A matrix containing values for processing.
 	* \param output A matrix that holds the output values.
 	*/
-	__global__ void CRCuSigmoid(CRNWMat const* input, CRNWMat* output);
-	void CRSigmoid(CRNWMat const* input, CRNWMat* output)
+	__global__ void CRCuSigmoid(CRMatrixf const* input, CRMatrixf* output);
+	void CRSigmoid(CRMatrixf const* input, CRMatrixf* output)
 	{
 		CRIA_SIGMOID_VALIDATION_CHECK(input, output);
 
 		CRCuSigmoid<<<CR_CUDA_AF_BLOCK_COUNT, CR_CUDA_AF_THREAD_COUNT >>>(input, output);
 		cudaDeviceSynchronize();
 	}
-	__global__ void CRCuSigmoid(CRNWMat const* input, CRNWMat* output)
+	__global__ void CRCuSigmoid(CRMatrixf const* input, CRMatrixf* output)
 	{
 		int startIndex = blockIdx.x * blockDim.x + threadIdx.x;
 		int stride = blockDim.x * gridDim.x;
@@ -46,15 +46,15 @@ namespace cria_ai { namespace paco {
 	* \param input  A matrix containing values for processing.
 	* \param output A matrix that holds the output values.
 	*/
-	__global__ void CRCuSigmoidInv(CRNWMat const* input, CRNWMat* output);
-	void CRSigmoidInv(CRNWMat const* input, CRNWMat* output)
+	__global__ void CRCuSigmoidInv(CRMatrixf const* input, CRMatrixf* output);
+	void CRSigmoidInv(CRMatrixf const* input, CRMatrixf* output)
 	{
 		CRIA_SIGMOID_VALIDATION_CHECK(input, output);
 
 		CRCuSigmoidInv<<<CR_CUDA_AF_BLOCK_COUNT, CR_CUDA_AF_THREAD_COUNT>>>(input, output);
 		cudaDeviceSynchronize();
 	}
-	__global__ void CRCuSigmoidInv(CRNWMat const* input, CRNWMat* output)
+	__global__ void CRCuSigmoidInv(CRMatrixf const* input, CRMatrixf* output)
 	{
 		int startIndex = blockIdx.x * blockDim.x + threadIdx.x;
 		int stride = blockDim.x * gridDim.x;

@@ -39,6 +39,4 @@ namespace cria_ai {
 
 	typedef float            crnwdec;
 
-	typedef CRMatrixf        CRNWMat; // change memset CRNeuronLayer::processData when the data type changed or gets templated
-
 }

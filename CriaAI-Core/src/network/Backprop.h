@@ -34,6 +34,10 @@
 
 #include "../Common.hpp"
 
+#ifndef CR_BP_LEARN_RATE
+#	define CR_BP_LEARN_RATE 0.5f
+#endif
+
 namespace cria_ai { namespace network {
 	
 	class CRNeuronNetwork;
@@ -49,7 +53,8 @@ namespace cria_ai { namespace network {
 		uint TotalBPsCount;
 
 		// bp info
-		float       AverageCost;
+		float       TotalCost;
+		CRMatrixf*** IdealOutputs;
 		CRMatrixf** BiasChanges;
 		CRMatrixf** WeightChanges;
 
@@ -65,12 +70,14 @@ namespace cria_ai { namespace network {
 	/* //////////////////////////////////////////////////////////////////////////////// */
 	typedef struct CR_NN_BP_LAYER_OUTPUTS_ {
 		uint LayerCount; 
-		CRMatrixf** LayerOutputs; /* [input layer] + [hidden layers] + [output layer] */
+		uint BatchSize;
+		CRMatrixf*** LayerOutputs; /* [input layer] + [hidden layers] + [output layer] */
 	} CR_NN_BP_LAYER_OUTPUTS;
 
-	CR_NN_BP_LAYER_OUTPUTS* CRCreateBPLayerOut(CRNeuronNetwork const* targetNN);
+	CR_NN_BP_LAYER_OUTPUTS* CRCreateBPLayerOut(CRNeuronNetwork const* targetNN, uint batchSize);
 	void CRDeleteBPLayerOut(CR_NN_BP_LAYER_OUTPUTS* lOutInfo);
 
+	float CRGetCost(CRMatrixf const* actualOutput, CRMatrixf const* idealOutput);
 	/*
 	 * Can run in a different thread
 	 */

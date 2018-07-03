@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CriaAI-Core", "CriaAI-Core\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Sandbox", "Sandbox\Sandbox.vcxproj", "{CDFDDC52-B906-4AE5-B61A-9CB729C1FE0E}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LogicGateNN", "LogicGateNN\LogicGateNN.vcxproj", "{A40A1503-C4AA-43E9-A003-3D52F86F26A5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -27,6 +29,12 @@ Global
 		{CDFDDC52-B906-4AE5-B61A-9CB729C1FE0E}.Release|x64.ActiveCfg = Release|x64
 		{CDFDDC52-B906-4AE5-B61A-9CB729C1FE0E}.Release|x64.Build.0 = Release|x64
 		{CDFDDC52-B906-4AE5-B61A-9CB729C1FE0E}.Release|x86.ActiveCfg = Release|x64
+		{A40A1503-C4AA-43E9-A003-3D52F86F26A5}.Debug|x64.ActiveCfg = Debug|x64
+		{A40A1503-C4AA-43E9-A003-3D52F86F26A5}.Debug|x64.Build.0 = Debug|x64
+		{A40A1503-C4AA-43E9-A003-3D52F86F26A5}.Debug|x86.ActiveCfg = Debug|x64
+		{A40A1503-C4AA-43E9-A003-3D52F86F26A5}.Release|x64.ActiveCfg = Release|x64
+		{A40A1503-C4AA-43E9-A003-3D52F86F26A5}.Release|x64.Build.0 = Release|x64
+		{A40A1503-C4AA-43E9-A003-3D52F86F26A5}.Release|x86.ActiveCfg = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -40,9 +40,9 @@ namespace cria_ai { namespace network {
 	{
 		return m_LayerList.size();
 	}
-	std::list<CRNeuronLayer*> CRNeuronNetwork::getLayers()
+	std::vector<CRNeuronLayer*> CRNeuronNetwork::getLayers()
 	{
-		std::list<CRNeuronLayer*> layers;
+		std::vector<CRNeuronLayer*> layers;
 
 		for (const CRNeuronLayerPtr& ptr : m_LayerList) {
 			layers.push_back(ptr.get());
@@ -50,9 +50,9 @@ namespace cria_ai { namespace network {
 
 		return layers;
 	}
-	std::list<CRNeuronLayer const*> CRNeuronNetwork::getLayers() const
+	std::vector<CRNeuronLayer const*> CRNeuronNetwork::getLayers() const
 	{
-		std::list<CRNeuronLayer const*> constList;
+		std::vector<CRNeuronLayer const*> constList;
 
 		for (const CRNeuronLayerPtr& ptr : m_LayerList)
 		{

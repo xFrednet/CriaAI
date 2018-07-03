@@ -164,8 +164,8 @@ namespace cria_ai { namespace network {
 			}
 
 			StopWatch timer;
-			CRNWMat* weightOut = CRMul(inputData, m_Weights);
-			CRNWMat* biasOut   = CRSub(weightOut, m_Bias);
+			CRMatrixf* weightOut = CRMul(inputData, m_Weights);
+			CRMatrixf* biasOut   = CRSub(weightOut, m_Bias);
 
 			timer.start();
 			m_ActivationFunc(biasOut, m_Output);
@@ -175,7 +175,7 @@ namespace cria_ai { namespace network {
 		}
 		else
 		{
-			memcpy(m_Output, inputData, sizeof(float) * inputData->Rows);
+			memcpy(m_Output->Data, inputData->Data, sizeof(float) * inputData->Rows);
 		}
 
 	}
@@ -196,27 +196,27 @@ namespace cria_ai { namespace network {
 	/*
 	* getters
 	*/
-	CRNWMat* CRNeuronLayer::getOutput()
+	CRMatrixf* CRNeuronLayer::getOutput()
 	{
 		return m_Output;
 	}
-	CRNWMat const* CRNeuronLayer::getOutput() const
+	CRMatrixf const* CRNeuronLayer::getOutput() const
 	{
 		return m_Output;
 	}
-	CRNWMat* CRNeuronLayer::getWeights()
+	CRMatrixf* CRNeuronLayer::getWeights()
 	{
 		return m_Weights;
 	}
-	CRNWMat const* CRNeuronLayer::getWeights() const
+	CRMatrixf const* CRNeuronLayer::getWeights() const
 	{
 		return m_Weights;
 	}
-	CRNWMat* CRNeuronLayer::getBias()
+	CRMatrixf* CRNeuronLayer::getBias()
 	{
 		return m_Bias;
 	}
-	CRNWMat const* CRNeuronLayer::getBias() const
+	CRMatrixf const* CRNeuronLayer::getBias() const
 	{
 		return m_Bias;
 	}

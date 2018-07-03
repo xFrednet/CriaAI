@@ -10,7 +10,7 @@
 #define BOI_BASE_HEIGHT                288
 #define BOI_SCALE                      2
 #define BOI_SAMPLE_SIZE                2
-#define BOI_BATCH_SIZE                 10000
+#define BOI_BATCH_SIZE                 500
 
 #define CON_TITLE "C:\\Users\\xFrednet\\My Projects\\VS Projects\\CriaAI\\bin\\Debug\\Sandbox.exe"
 
@@ -132,7 +132,7 @@ CRMatrixf* getCurrentInput()
 
 	return g_CurrentInput;
 }
-void printBOIOutput(CRNWMat const* mat)
+void printBOIOutput(CRMatrixf const* mat)
 {
 	if (mat->Cols != 1 || mat->Rows != 12)
 		return;
@@ -172,7 +172,7 @@ void testBOINetwork()
 	// network
 	CRNeuronLayerPtr outputLayer;
 	CRNeuronNetwork* network = createBOINetwork(outputLayer);
-	CR_NN_BP_LAYER_OUTPUTS* outputs = CRCreateBPLayerOut(network);
+	CR_NN_BP_LAYER_OUTPUTS* outputs = CRCreateBPLayerOut(network, );
 	CR_NN_BP_INFO* bpInfo = CRCreateBPInfo(network, BOI_BATCH_SIZE);
 
 	std::cout << " [INFO] = init finish" << std::endl;
@@ -242,7 +242,7 @@ void testBOINetwork()
 			}
 		} else
 		{
-			printf("                                          \n");
+			printf(" [INFO] backpropagation: %5i / %5i                       \n", bpInfo->TotalBPsCount, BOI_BATCH_SIZE);
 			CRBackprop(bpInfo, getCurrentInput(), outputs, network);
 		}
 		//CRDeleteMatrixf(data);
