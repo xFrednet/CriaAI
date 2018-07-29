@@ -81,16 +81,16 @@ namespace cria_ai { namespace network {
 			bpInfo->TotalBPsCount = 0;
 			bpInfo->AverageCost = 0;
 
-			// bpInfo->ErrorBlame
-			bpInfo->ErrorBlame = new CRMatrixf*[bpInfo->LayerCount];
-			if (!bpInfo->ErrorBlame)
+			// bpInfo->NeuronBlame
+			bpInfo->NeuronBlame = new CRMatrixf*[bpInfo->LayerCount];
+			if (!bpInfo->NeuronBlame)
 				break;
-			memset(bpInfo->ErrorBlame, 0, sizeof(CRMatrixf*) * bpInfo->LayerCount);
+			memset(bpInfo->NeuronBlame, 0, sizeof(CRMatrixf*) * bpInfo->LayerCount);
 			bool initWorked = true;
 			for (uint layerNo = 0; layerNo < bpInfo->LayerCount; layerNo++)
 			{
-				bpInfo->ErrorBlame[layerNo] = CRCreateMatrixf(layerOutputs[layerNo]->Cols, layerOutputs[layerNo]->Rows);
-				if (!bpInfo->ErrorBlame[layerNo])
+				bpInfo->NeuronBlame[layerNo] = CRCreateMatrixf(layerOutputs[layerNo]->Cols, layerOutputs[layerNo]->Rows);
+				if (!bpInfo->NeuronBlame[layerNo])
 				{
 					initWorked = false;
 					break;
@@ -159,17 +159,17 @@ namespace cria_ai { namespace network {
 			return;
 
 		/*
-		 * delete bpInfo->ErrorBlame
+		 * delete bpInfo->NeuronBlame
 		 */
-		if (bpInfo->ErrorBlame)
+		if (bpInfo->NeuronBlame)
 		{
 			for (uint layerNo = 0; layerNo < bpInfo->LayerCount; layerNo++)
 			{
-				if (bpInfo->ErrorBlame[layerNo])
-					CRDeleteMatrixf(bpInfo->ErrorBlame[layerNo]);
+				if (bpInfo->NeuronBlame[layerNo])
+					CRDeleteMatrixf(bpInfo->NeuronBlame[layerNo]);
 			}
 				
-			delete[] bpInfo->ErrorBlame;
+			delete[] bpInfo->NeuronBlame;
 		}
 
 		/*
@@ -334,17 +334,17 @@ namespace cria_ai { namespace network {
 		CRNeuronLayer const* layer = layers[layerNo];
 		CRNeuronLayer const* prevLayer = layers[layerNo - 1];
 		uint weightCounts = prevLayer->getNeuronCount();
-		
-		CRMatrixf const* blameMat = bpInfo->ErrorBlame[layerNo];
+
+		CRMatrixf const* blameMat = bpInfo->NeuronBlame[layerNo];
 		CRMatrixf const* layerOut = layerOutputs->LayerOutputs[layerNo];
 		CRMatrixf const* prevLayOut = layerOutputs->LayerOutputs[layerNo - 1];
 
-		CRMatrixf* prevBlameMat = bpInfo->ErrorBlame[layerNo - 1];
+		CRMatrixf* prevBlameMat = bpInfo->NeuronBlame[layerNo - 1];
 		CRMatrixf* layerNet = CRCreateMatrixf(layerOut->Cols, layerOut->Rows);
 		layer->getActivationFuncInv()(layerOut, layerNet);
 
 		for (uint neuronNo = 0; neuronNo < layer->getNeuronCount(); neuronNo++) {
-				
+
 			float errorBlame = blameMat->Data[neuronNo];
 			float netVsOut = layerOut->Data[neuronNo] * (1 - layerOut->Data[neuronNo]);
 
@@ -356,63 +356,58 @@ namespace cria_ai { namespace network {
 				float weightChange = (delta * a3);
 				bpInfo->WeightChanges[layerNo]->Data[
 					CR_MATF_VALUE_INDEX(weightNo, neuronNo, bpInfo->WeightChanges[layerNo])
-				] += CR_BP_LEARN_RATE * weightChange / bpInfo->BatchSize;
+				] += CR_BP_WEIGHT_LEARN_RATE * weightChange / bpInfo->BatchSize;
 
 				prevBlameMat->Data[weightNo % weightCounts] += delta;
 			}
 		}
-		
+
 	}
 	void CRBackprop(CR_NN_BP_INFO* bpInfo, CRMatrixf const* expectedOutput,
 		CR_NN_BP_LAYER_OUTPUTS const* layerOutputs, CRNeuronNetwork const* network)
 	{
-		if (!bpInfo       || !expectedOutput || 
+		if (!bpInfo || !expectedOutput ||
 			!layerOutputs || !network ||
 			bpInfo->LayerCount != layerOutputs->LayerCount)
 			return;
 
-		/*
-		 * Util values
-		 */
-		const uint layerCount = bpInfo->LayerCount;
-		const std::vector<CRNeuronLayer const*> layers = network->getLayers();
-		if (layers.empty())
-			return;
+		CRMatrixf* idealOutput = CRClamp(expectedOutput, 0.1f, 0.9f);
 
 		/*
-		 * Error / blame
-		 */
-		for (uint layerNo = 1; layerNo < layerCount; layerNo++)
-		{
-			if (layerNo == layerCount - 1)
-			{
-				CR_MATF_COPY_DATA(bpInfo->ErrorBlame[layerNo], expectedOutput);
+		* reset and init error blame
+		*/
+		for (uint layerNo = 1; layerNo < bpInfo->LayerCount; layerNo++) {
+			if (layerNo == bpInfo->LayerCount - 1) {
+				CR_MATF_COPY_DATA(bpInfo->NeuronBlame[layerNo], idealOutput);
 				CRMatrixf* layerOut = layerOutputs->LayerOutputs[layerOutputs->LayerCount - 1];
-				for (uint outputNo = 0; outputNo < CR_MATF_VALUE_COUNT(expectedOutput); outputNo++)
-				{
-					float outputError = (expectedOutput->Data[outputNo] - layerOut->Data[outputNo]);
-					bpInfo->ErrorBlame[layerNo]->Data[outputNo] = outputError * outputError;
+				for (uint outputNo = 0; outputNo < CR_MATF_VALUE_COUNT(idealOutput); outputNo++) {
+					float outputError = -(idealOutput->Data[outputNo] - layerOut->Data[outputNo]);
+					bpInfo->NeuronBlame[layerNo]->Data[outputNo] = outputError;
 				}
 			}
-			else
-			{
-				CR_MATF_FILL_ZERO(bpInfo->ErrorBlame[layerNo]);
+			else {
+				CR_MATF_FILL_ZERO(bpInfo->NeuronBlame[layerNo]);
 			}
 		}
-		const float e_total = CRMatFSum(bpInfo->ErrorBlame[layerCount - 1]);
-		bpInfo->AverageCost += e_total / bpInfo->BatchSize;
-		
+
 		/*
-		 * Backprop
-		 */
-		for (uint layerNo = layerCount - 1; layerNo > 0; layerNo--)
-		{
+		* Total cost
+		*/
+		bpInfo->AverageCost += CRGetCost(layerOutputs->LayerOutputs[layerOutputs->LayerCount - 1], idealOutput) / bpInfo->BatchSize;
+
+		/*
+		* Backprop
+		*/
+		for (uint layerNo = bpInfo->LayerCount - 1; layerNo > 0; layerNo--) {
 			CRBackpropLayer(bpInfo, layerOutputs, network, layerNo);
 		}
 
 		bpInfo->TotalBPsCount++;
+		
+		CRDeleteMatrixf(idealOutput);
 	}
 
+	uint g_WriteIndex = 0;
 	void CRApplyBackprop(CRNeuronNetwork* network, CR_NN_BP_INFO const* bpInfo)
 	{
 		if (!network || !bpInfo)
@@ -422,13 +417,48 @@ namespace cria_ai { namespace network {
 		if (layers.size() != bpInfo->LayerCount)
 			return;
 
+
+		/*
+		* Debug info
+		*/
+		if (false)
+		{
+			String prefix = "bptest\\";
+			{
+				String writeIndex = std::to_string(g_WriteIndex);
+
+				for (uint charNo = 0; charNo < 4 - writeIndex.length(); charNo++) {
+					prefix += "0";
+				}
+				prefix += writeIndex;
+				prefix += "_";
+			}
+
+			uint layerNo = layers.size() - 1;
+			String wChangeName = prefix + "bpWeightChange.txt";
+			CRWriteMatrixf(bpInfo->WeightChanges[layerNo], wChangeName.c_str());
+			String bChangeName = prefix + "bpBiasChange.txt";
+			CRWriteMatrixf(bpInfo->BiasChanges[layerNo], bChangeName.c_str());
+
+			String weightsName = prefix + "Weights.txt";
+			CRWriteMatrixf(layers[layerNo]->getWeights(), weightsName.c_str());
+			String baisName = prefix + "Bias.txt";
+			CRWriteMatrixf(layers[layerNo]->getBias(), baisName.c_str());
+
+			g_WriteIndex++;
+		}
+
 		uint layerNo = 0;
 		for (CRNeuronLayer* layer : layers) 
 		{
+			//if (layerNo != 0)
+				//CR_MATF_FILL_ZERO(bpInfo->BiasChanges[layerNo]); //TODO remove this !!!!!!!
+
 			if (layerNo != 0)
 				layer->applyBackpropagation(bpInfo->WeightChanges[layerNo], bpInfo->BiasChanges[layerNo]);
 			
 			layerNo++;
 		}
+
 	}
 }}

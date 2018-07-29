@@ -34,8 +34,12 @@
 
 #include "../Common.hpp"
 
-#ifndef CR_BP_LEARN_RATE
-#	define CR_BP_LEARN_RATE 0.5f
+#ifndef CR_BP_WEIGHT_LEARN_RATE
+#	define CR_BP_WEIGHT_LEARN_RATE 0.5f
+#endif
+
+#ifndef CR_BP_BIAS_LERN_RATE
+#	define CR_BP_BIAS_LERN_RATE 0.5f
 #endif
 
 namespace cria_ai { namespace network {
@@ -54,7 +58,7 @@ namespace cria_ai { namespace network {
 
 		// bp info
 		float       AverageCost;
-		CRMatrixf** ErrorBlame;
+		CRMatrixf** NeuronBlame;
 		CRMatrixf** BiasChanges;
 		CRMatrixf** WeightChanges;
 

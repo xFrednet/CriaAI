@@ -200,7 +200,7 @@ namespace cria_ai
 
 		/* init format values */
 		predecimals = (uint)log10f(
-			MAX(CRGetMaxValue(mat), -CRGetMinValue(mat)) /* Getting the longest value */
+			MAX(abs(CRGetMaxValue(mat)), abs(CRGetMinValue(mat))) /* Getting the longest value */
 			) + 2 /* plus one for the sign and one because log10 returns one too short */;
 		
 		/* opening the file*/
@@ -210,8 +210,9 @@ namespace cria_ai
 		if (!file.is_open())
 			return false;
 
-		char* str = new char[1 + predecimals + 1 + decimals + 1 + 1];
+		char* str = new char[1 + predecimals + 1 + decimals + 1 + 1 + 1];
 		str[1 + predecimals + 1 + decimals + 1] = 0;
+		str[1 + predecimals + 1 + decimals + 1 + 1] = 0;
 		for (index = 0; index < mat->Cols * mat->Rows; index++)
 		{
 			sprintf(str, "%+*.*f ", predecimals, decimals, mat->Data[index]);

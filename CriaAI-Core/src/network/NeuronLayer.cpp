@@ -148,7 +148,7 @@ namespace cria_ai { namespace network {
 		if (!m_IsOperational || !inputData)
 		{
 			memset(m_Output, 0, sizeof(float) * m_NeuronCount);
-			CRIA_INFO_PRINTF("CRNeuronLayer::processData: m_Output was set to 0");
+			CRIA_INFO_PRINTF("CRNeuronLayer::processData: m_LastOutput was set to 0");
 			return;
 		}
 
@@ -159,12 +159,12 @@ namespace cria_ai { namespace network {
 		{
 			if (inputData->Rows != m_Weights->Cols) {
 				memset(m_Output, 0, sizeof(float) * m_NeuronCount);
-				CRIA_INFO_PRINTF("CRNeuronLayer::processData: m_Output was set to 0");
+				CRIA_INFO_PRINTF("CRNeuronLayer::processData: m_LastOutput was set to 0");
 				return;
 			}
 
 			CRMatrixf* weightOut = CRMul(inputData, m_Weights);
-			CRMatrixf* biasOut   = CRSub(weightOut, m_Bias);
+			CRMatrixf* biasOut   = CRAdd(weightOut, m_Bias);
 
 			m_ActivationFunc(biasOut, m_Output);
 

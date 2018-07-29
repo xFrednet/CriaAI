@@ -48,7 +48,7 @@ namespace cria_ai { namespace network {
 	 * 
 	 * [CRNeuronLayer]
 	 * 
-	 * m_ActivationFunc([input] * [m_Weights] - [m_Bias]) -> [m_Output]
+	 * m_ActivationFunc([input] * [m_Weights] - [m_Bias]) -> [m_LastOutput]
 	 * 
 	 */
 	class CRNeuronLayer
