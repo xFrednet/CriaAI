@@ -2,16 +2,48 @@
 #include <iostream>
 #include <stdlib.h>
 #include <vector>
+#include <AsyncInfo.h>
 
-#define LERN_RATE 0.5f
+#include <thread>
+
+#define LERN_RATE 1.0f
 #define LERN_CYCLES 1000
+#define BATCH_SIZE 1
 
 typedef unsigned int uint;
 typedef std::vector<float> fvec;
+typedef std::vector<fvec> fvecvec;
+
+void setConCursorPos(COORD pos = {0, 0})
+{
+	HANDLE hCon = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleCursorPosition(hCon, pos);
+}
+COORD getConCursorPos()
+{
+	HANDLE hCon = GetStdHandle(STD_OUTPUT_HANDLE);
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	if (!GetConsoleScreenBufferInfo(
+		GetStdHandle(STD_OUTPUT_HANDLE),
+		&csbi
+	))
+		return {0, 0};
+
+	return csbi.dwCursorPosition;
+}
 
 float GetRandFloat()
 {
 	return (((float)rand() / (float)RAND_MAX) * 2) - 1;
+}
+
+float AFCal(float value)
+{
+	return 1.0f / (1.0f + exp(-value));
+}
+float AFInv(float value)
+{
+	return value * (1 - value);
 }
 
 class NN;
@@ -22,23 +54,65 @@ class Neuron
 	friend class NN;
 	friend class NLayer;
 
-	float m_Bias;
-	float m_LastOutput;
-	fvec m_Weights;
 	fvec m_Inputs;
+	fvec m_Weights;
+	float m_Bias;
+	float m_Output;
+	float m_Blame;
+	float m_PDErrWrtNet;
+
+	//BP
+	fvec m_WeightChange;
+	float m_BiasChange;
 
 public:
 
-	Neuron(float bias, uint weightCount)
-		: m_Bias(bias),
-		m_LastOutput(0.0f),
-		m_Weights(weightCount),
-		m_Inputs(weightCount)
+	Neuron(float bias, uint inputCount)
+		: m_Inputs(inputCount),
+		m_Weights(inputCount),
+		m_Bias(bias),
+		m_Output(0.0f),
+		m_Blame(0.0f),
+		m_PDErrWrtNet(0.0f),
+		
+		m_WeightChange(inputCount),
+		m_BiasChange(0.0f)
 	{
-		for (uint weightNo = 0; weightNo < weightCount; weightNo++) 
+		for (uint weightNo = 0; weightNo < inputCount; weightNo++) 
 		{
 			m_Weights[weightNo] = GetRandFloat();
 		}
+	}
+
+	float JSCalWeightedSum()
+	{
+		float total = 0.0f;
+		for (uint inNo = 0; inNo < m_Inputs.size(); inNo++)
+		{
+			total += m_Inputs[inNo] * m_Weights[inNo];
+		}
+
+		return total + m_Bias;
+	}
+	float JSCalOutput(const fvec& input)
+	{
+		m_Inputs = input;
+		float weightedSum = JSCalWeightedSum();
+		m_Output = AFCal(weightedSum);
+		return m_Output;
+	}
+	fvec JSUpdateWeights()
+	{
+		float pdOutWrtNet = AFInv(m_Output);
+		m_PDErrWrtNet = m_Blame * pdOutWrtNet;
+
+		for (uint wNo = 0; wNo < m_Inputs.size(); wNo++) 
+		{
+			float pdNetWrtInput = m_Inputs[wNo];
+			float errWrtWeight = m_PDErrWrtNet * pdNetWrtInput;
+			m_Weights[wNo] += LERN_RATE * errWrtWeight;
+		}
+		return m_Weights;
 	}
 
 	float calNetOutput(const fvec& inputs)
@@ -62,8 +136,8 @@ public:
 	}
 	float calOutput(const fvec& inputs)
 	{
-		m_LastOutput = activFunc(calNetOutput(inputs));
-		return m_LastOutput;
+		m_Output = activFunc(calNetOutput(inputs));
+		return m_Output;
 	}
 
 	/*
@@ -71,17 +145,17 @@ public:
 	 */
 	float calError(float idealOut) const
 	{
-		float errorSqrt = idealOut - m_LastOutput;
+		float errorSqrt = idealOut - m_Output;
 		return 0.5f * (errorSqrt * errorSqrt);
 	}
 
 	float calculate_pd_error_wrt_output(float idealOut) const
 	{
-		return -(idealOut - m_LastOutput);
+		return -(idealOut - m_Output);
 	}
 	float calculate_pd_total_net_input_wrt_input() const
 	{
-		return m_LastOutput * (1 - m_LastOutput);
+		return m_Output * (1 - m_Output);
 	}
 	float calculate_pd_error_wrt_total_net_input(float idealOut) const
 	{
@@ -102,6 +176,17 @@ public:
 		}
 	}
 
+	void applyBP()
+	{
+		for (uint weightNo = 0; weightNo < m_Weights.size(); weightNo++)
+		{
+			m_Weights[weightNo] -= m_WeightChange[weightNo];
+			m_WeightChange[weightNo] = 0.0f;
+		}
+		m_Bias -= m_BiasChange;
+		m_BiasChange = 0.0f;
+	}
+
 	/*
 	 * getters
 	 */
@@ -111,7 +196,7 @@ public:
 	}
 	float getLastOutput() const
 	{
-		return m_LastOutput;
+		return m_Output;
 	}
 	float getWeight(uint weightNo) const
 	{
@@ -127,6 +212,26 @@ class NLayer
 	std::vector<Neuron> m_Neurons;
 
 public:
+
+	NLayer(uint neuronCount, uint inputCount, bool JS)
+		: m_NeuronCount(neuronCount)
+	{
+		float bias = GetRandFloat();
+		for (uint nNo = 0; nNo < neuronCount; nNo++)
+		{
+			m_Neurons.push_back(Neuron(bias, inputCount));
+		}
+	}
+	fvec JSFeedForward(const fvec& input)
+	{
+		fvec output(m_NeuronCount);
+		for (uint nNo = 0; nNo < m_NeuronCount; nNo++)
+		{
+			output[nNo] = m_Neurons[nNo].JSCalOutput(input);
+		}
+		return output;
+	}
+
 	NLayer(uint neuronCount, uint inputCount, fvec bias = {})
 		: m_NeuronCount(neuronCount)
 	{
@@ -195,6 +300,14 @@ public:
 		return pdErr;
 	}
 
+	void applyBP()
+	{
+		for (uint neuronNo = 0; neuronNo < m_NeuronCount; neuronNo++)
+		{
+			m_Neurons[neuronNo].applyBP();
+		}
+	}
+
 	uint getNeuronCount() const
 	{
 		return m_NeuronCount;
@@ -206,6 +319,13 @@ public:
 	}
 };
 
+typedef struct TRAINING_SET_ 
+{
+	fvec Input;
+	fvec IdealOut;
+} TRAINING_SET;
+typedef std::vector<TRAINING_SET> tsvec;
+
 class NN
 {
 private:
@@ -214,6 +334,52 @@ private:
 	NLayer m_OutputLayer;
 	fvec m_LastInput;
 public: 
+	NN(uint inCount, uint hidCount, uint outCount, bool JS)
+		: m_InputCount(inCount),
+		m_HiddenLayer(hidCount, inCount),
+		m_OutputLayer(outCount, hidCount)
+	{}
+	fvec JSFeedForward(const fvec& input)
+	{
+		fvec hidOut = m_HiddenLayer.JSFeedForward(input);
+		return m_OutputLayer.JSFeedForward(hidOut);
+	}
+	float JSGetAvgErr(const fvec& input, const fvec& idealOut)
+	{
+		float total = 0.0f;
+		fvec realOut = JSFeedForward(input);
+
+		for (uint outNo = 0; outNo < idealOut.size(); outNo++)
+		{
+			float err = abs(idealOut[outNo] - realOut[outNo]);
+			total += err / idealOut.size();
+		}
+
+		return total;
+	}
+	void JSTrain(const fvec& input, const fvec& idealOut)
+	{
+		fvec out = JSFeedForward(input);
+		for (uint outNo = 0; outNo < idealOut.size(); outNo++)
+		{
+			Neuron& neuron = m_OutputLayer.m_Neurons[outNo];
+			neuron.m_Blame = idealOut[outNo] - neuron.m_Output;
+			neuron.JSUpdateWeights();
+		}
+		for (uint hidNo = 0; hidNo < m_HiddenLayer.m_NeuronCount; hidNo++)
+		{
+			Neuron& hidNeuron = m_HiddenLayer.m_Neurons[hidNo];
+			hidNeuron.m_Blame = 0;
+			for (uint outNo = 0; outNo < m_OutputLayer.m_NeuronCount; outNo++)
+			{
+				Neuron& outNeuron = m_OutputLayer.m_Neurons[outNo];
+				hidNeuron.m_Blame += outNeuron.m_Weights[hidNo] * outNeuron.m_Blame;
+			}
+
+			hidNeuron.JSUpdateWeights();
+		}
+	}
+
 	NN(uint inCount, uint hiddenCount, uint outCount) 
 		: m_InputCount(inCount),
 		m_HiddenLayer(hiddenCount, inCount),
@@ -260,15 +426,15 @@ public:
 
 	void setBiasesAndWeights()
 	{
-		m_HiddenLayer.m_Neurons[0].m_Bias = 0.35f;
-		m_HiddenLayer.m_Neurons[0].m_Weights = {0.15f, 0.2f};
-		m_HiddenLayer.m_Neurons[1].m_Bias = 0.35f;
-		m_HiddenLayer.m_Neurons[1].m_Weights = {0.25f, 0.30f};
-
-		m_OutputLayer.m_Neurons[0].m_Bias = 0.6f;
-		m_OutputLayer.m_Neurons[0].m_Weights = {0.40f, 0.45f};
-		m_OutputLayer.m_Neurons[1].m_Bias = 0.6f;
-		m_OutputLayer.m_Neurons[1].m_Weights = {0.50f, 0.55f};
+		//m_HiddenLayer.m_Neurons[0].m_Bias = 0.35f;
+		//m_HiddenLayer.m_Neurons[0].m_Weights = {0.15f, 0.2f};
+		//m_HiddenLayer.m_Neurons[1].m_Bias = 0.35f;
+		//m_HiddenLayer.m_Neurons[1].m_Weights = {0.25f, 0.30f};
+		//
+		//m_OutputLayer.m_Neurons[0].m_Bias = 0.6f;
+		//m_OutputLayer.m_Neurons[0].m_Weights = {0.40f, 0.45f};
+		//m_OutputLayer.m_Neurons[1].m_Bias = 0.6f;
+		//m_OutputLayer.m_Neurons[1].m_Weights = {0.50f, 0.55f};
 	}
 	void train(const fvec& traiIn, const fvec& idealOut)
 	{
@@ -302,7 +468,7 @@ public:
 				float pdErrWeight = pdOutErrNetInput[onNo] * 
 					m_OutputLayer.m_Neurons[onNo].calculate_pd_total_net_input_wrt_weight(weightNo);
 
-				m_OutputLayer.m_Neurons[onNo].m_Weights[weightNo] -= LERN_RATE * pdErrWeight;
+				m_OutputLayer.m_Neurons[onNo].m_WeightChange[weightNo] += (LERN_RATE * pdErrWeight) / BATCH_SIZE;
 			}
 		}
 
@@ -314,9 +480,15 @@ public:
 				float pdErrWeight = pfHidErrNetInput[hnNo] *
 					m_HiddenLayer.m_Neurons[hnNo].calculate_pd_total_net_input_wrt_weight(weightNo);
 
-				m_HiddenLayer.m_Neurons[hnNo].m_Weights[weightNo] -= LERN_RATE * pdErrWeight;
+				m_HiddenLayer.m_Neurons[hnNo].m_WeightChange[weightNo] += (LERN_RATE * pdErrWeight) / BATCH_SIZE;
 			}
 		}
+	}
+
+	void applyBP()
+	{
+		m_HiddenLayer.applyBP();
+		m_OutputLayer.applyBP();
 	}
 };
 
@@ -327,26 +499,121 @@ int main()
 	printf("- XOR gates are fun but AI is the future -\n");
 	printf("##########################################\n");
 	printf("\n");
-	NN nn(2, 2, 2);
-	nn.setBiasesAndWeights();
+	
+	srand(0);
+	NN nn(2, 20, 1, true);
+	//nn.setBiasesAndWeights();
 
-	for (uint trainNo = 0; trainNo < 1000; trainNo++)
+	COORD curserPos = getConCursorPos();
+	for (uint trainNo = 0; trainNo < 100000; trainNo++)
 	{
 		fvec nnInput(2);
 		nnInput[0] = ((rand() % 2) == 0) ? 0.1f : 0.9f;
 		nnInput[1] = ((rand() % 2) == 0) ? 0.1f : 0.9f;
-		fvec nnIdealOut(2);// = {0.01f, 0.99f};
+		fvec nnIdealOut(1);// = {0.01f, 0.99f};
 		nnIdealOut[0] = (nnInput[0] == nnInput[1]) ? 0.1f : 0.9f;
-		nnIdealOut[1] = (nnInput[0] != nnInput[1]) ? 0.1f : 0.9f;
+
+		//nnInput = {0.1f, 0.9f};
+		//nnIdealOut = {0.1f};
+
+		nn.JSTrain(nnInput, nnIdealOut);
+
+		//nn.applyBP();
+		if (trainNo % 50 == 0)
+		{
+			setConCursorPos(curserPos);
+
+			printf("Epoch No: %u \n\n", trainNo);
+
+			nnInput = {0.1f, 0.1f};
+			nnIdealOut = {0.1f};
+			fvec nnOut = nn.JSFeedForward(nnInput);
+			printf("Input: {%1.1f, %1.1f}, Output: {%1.1f} [%1.1f], Error: %1.6f \n",
+				nnInput[0], nnInput[1],
+				nnOut[0], nnIdealOut[0],
+				nn.JSGetAvgErr(nnInput, nnIdealOut));
+
+			nnInput = {0.1f, 0.9f};
+			nnIdealOut = {0.9f};
+			nnOut = nn.JSFeedForward(nnInput);
+			printf("Input: {%1.1f, %1.1f}, Output: {%1.1f} [%1.1f], Error: %1.6f \n",
+				nnInput[0], nnInput[1],
+				nnOut[0], nnIdealOut[0],
+				nn.JSGetAvgErr(nnInput, nnIdealOut));
+
+			nnInput = {0.9f, 0.1f};
+			nnIdealOut = {0.9f};
+			nnOut = nn.JSFeedForward(nnInput);
+			printf("Input: {%1.1f, %1.1f}, Output: {%1.1f} [%1.1f], Error: %1.6f \n",
+				nnInput[0], nnInput[1],
+				nnOut[0], nnIdealOut[0],
+				nn.JSGetAvgErr(nnInput, nnIdealOut));
+
+			nnInput = {0.9f, 0.9f};
+			nnIdealOut = {0.1f};
+			nnOut = nn.JSFeedForward(nnInput);
+			printf("Input: {%1.1f, %1.1f}, Output: {%1.1f} [%1.1f], Error: %1.6f \n",
+				nnInput[0], nnInput[1],
+				nnOut[0], nnIdealOut[0],
+				nn.JSGetAvgErr(nnInput, nnIdealOut));
+
+			printf("\n");
+			nn.printInfo();
+			std::this_thread::sleep_for(std::chrono::milliseconds(50));
+			//fvec nnOut = nn.JSFeedForward(nnInput);
+			//printf("Input: {%1.1f, %1.1f}, Output: {%1.1f} [%1.1f], Error: %1.6f \n",
+			//	nnInput[0], nnInput[1],
+			//	nnOut[0], nnIdealOut[0],
+			//	nn.JSGetAvgErr(nnInput, nnIdealOut));
+
+			///*float avgErr = 0.0f;
+			//avgErr += nn.calTotalError({0.1f, 0.1f}, {0.1f});
+			//avgErr += nn.calTotalError({0.1f, 0.9f}, {0.9f});
+			//avgErr += nn.calTotalError({0.9f, 0.1f}, {0.9f});
+			//avgErr += nn.calTotalError({0.9f, 0.9f}, {0.1f});
+			//avgErr /= 4;
+			//printf("[%4u] %1.6f\n", trainNo, avgErr);*/
+			////printf("[%4u] %1.6f\n", trainNo, nn.calTotalError(nnInput, nnIdealOut));
+		}
+		
+	}
+	printf("\n");
+	if (false)	{
+		fvec nnOut;
+		fvec nnInput(2);
+		fvec nnIdealOut(1);
+
+		nnInput = {0.1f, 0.1f};
+		nnIdealOut = {0.1f};
+		nnOut = nn.feedForward(nnInput);
+		printf("Input: {%1.1f, %1.1f}, Output: {%1.1f} [%1.1f], Error: %1.6f \n", 
+			nnInput[0], nnInput[1],
+			nnOut[0], nnIdealOut[0],
+			nn.calTotalError(nnInput, nnIdealOut));
 
 		nnInput = {0.1f, 0.9f};
-		nnIdealOut = {0.1f, 0.9f};
+		nnIdealOut = {0.9f};
+		nnOut = nn.feedForward(nnInput);
+		printf("Input: {%1.1f, %1.1f}, Output: {%1.1f} [%1.1f], Error: %1.6f \n",
+			nnInput[0], nnInput[1],
+			nnOut[0], nnIdealOut[0],
+			nn.calTotalError(nnInput, nnIdealOut));
 
-		fvec nnOut = nn.feedForward(nnInput);
-		if (trainNo % 50 == 0)
-			printf("[%3u] %1.6f [%1.6f, %1.6f] \n", trainNo,  nn.calTotalError(nnInput, nnIdealOut), nnOut[0], nnOut[1]);
-		nn.train(nnInput, nnIdealOut);
-		
+		nnInput = {0.9f, 0.1f};
+		nnIdealOut = {0.9f};
+		nnOut = nn.feedForward(nnInput);
+		printf("Input: {%1.1f, %1.1f}, Output: {%1.1f} [%1.1f], Error: %1.6f \n",
+			nnInput[0], nnInput[1],
+			nnOut[0], nnIdealOut[0],
+			nn.calTotalError(nnInput, nnIdealOut));
+
+		nnInput = {0.9f, 0.9f};
+		nnIdealOut = {0.1f};
+		nnOut = nn.feedForward(nnInput);
+		printf("Input: {%1.1f, %1.1f}, Output: {%1.1f} [%1.1f], Error: %1.6f \n",
+			nnInput[0], nnInput[1],
+			nnOut[0], nnIdealOut[0],
+			nn.calTotalError(nnInput, nnIdealOut));
 	}
 	printf("\n");
 	nn.printInfo();

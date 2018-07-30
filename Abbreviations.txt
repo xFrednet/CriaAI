@@ -2,6 +2,7 @@ Abbreviation:
 
 Word                    Abbreviation
 -------------------- - --------------------
+Average              - avg
 Bitmap               - bmp
 Bounderies           - bounds
 Backpropagation      - bp | backprop
