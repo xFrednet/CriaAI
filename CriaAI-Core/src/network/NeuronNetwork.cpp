@@ -14,10 +14,10 @@ namespace cria_ai { namespace network {
 		}
 	}
 
-	void CRNeuronNetwork::process(CRMatrixf const* data, CR_NN_BP_LAYER_OUTPUTS* outputs)
+	void CRNeuronNetwork::process(CR_MATF const* data, CR_NN_BP_LAYER_OUTPUTS* outputs)
 	{
 		uint outputNo = 0;
-		CRMatrixf const* processData = data;
+		CR_MATF const* processData = data;
 
 		for (CRNeuronLayerPtr& ptr : m_LayerList)
 		{
@@ -34,7 +34,7 @@ namespace cria_ai { namespace network {
 
 	uint CRNeuronNetwork::getLayerCount() const
 	{
-		return m_LayerList.size();
+		return (uint)m_LayerList.size();
 	}
 	std::vector<CRNeuronLayer*> CRNeuronNetwork::getLayers()
 	{

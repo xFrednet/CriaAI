@@ -37,29 +37,31 @@
 #define CR_SUCCESS(crresult)           ((crresult).Value >= 0)
 #define CR_FAILED(crresult)            ((crresult).Value < 0 )
 
-/**
- * \brief 
- * 
- * Structure:
- * 
- *       1 1 1 1 1 1 1
- *       6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1
- *      +-------+-------+---------------+
- *      |---R---|-Source|-----Code------|
- *      +-------+-------+---------------+
- *    
- *      R      - Result: 
- *                 0: success
- *                 1: error
- *      
- *      Source - Indicates the source (15 possible sources)
- *      
- *      Code   - The error code (256 possible codes)
- * 
- */
 namespace cria_ai
 {
 	
+	/**
+	 * \brief 
+	 * 
+	 * Structure:
+	 * 
+	 *       1 1 1 1 1 1 1
+	 *       6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1
+	 *      +-+-----+-------+---------------+
+	 *      |R|-BUF-|-Source|-----Code------|
+	 *      +-+-----+-------+---------------+
+	 *    
+	 *      R      - Result: 
+	 *                 0: success
+	 *                 1: error
+	 *      
+	 *      BUF    - a clear Buffer to make the results more readable
+	 *      
+	 *      Source - Indicates the source (15 possible sources)
+	 *      
+	 *      Code   - The error code (256 possible codes)
+	 * 
+	 */
 	typedef struct crresult_ {
 		int16_t Value;
 
@@ -122,7 +124,7 @@ namespace cria_ai
 #define CRRES_OK_SINGLETON_IS_ALREADY_INITIALIZED CRIA_RES_TYPEDEF(0x0001)
 #define CRRES_OK_STATIC_INSTANCE_IS_NULL         CRIA_RES_TYPEDEF(0x0002)
 
-#define CRRES_ERR_INVALUD_ARGUMENTS              CRIA_RES_TYPEDEF(0x8001)
+#define CRRES_ERR_INVALID_ARGUMENTS              CRIA_RES_TYPEDEF(0x8001)
 #define CRRES_ERR_FUNCTION_NOT_IMPLEMENTED       CRIA_RES_TYPEDEF(0x8002)
 #define CRRES_ERR_INVALID_DIMENSIONS             CRIA_RES_TYPEDEF(0x8003)
 #define CRRES_ERR_MISSING_INFORMATION            CRIA_RES_TYPEDEF(0x8004)
@@ -132,6 +134,8 @@ namespace cria_ai
 #define CRRES_ERR_NEW_FAILED                     CRIA_RES_TYPEDEF(0x8007)
 #define CRRES_ERR_MAKE_SHARED_FAILED             CRIA_RES_TYPEDEF(0x8008)
 #define CRRES_ERR_STATIC_VAR_IS_ALREADY_VALID    CRIA_RES_TYPEDEF(0x8009)
+#define CRRES_ERR_FAILED_TO_CREATE_BYTE_BUFFER   CRIA_RES_TYPEDEF(0x8010)
+#define CRRES_ERR_INVALID_BYTE_BUFFER_SIZE       CRIA_RES_TYPEDEF(0x8011)
 
 /* //////////////////////////////////////////////////////////////////////////////// */
 // // CRRES_SOURCE_UTILS //
@@ -172,6 +176,9 @@ namespace cria_ai
 #define CRRES_ERR_OS_WINDOW_RESIZE_FAILED        CRIA_RES_TYPEDEF(0x8A09)
 #define CRRES_ERR_OS_FAILED_TO_CREATE_DIR        CRIA_RES_TYPEDEF(0x8A0A)
 
+#define CRRES_ERR_OS_FILE_COULD_NOT_BE_OPENED    CRIA_RES_TYPEDEF(0x8A11)
+#define CRRES_ERR_OS_WRITE_TO_FILE_FAILED        CRIA_RES_TYPEDEF(0x8A12)
+#define CRRES_ERR_OS_READ_FROM_FILE_FAILED       CRIA_RES_TYPEDEF(0x8A13)
 
 /* //////////////////////////////////////////////////////////////////////////////// */
 // // CRRES_SOURCE_WIN //
@@ -218,7 +225,7 @@ namespace cria_ai {
 					CRIA_SWITCH_CRRESULT(CRRES_OK_SINGLETON_IS_ALREADY_INITIALIZED);
 					CRIA_SWITCH_CRRESULT(CRRES_OK_STATIC_INSTANCE_IS_NULL);
 
-					CRIA_SWITCH_CRRESULT(CRRES_ERR_INVALUD_ARGUMENTS);
+					CRIA_SWITCH_CRRESULT(CRRES_ERR_INVALID_ARGUMENTS);
 					CRIA_SWITCH_CRRESULT(CRRES_ERR_FUNCTION_NOT_IMPLEMENTED);
 					CRIA_SWITCH_CRRESULT(CRRES_ERR_INVALID_DIMENSIONS);
 					CRIA_SWITCH_CRRESULT(CRRES_ERR_MISSING_INFORMATION);
@@ -227,6 +234,8 @@ namespace cria_ai {
 					CRIA_SWITCH_CRRESULT(CRRES_ERR_NEW_FAILED);
 					CRIA_SWITCH_CRRESULT(CRRES_ERR_MAKE_SHARED_FAILED);
 					CRIA_SWITCH_CRRESULT(CRRES_ERR_STATIC_VAR_IS_ALREADY_VALID);
+					CRIA_SWITCH_CRRESULT(CRRES_ERR_FAILED_TO_CREATE_BYTE_BUFFER);
+					CRIA_SWITCH_CRRESULT(CRRES_ERR_INVALID_BYTE_BUFFER_SIZE);
 
 					default:
 						return String("CRRESULT_UNNAMED_RESULT");
@@ -274,6 +283,10 @@ namespace cria_ai {
 					CRIA_SWITCH_CRRESULT(CRRES_ERR_OS_TARGET_IS_NULL);
 					CRIA_SWITCH_CRRESULT(CRRES_ERR_OS_WINDOW_RESIZE_FAILED);
 					CRIA_SWITCH_CRRESULT(CRRES_ERR_OS_FAILED_TO_CREATE_DIR);
+
+					CRIA_SWITCH_CRRESULT(CRRES_ERR_OS_FILE_COULD_NOT_BE_OPENED);
+					CRIA_SWITCH_CRRESULT(CRRES_ERR_OS_WRITE_TO_FILE_FAILED);
+					CRIA_SWITCH_CRRESULT(CRRES_ERR_OS_READ_FROM_FILE_FAILED);
 
 					default:
 						return String("CRRESULT_UNNAMED_RESULT");

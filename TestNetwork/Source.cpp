@@ -15,7 +15,6 @@
 using namespace cria_ai;
 typedef unsigned int uint;
 typedef std::vector<float> fvec;
-typedef CRMatrixf CR_MATF;
 
 void setConCursorPos(COORD pos = {0, 0})
 {
@@ -73,13 +72,13 @@ public:
 		m_Weigths(nullptr),
 		m_Bias(nullptr)
 	{
-		m_Input = CRCreateMatrixf(1, inputCount);
-		m_Output = CRCreateMatrixf(1, m_NeuronCount);
+		m_Input = CRMatFCreate(1, inputCount);
+		m_Output = CRMatFCreate(1, m_NeuronCount);
 
-		m_Blame = CRCreateMatrixf(1, m_NeuronCount);
+		m_Blame = CRMatFCreate(1, m_NeuronCount);
 
-		m_Weigths = CRCreateMatrixf(inputCount, m_NeuronCount);
-		m_Bias = CRCreateMatrixf(1, m_NeuronCount);
+		m_Weigths = CRMatFCreate(inputCount, m_NeuronCount);
+		m_Bias = CRMatFCreate(1, m_NeuronCount);
 
 
 		if (!m_Input || !m_Output || !m_Blame  || !m_Weigths || !m_Bias)
@@ -97,28 +96,28 @@ public:
 	~NLayer()
 	{
 		if (m_Input) {
-			CRDeleteMatrixf(m_Input);
+			CRMatFDelete(m_Input);
 			m_Input = nullptr;
 		}
 		if (m_Output) {
-			CRDeleteMatrixf(m_Output);
+			CRMatFDelete(m_Output);
 			m_Output = nullptr;
 		}
 
 		if (m_Blame)
 		{
-			CRDeleteMatrixf(m_Blame);
+			CRMatFDelete(m_Blame);
 			m_Blame = nullptr;
 		}
 
 		if (m_Weigths) 
 		{
-			CRDeleteMatrixf(m_Weigths);
+			CRMatFDelete(m_Weigths);
 			m_Weigths = nullptr;
 		}
 		if (m_Bias)
 		{
-			CRDeleteMatrixf(m_Bias);
+			CRMatFDelete(m_Bias);
 			m_Bias = nullptr;
 		}
 	}
@@ -136,14 +135,14 @@ public:
 		/*
 		 * Feed the child named "Forward" 
 		 */
-		CR_MATF* weightOut = CRMul(m_Input, m_Weigths);
-		CR_MATF* biasOut = CRAdd(weightOut, m_Bias);
+		CR_MATF* weightOut = CRMatFMul(m_Input, m_Weigths);
+		CR_MATF* biasOut = CRMatFAdd(weightOut, m_Bias);
 		for (uint outIndex = 0; outIndex < m_NeuronCount; outIndex++)
 		{
 			m_Output->Data[outIndex] = AFCal(biasOut->Data[outIndex]);
 		}
-		CRDeleteMatrixf(weightOut);
-		CRDeleteMatrixf(biasOut);
+		CRMatFDelete(weightOut);
+		CRMatFDelete(biasOut);
 
 		/*
 		 * Return
@@ -379,7 +378,6 @@ int main()
 		
 	}
 	printf("\n");
-
 
 	std::cin.get();
 	return 0;

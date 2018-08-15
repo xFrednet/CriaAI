@@ -20,7 +20,7 @@ namespace cria_ai { namespace network {
 
 		void initRandom();
 
-		void process(CRMatrixf const* data, CR_NN_BP_LAYER_OUTPUTS* outputs = nullptr);
+		void process(CR_MATF const* data, CR_NN_BP_LAYER_OUTPUTS* outputs = nullptr);
 
 		uint getLayerCount() const;
 		std::vector<CRNeuronLayer*> getLayers();

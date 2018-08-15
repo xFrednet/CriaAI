@@ -85,8 +85,8 @@ CRNeuronNetwork* createBOINetwork(CRNeuronLayerPtr& outputLayer)
 
 CR_FBMP* g_Fpp1Out = CRFBmpCreate(BOI_BASE_WIDTH * BOI_SCALE, BOI_BASE_HEIGHT * BOI_SCALE, 1);
 CR_FBMP* g_ScaleOut = CRFBmpCreate(BOI_BASE_WIDTH / BOI_SAMPLE_SIZE, BOI_BASE_HEIGHT / BOI_SAMPLE_SIZE, 1);
-CRMatrixf* g_MatOut = CRCreateMatrixf(1, (BOI_BASE_WIDTH / BOI_SAMPLE_SIZE) * (BOI_BASE_HEIGHT / BOI_SAMPLE_SIZE));
-CRMatrixf* processBOIFrame(CR_FBMP* inFrame)
+CR_MATF* g_MatOut = CRMatFCreate(1, (BOI_BASE_WIDTH / BOI_SAMPLE_SIZE) * (BOI_BASE_HEIGHT / BOI_SAMPLE_SIZE));
+CR_MATF* processBOIFrame(CR_FBMP* inFrame)
 {
 	if (!inFrame || inFrame->Width != BOI_BASE_WIDTH * BOI_SCALE || inFrame->Height != BOI_BASE_HEIGHT * BOI_SCALE)
 	{
@@ -121,8 +121,8 @@ CRMatrixf* processBOIFrame(CR_FBMP* inFrame)
 	return g_MatOut;
 }
 
-CRMatrixf* g_CurrentInput = CRCreateMatrixf(12, 1);
-CRMatrixf* getCurrentInput()
+CR_MATF* g_CurrentInput = CRMatFCreate(12, 1);
+CR_MATF* getCurrentInput()
 {
 	short buttons[12] = {'W', 'A', 'S', 'D', VK_UP, VK_DOWN, VK_LEFT, VK_RIGHT, ' ', VK_LCONTROL, 'E', 'Q'};
 	for (uint index = 0; index < 12; index++)
@@ -132,7 +132,7 @@ CRMatrixf* getCurrentInput()
 
 	return g_CurrentInput;
 }
-void printBOIOutput(CRMatrixf const* mat)
+void printBOIOutput(CR_MATF const* mat)
 {
 	if (mat->Cols != 1 || mat->Rows != 12)
 		return;
@@ -224,8 +224,8 @@ void testBOINetwork()
 		 */
 
 		// frame processing
-		CRMatrixf* data = processBOIFrame(frame);
-		//CRMatrixf* data = nullptr;
+		CR_MATF* data = processBOIFrame(frame);
+		//CR_MATF* data = nullptr;
 		CRFBmpDelete(frame);
 		if (!data)
 			continue;
@@ -245,7 +245,7 @@ void testBOINetwork()
 			printf(" [INFO] backpropagation: %5i / %5i                       \n", bpInfo->TotalBPsCount, BOI_BATCH_SIZE);
 			CRBackprop(bpInfo, getCurrentInput(), outputs, network);
 		}
-		//CRDeleteMatrixf(data);
+		//CRMatFDelete(data);
 
 		// print result
 		printBOIOutput(outputLayer->getOutput());

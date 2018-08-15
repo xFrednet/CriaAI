@@ -117,8 +117,8 @@ namespace cria_ai { namespace paco {
 	/* ###################################################################################### */
 	// # CRFBmpToMatf #
 	/* ###################################################################################### */
-	void              CRFBmpToMatf(CR_FBMP const* inBmp, CRMatrixf* outMat);
-	inline CRMatrixf* CRFBmpTo1DMatf(CR_FBMP const* inBmp)
+	void              CRFBmpToMatf(CR_FBMP const* inBmp, CR_MATF* outMat);
+	inline CR_MATF* CRFBmpTo1DMatf(CR_FBMP const* inBmp)
 	{
 		/*
 		 * Validation
@@ -129,7 +129,7 @@ namespace cria_ai { namespace paco {
 		/*
 		 * Create output
 		 */
-		CRMatrixf* outMat = CRCreateMatrixf(1, inBmp->Width * inBmp->Height * inBmp->Fpp);
+		CR_MATF* outMat = CRMatFCreate(1, inBmp->Width * inBmp->Height * inBmp->Fpp);
 		CRIA_AUTO_ASSERT(outMat, "CRFBmpTo1DMatf: The Creation of the output matrix failed");
 		if (!outMat)
 			return nullptr;
@@ -141,7 +141,7 @@ namespace cria_ai { namespace paco {
 
 		return outMat;
 	}
-	inline CRMatrixf* CRFBmpTo2DMatf(CR_FBMP const* inBmp)
+	inline CR_MATF* CRFBmpTo2DMatf(CR_FBMP const* inBmp)
 	{
 		/*
 		* Validation
@@ -152,7 +152,7 @@ namespace cria_ai { namespace paco {
 		/*
 		* Create output
 		*/
-		CRMatrixf* outMat = CRCreateMatrixf(inBmp->Width * inBmp->Fpp, inBmp->Height);
+		CR_MATF* outMat = CRMatFCreate(inBmp->Width * inBmp->Fpp, inBmp->Height);
 		CRIA_AUTO_ASSERT(outMat, "CRFBmpTo1DMatf: The Creation of the output matrix failed");
 		if (!outMat)
 			return nullptr;

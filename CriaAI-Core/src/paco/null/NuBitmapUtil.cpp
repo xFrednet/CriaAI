@@ -219,7 +219,7 @@ namespace cria_ai { namespace paco {
 		}
 	}
 
-	void CRFBmpToMatf(CR_FBMP const* inBmp, CRMatrixf* outMat)
+	void CRFBmpToMatf(CR_FBMP const* inBmp, CR_MATF* outMat)
 	{
 		/*
 		* Validation

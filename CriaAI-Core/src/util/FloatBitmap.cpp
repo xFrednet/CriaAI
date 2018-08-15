@@ -180,7 +180,7 @@ memset(bmp->Data, 0, CR_FBMP_DATA_SIZE(bmp));
 		 /*
 		 * making sure the directory exists.
 		 */
-		if (!CreateContainingDir(file)) 
+		if (!CRCreateContainingDir(file)) 
 		{
 			CRIA_AUTO_ASSERT(false, "CRSaveBmp: The creation of the containing directory failed, file: \"%s\"", file.c_str());
 			return CRRES_ERR_OS_FAILED_TO_CREATE_DIR;

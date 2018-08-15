@@ -50,5 +50,8 @@ typedef unsigned short                 uint16;
 typedef unsigned int                   uint32;
 typedef unsigned long long             uint64;
 
-typedef uint32                         uint;
 typedef unsigned char                  byte;
+typedef uint32                         uint;
+typedef intptr_t                       intptr;
+typedef uintptr_t                      uintptr;
+

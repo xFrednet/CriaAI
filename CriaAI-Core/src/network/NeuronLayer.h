@@ -56,10 +56,10 @@ namespace cria_ai { namespace network {
 	protected:
 		CRNeuronLayer const* m_PrevLayer;
 
-		CRMatrixf* m_Output;
+		CR_MATF* m_Output;
 
-		CRMatrixf* m_Weights;
-		CRMatrixf* m_Bias;
+		CR_MATF* m_Weights;
+		CR_MATF* m_Bias;
 
 		uint m_NeuronCount;
 
@@ -89,19 +89,19 @@ namespace cria_ai { namespace network {
 
 		void setActivationFunc(paco::cr_activation_func activationFunc, paco::cr_activation_func_inv activationFuncInv);
 
-		void processData(CRMatrixf const* inputData);
+		void processData(CR_MATF const* inputData);
 
-		void applyBackpropagation(CRMatrixf const* weightChange, CRMatrixf const* biasChange);
+		void applyBackpropagation(CR_MATF const* weightChange, CR_MATF const* biasChange);
 
 		/*
 		 * getters
 		 */
-		CRMatrixf* getOutput();
-		CRMatrixf const* getOutput() const;
-		CRMatrixf* getWeights();
-		CRMatrixf const* getWeights() const;
-		CRMatrixf* getBias();
-		CRMatrixf const* getBias() const;
+		CR_MATF* getOutput();
+		CR_MATF const* getOutput() const;
+		CR_MATF* getWeights();
+		CR_MATF const* getWeights() const;
+		CR_MATF* getBias();
+		CR_MATF const* getBias() const;
 
 		paco::cr_activation_func getActivationFunc() const;
 		paco::cr_activation_func_inv getActivationFuncInv() const;

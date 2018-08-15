@@ -36,7 +36,7 @@
 
 namespace cria_ai { namespace paco {
 	
-	void CRSigmoid(CRMatrixf const* input, CRMatrixf* output)
+	void CRSigmoid(CR_MATF const* input, CR_MATF* output)
 	{
 		CRIA_SIGMOID_VALIDATION_CHECK(input, output);
 		
@@ -45,7 +45,7 @@ namespace cria_ai { namespace paco {
 		}
 	}
 
-	void CRSigmoidInv(CRMatrixf const* input, CRMatrixf* output)
+	void CRSigmoidInv(CR_MATF const* input, CR_MATF* output)
 	{
 		CRIA_SIGMOID_VALIDATION_CHECK(input, output);
 

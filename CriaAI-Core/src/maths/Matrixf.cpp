@@ -11,74 +11,97 @@
 
 namespace cria_ai
 {
-	CRMatrixf* CRCreateMatrixf(uint cols, uint rows)
+	/* //////////////////////////////////////////////////////////////////////////////// */
+	// // CRMatFCreate //
+	/* //////////////////////////////////////////////////////////////////////////////// */
+	inline CR_MATF* CRMatFCreate(uint cols, uint rows, bool usePacoMalloc)
 	{
+		/*
+		 * Validation
+		 */
 		CRIA_AUTO_ASSERT(cols != 0 && rows != 0, "A matrix with 0 columns or rows is dumdum");
 		CRIA_AUTO_ASSERT(CR_CAN_UINT32_MUL(cols, rows), "The index would exceed UINT32_MAX in this case");
 		if (cols == 0 || rows == 0 || !CR_CAN_UINT32_MUL(cols, rows))
 			return nullptr;
 
-		CRMatrixf* matrix = (CRMatrixf*)paco::CRPaCoMalloc(sizeof(CRMatrixf) + sizeof(float) * cols * rows);
+		/*
+		 * Memory allocation
+		 */
+		size_t matMemSize = sizeof(CR_MATF) + sizeof(float) * cols * rows;
+		CR_MATF* matrix;
+		if (usePacoMalloc)
+		{
+			matrix = (CR_MATF*)paco::CRPaCoMalloc(matMemSize);
+		} 
+		else
+		{
+			matrix = (CR_MATF*)malloc(matMemSize);
+		}
 		CRIA_AUTO_ASSERT(matrix, "");
 		if (!matrix)
 			return nullptr;
 
+		/*
+		 * Filling the memory
+		 */
 		matrix->Cols = cols;
 		matrix->Rows = rows;
-		matrix->Data = (float*)((uintptr_t)matrix + (uintptr_t)sizeof(CRMatrixf));
+		matrix->Data = (float*)((uintptr_t)matrix + (uintptr_t)sizeof(CR_MATF));
 
 		memset(matrix->Data, 0, sizeof(float) * cols * rows);
 
+		/*
+		 * Return the matrix
+		 */
 		return matrix;
 	}
-	void       CRDeleteMatrixf(CRMatrixf* matrix)
+	CR_MATF* CRMatFCreatePaco(uint cols, uint rows)
+	{
+		return CRMatFCreate(cols, rows, true);
+	}
+	CR_MATF* CRMatFCreateNormal(uint cols, uint rows)
+	{
+		return CRMatFCreate(cols, rows, false);
+	}
+	
+	/* //////////////////////////////////////////////////////////////////////////////// */
+	// // CRMatFDelete //
+	/* //////////////////////////////////////////////////////////////////////////////// */
+	void       CRMatFDeletePaco(CR_MATF* matrix)
 	{
 		if (matrix)
 			paco::CRPaCoFree(matrix);
 	}
+	void       CRMatFDeleteNormal(CR_MATF* matrix)
+	{
+		if (matrix)
+			free(matrix);
+	}
 
-	struct CR_FILE_HEADER
+
+	/* //////////////////////////////////////////////////////////////////////////////// */
+	// // CRMatF Save //
+	/* //////////////////////////////////////////////////////////////////////////////// */
+	typedef struct CR_MATF_FILE_HEADER_
 	{
 		byte   Magic[8];  /* these bytes contain the chars "CRAIMATF"*/
 		uint32 Cols;      /* This is the number of columns of the matrix */
 		uint32 Rows;      /* This is the number of rows of the matrix */
-		uint32 DataStart; /* This is the information where the matrix data starts */
-	};
+		uint32 DataStart; /* This is the number of bytes from the file/buffer beginning where the matrix data starts */
+	} CR_MATF_FILE_HEADER;
 	/*
 	* Why do I need to write extra methods? well the structs may use padding that
-	* isn't supported by loaders
+	* isn't supported by the loader
 	*/
-	inline int WriteData(FILE* file, void* data, size_t size)
+	inline int WriteData(CR_BYTE_BUFFER* file, void* data, size_t size)
 	{
 		return fwrite(data, 1, size, file) == size;
 	}
-	inline int ReadData(FILE* file, void* buffer, size_t size)
+	inline int ReadData(CR_BYTE_BUFFER* file, void* buffer, size_t size)
 	{
 		return fread(buffer, 1, size, file) == size;
 	}
-	inline FILE* fileopen(const char* fileName, char const* mode)
-	{
-		/*
-		 * create directory
-		 */
-		if (!CreateContainingDir(fileName))
-		{
-			CRIA_AUTO_ASSERT("The creation of the containing directory failed, file: \"%s\"", fileName);
-			return nullptr;
-		}
-
-		/*
-		 * open file
-		 */
-		FILE* file = nullptr;
-		errno_t err = fopen_s(&file, fileName, mode);
-		CRIA_AUTO_ASSERT(file, "fopen_s failed to open the file. fileName:\"%s\", mode:\"%s\", errno_t\"%i\"", fileName, mode, err);
-		if (!file)
-			return nullptr;
-
-		return file;
-	}
-	inline int WriteFileHeader(FILE* file, CR_FILE_HEADER* header)
+	inline int WriteFileHeader(CR_BYTE_BUFFER* file, CR_MATF_FILE_HEADER* header)
 	{
 		if (!WriteData(file, &header->Magic[0] , 8)) return 0;
 		if (!WriteData(file, &header->Cols     , 4)) return 0;
@@ -86,7 +109,7 @@ namespace cria_ai
 		if (!WriteData(file, &header->DataStart, 4)) return 0;
 		return 1;
 	}
-	inline int ReadFileHeader(FILE* file, CR_FILE_HEADER* header)
+	inline int ReadFileHeader(FILE* file, CR_MATF_FILE_HEADER* header)
 	{
 		if (!ReadData(file, &header->Magic[0] , 8)) return 0;
 		if (!ReadData(file, &header->Cols     , 4)) return 0;
@@ -94,9 +117,9 @@ namespace cria_ai
 		if (!ReadData(file, &header->DataStart, 4)) return 0;
 		return 1;
 	}
-	bool       CRSaveMatrixf(CRMatrixf* mat, char const* fileName)
+	bool       CRMatFSave_DEP(CR_MATF* mat, char const* fileName)
 	{
-		CR_FILE_HEADER header;
+		CR_MATF_FILE_HEADER header;
 		FILE* file = nullptr;
 
 		/* validation */
@@ -132,11 +155,11 @@ namespace cria_ai
 		fclose(file);
 		return true;
 	}
-	CRMatrixf* CRLoadMatrixf(char const* fileName)
+	CR_MATF* CRMatFLoad_DEP(char const* fileName)
 	{
-		CR_FILE_HEADER header;
+		CR_MATF_FILE_HEADER header;
 		FILE* file;
-		CRMatrixf* mat = 0;
+		CR_MATF* mat = 0;
 
 		/* validation */
 		CRIA_AUTO_ASSERT(fileName, "Hello, I don't exist");
@@ -161,7 +184,7 @@ namespace cria_ai
 				break;
 			
 			/* create matrix */
-			mat = CRCreateMatrixf(header.Cols, header.Rows);
+			mat = CRMatFCreate(header.Cols, header.Rows);
 			CRIA_AUTO_ASSERT(mat, "Matrix creation failed!");
 			if (!mat)
 				break;
@@ -181,11 +204,62 @@ namespace cria_ai
 
 		fclose(file);
 		if (mat)
-			CRDeleteMatrixf(mat);
+			CRMatFDelete(mat);
 		return 0;
 	}
 
-	bool       CRWriteMatrixf(CRMatrixf* mat, char const* fileName, uint decimals)
+	size_t CRMatFGetSaveBufferSize(CR_MATF const* mat)
+	{
+		/*
+		 * Validation
+		 */
+		if (!VALID_MAT(mat))
+			return 0;
+
+		/*
+		 * Calculation
+		 */
+		size_t size = 0;
+		size += 8 + 4 + 4 + 4; // CR_MATF_FILE_HEADER
+		size += sizeof(float) * CR_MATF_VALUE_COUNT(mat); // The matrix data
+
+		/*
+		 * return
+		 */
+		return size;
+	}
+
+	crresult CRMatFSave(CR_MATF const* mat, CR_BYTE_BUFFER* buffer)
+	{
+		/*
+		 * Validation check
+		 */
+		if (!VALID_MAT(mat) || CRByteBufferValid(buffer))
+			return CRRES_ERR_INVALID_ARGUMENTS;
+		if (buffer->Size < CRMatFGetSaveBufferSize(mat))
+			return CRRES_ERR_INVALID_BYTE_BUFFER_SIZE;
+
+		/*
+		 * File header
+		 */
+		CR_MATF_FILE_HEADER header;
+		memcpy(&header.Magic[0], "CRAIMATF", 8);
+		header.Cols = mat->Cols;
+		header.Rows = mat->Rows;
+		header.DataStart = 8 + 4 + 4 + 4;
+
+	}
+	crresult CRMatFSave(CR_MATF const* mat, const String& fileName)
+	{
+	}
+	CR_MATF* CRMatFLoad(CR_BYTE_BUFFER const* buffer, crresult* result)
+	{
+	}
+	CR_MATF* CRMatFLoad(const String& file, crresult* result)
+	{
+	}
+
+	bool       CRMatFSaveAsText(CR_MATF* mat, char const* fileName, uint decimals)
 	{
 		using namespace std;
 
@@ -200,11 +274,11 @@ namespace cria_ai
 
 		/* init format values */
 		predecimals = (uint)log10f(
-			MAX(abs(CRGetMaxValue(mat)), abs(CRGetMinValue(mat))) /* Getting the longest value */
+			MAX(abs(CRMatFGetMaxValue(mat)), abs(CRMatFGetMinValue(mat))) /* Getting the longest value */
 			) + 2 /* plus one for the sign and one because log10 returns one too short */;
 		
 		/* opening the file*/
-		CreateContainingDir(fileName);
+		CRCreateContainingDir(fileName);
 		ofstream file(fileName, ifstream::out | ofstream::binary);
 		CRIA_AUTO_ASSERT(file.is_open(), "Failed to create/open the File[%s]", fileName);
 		if (!file.is_open())
@@ -227,8 +301,7 @@ namespace cria_ai
 		file.close();
 		return true;
 	}
-
-	bool       CRWriteMatrixfBmp(CRMatrixf* mat, char const* fileName)
+	bool       CRMatfSaveAsBmp(CR_MATF* mat, char const* fileName)
 	{
 		using namespace bmp_renderer;
 
@@ -254,7 +327,7 @@ namespace cria_ai
 		}
 		
 		/* saving the file */
-		if (CreateContainingDir(fileName) && !SaveBitmap(bmp, fileName))
+		if (CRCreateContainingDir(fileName) && !SaveBitmap(bmp, fileName))
 		{
 			CRIA_AUTO_ASSERT(false, "The bitmap could not be saved sorry!!");
 			DeleteBmp(bmp);
@@ -265,12 +338,12 @@ namespace cria_ai
 		return true;
 	}
 
-	bool       CRIsMatValid(CRMatrixf* mat)
+	bool       CRMatFValid(CR_MATF const* mat)
 	{
 		return VALID_MAT(mat);
 	}
 
-	void       CRFillMatrixRand(CRMatrixf* mat)
+	void       CRMatFFillRand(CR_MATF* mat)
 	{
 		uint index;
 
@@ -284,7 +357,7 @@ namespace cria_ai
 		}
 	}
 
-	float      CRGetMaxValue(CRMatrixf const* mat)
+	float      CRMatFGetMaxValue(CR_MATF const* mat)
 	{
 		uint index;
 		float min;
@@ -305,7 +378,7 @@ namespace cria_ai
 		/* return */
 		return min;
 	}
-	float      CRGetMinValue(CRMatrixf const* mat)
+	float      CRMatFGetMinValue(CR_MATF const* mat)
 	{
 		uint index;
 		float max;
@@ -326,10 +399,10 @@ namespace cria_ai
 		/* return */
 		return max;
 	}
-	CRMatrixf* CRClamp(CRMatrixf const* srcMat, float min, float max)
+	CR_MATF* CRMatFClamp(CR_MATF const* srcMat, float min, float max)
 	{
 		uint index;
-		CRMatrixf* dstMat;
+		CR_MATF* dstMat;
 
 		/* validate */
 		CRIA_AUTO_ASSERT(VALID_MAT(srcMat), "The matrix has to be valid.");
@@ -338,7 +411,7 @@ namespace cria_ai
 			return 0;
 
 		/* creating the matrix */
-		dstMat = CRCreateMatrixf(srcMat->Cols, srcMat->Rows);
+		dstMat = CRMatFCreate(srcMat->Cols, srcMat->Rows);
 		CRIA_AUTO_ASSERT(dstMat, "Failed to create the output matrix");
 		if (!dstMat)
 			return 0;
@@ -356,7 +429,7 @@ namespace cria_ai
 
 		return dstMat;
 	}
-	float CRMatFSum(CRMatrixf const* mat)
+	float CRMatFSum(CR_MATF const* mat)
 	{
 		/*
 		 * Validation
@@ -376,9 +449,9 @@ namespace cria_ai
 		return sum;
 	}
 
-	CRMatrixf* CRAdd(CRMatrixf const* a, CRMatrixf const* b)
+	CR_MATF* CRMatFAdd(CR_MATF const* a, CR_MATF const* b)
 	{
-		CRMatrixf* mat;
+		CR_MATF* mat;
 		uint index;
 
 		/* matrix validation */
@@ -389,7 +462,7 @@ namespace cria_ai
 			return 0;
 
 		/* matrix creation */
-		mat = CRCreateMatrixf(a->Cols, a->Rows);
+		mat = CRMatFCreate(a->Cols, a->Rows);
 		CRIA_AUTO_ASSERT(mat, "Matrix creation failed!");
 		if (!mat)
 			return 0;
@@ -402,9 +475,9 @@ namespace cria_ai
 
 		return mat;
 	}
-	CRMatrixf* CRSub(CRMatrixf const* a, CRMatrixf const* b)
+	CR_MATF* CRMatFSub(CR_MATF const* a, CR_MATF const* b)
 	{
-		CRMatrixf* mat;
+		CR_MATF* mat;
 		uint index;
 
 		/* matrix validation */
@@ -415,7 +488,7 @@ namespace cria_ai
 			return 0;
 
 		/* matrix creation */
-		mat = CRCreateMatrixf(a->Cols, a->Rows);
+		mat = CRMatFCreate(a->Cols, a->Rows);
 		CRIA_AUTO_ASSERT(mat, "Matrix creation failed!");
 		if (!mat)
 			return 0;
@@ -427,9 +500,9 @@ namespace cria_ai
 
 		return mat;
 	}
-	CRMatrixf* CRMul(CRMatrixf const* a, CRMatrixf const* b)
+	CR_MATF* CRMatFMul(CR_MATF const* a, CR_MATF const* b)
 	{
-		CRMatrixf* mat;
+		CR_MATF* mat;
 
 		/* validation */
 		CRIA_AUTO_ASSERT(VALID_MAT(a) && VALID_MAT(b), "The matrices have to be valid sorry.");
@@ -439,7 +512,7 @@ namespace cria_ai
 			return 0;
 
 		/* create the output matrix */
-		mat = CRCreateMatrixf(a->Cols, b->Rows);
+		mat = CRMatFCreate(a->Cols, b->Rows);
 		CRIA_AUTO_ASSERT(mat, "The creation of the output matrix failed!")
 		if (!mat)
 			return 0;
@@ -466,9 +539,9 @@ namespace cria_ai
 		return mat;
 	}
 
-	CRMatrixf* CRMul(CRMatrixf const* a, float b)
+	CR_MATF* CRMatFMul(CR_MATF const* a, float b)
 	{
-		CRMatrixf* mat;
+		CR_MATF* mat;
 		uint index;
 
 		/* matrix validation */
@@ -477,7 +550,7 @@ namespace cria_ai
 			return 0;
 
 		/* matrix creation */
-		mat = CRCreateMatrixf(a->Cols, a->Rows);
+		mat = CRMatFCreate(a->Cols, a->Rows);
 		CRIA_AUTO_ASSERT(mat, "Matrix creation failed!");
 		if (!mat)
 			return 0;
@@ -489,13 +562,13 @@ namespace cria_ai
 
 		return mat;
 	}
-	CRMatrixf* CRDiv(CRMatrixf const* a, float b)
+	CR_MATF* CRMatFDiv(CR_MATF const* a, float b)
 	{
 		CRIA_AUTO_ASSERT(b == 0, "Devision by 0 is undefined behavior");
 		if (b == 0)
 			return nullptr;
 
-		return CRMul(a, 1.0f / b);
+		return CRMatFMul(a, 1.0f / b);
 	}
 }
  

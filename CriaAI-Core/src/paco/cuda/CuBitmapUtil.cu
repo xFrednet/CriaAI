@@ -299,7 +299,7 @@ namespace cria_ai { namespace paco {
 	/* ###################################################################################### */
 	// # CRFBmpToMatf #
 	/* ###################################################################################### */
-	__global__ void CRCuBmpToMatf(CR_FBMP const* inBmp, CRMatrixf* outMat)
+	__global__ void CRCuBmpToMatf(CR_FBMP const* inBmp, CR_MATF* outMat)
 	{
 		int startIndex = blockIdx.x * blockDim.x + threadIdx.x;
 		int stride = blockDim.x * gridDim.x;
@@ -309,7 +309,7 @@ namespace cria_ai { namespace paco {
 			outMat->Data[index] = (float)inBmp->Data[index] / 255.0f;
 		}
 	}
-	void CRFBmpToMatf(CR_FBMP const* inBmp, CRMatrixf* outMat)
+	void CRFBmpToMatf(CR_FBMP const* inBmp, CR_MATF* outMat)
 	{
 		/*
 		* Validation
