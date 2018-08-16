@@ -61,6 +61,7 @@ namespace cria_ai {
 		 * Filling the fields
 		 */
 		buffer->Size = size;
+		buffer->Position = 0;
 		buffer->Data = (byte*)((uintptr)buffer + sizeof(CR_BYTE_BUFFER));
 		memset(buffer->Data, 0, sizeof(buffer->Size));
 

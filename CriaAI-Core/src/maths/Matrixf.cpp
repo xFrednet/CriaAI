@@ -93,119 +93,29 @@ namespace cria_ai
 	* Why do I need to write extra methods? well the structs may use padding that
 	* isn't supported by the loader
 	*/
-	inline int WriteData(CR_BYTE_BUFFER* file, void* data, size_t size)
+	inline void WriteData(CR_BYTE_BUFFER* buffer, void* data, size_t size)
 	{
-		return fwrite(data, 1, size, file) == size;
+		memcpy(&(buffer->Data[buffer->Position]), data, size);
+		buffer->Position += size;
 	}
-	inline int ReadData(CR_BYTE_BUFFER* file, void* buffer, size_t size)
+	inline void ReadData(CR_BYTE_BUFFER const* data, void* outBuffer, size_t size)
 	{
-		return fread(buffer, 1, size, file) == size;
+		memcpy(outBuffer, &(data->Data[data->Position]), size);
+		data->Position += size;
 	}
-	inline int WriteFileHeader(CR_BYTE_BUFFER* file, CR_MATF_FILE_HEADER* header)
+	inline void CRWriteMatFFileHeader(CR_BYTE_BUFFER* buffer, CR_MATF_FILE_HEADER* header)
 	{
-		if (!WriteData(file, &header->Magic[0] , 8)) return 0;
-		if (!WriteData(file, &header->Cols     , 4)) return 0;
-		if (!WriteData(file, &header->Rows     , 4)) return 0;
-		if (!WriteData(file, &header->DataStart, 4)) return 0;
-		return 1;
+		WriteData(buffer, &header->Magic[0] , 8);
+		WriteData(buffer, &header->Cols     , 4);
+		WriteData(buffer, &header->Rows     , 4);
+		WriteData(buffer, &header->DataStart, 4);
 	}
-	inline int ReadFileHeader(FILE* file, CR_MATF_FILE_HEADER* header)
+	inline void CRReadMatFFileHeader(CR_BYTE_BUFFER const* data, CR_MATF_FILE_HEADER* header)
 	{
-		if (!ReadData(file, &header->Magic[0] , 8)) return 0;
-		if (!ReadData(file, &header->Cols     , 4)) return 0;
-		if (!ReadData(file, &header->Rows     , 4)) return 0;
-		if (!ReadData(file, &header->DataStart, 4)) return 0;
-		return 1;
-	}
-	bool       CRMatFSave_DEP(CR_MATF* mat, char const* fileName)
-	{
-		CR_MATF_FILE_HEADER header;
-		FILE* file = nullptr;
-
-		/* validation */
-		CRIA_AUTO_ASSERT(VALID_MAT(mat) && fileName, " ");
-		if (!VALID_MAT(mat) || !fileName)
-			return false;
-
-		/* file header*/
-		memcpy(&header.Magic[0], "CRAIMATF", 8);
-		header.Cols = mat->Cols;
-		header.Rows = mat->Rows;
-		header.DataStart = 8 + 4 + 4 + 4;
-
-		/* open file */
-		file = fileopen(fileName, "wb");
-		CRIA_AUTO_ASSERT(file, "");
-		if (!file)
-			return false;
-
-		/* writing file */
-		if (!WriteFileHeader(file, &header)) {
-			CRIA_AUTO_ASSERT(false, "WriteFileHeader failed");
-			fclose(file);
-			return false;
-		}
-		if (!WriteData(file, &mat->Data[0], sizeof(float) * mat->Cols * mat->Rows)) {
-			CRIA_AUTO_ASSERT(false, "WriteData failed");
-			fclose(file);
-			return false;
-		}
-
-		/* finishing */
-		fclose(file);
-		return true;
-	}
-	CR_MATF* CRMatFLoad_DEP(char const* fileName)
-	{
-		CR_MATF_FILE_HEADER header;
-		FILE* file;
-		CR_MATF* mat = 0;
-
-		/* validation */
-		CRIA_AUTO_ASSERT(fileName, "Hello, I don't exist");
-		if (!fileName)
-			return 0;
-
-		/* open file */
-		file = fileopen(fileName, "rb");
-		CRIA_AUTO_ASSERT(file, "Hey... I'm not good.");
-		if (!file)
-			return 0;
-
-		do {
-			/* reading header + validation */
-			if (!ReadFileHeader(file, &header)) {
-				CRIA_AUTO_ASSERT(false, "ReadFileHeader failed");
-				break;
-			}
-			CRIA_AUTO_ASSERT(memcmp(&header.Magic[0], "CRAIMATF", 8) == 0 && header.Cols != 0 && header.Rows != 0, "validation failed");
-			if (memcmp(&header.Magic[0], "CRAIMATF", 8) != 0 ||
-				header.Cols == 0 || header.Rows == 0)
-				break;
-			
-			/* create matrix */
-			mat = CRMatFCreate(header.Cols, header.Rows);
-			CRIA_AUTO_ASSERT(mat, "Matrix creation failed!");
-			if (!mat)
-				break;
-
-			if (fseek(file, header.DataStart, SEEK_SET)) {
-				CRIA_AUTO_ASSERT(false, "fseek failed to set the cursor");
-				break;
-			}
-			if (!ReadData(file, mat->Data, sizeof(float) * header.Cols * header.Rows)) {
-				CRIA_AUTO_ASSERT(false, "ReadData failed to load the matrix data");
-				break;
-			}
-
-			fclose(file);
-			return mat;
-		} while (false);
-
-		fclose(file);
-		if (mat)
-			CRMatFDelete(mat);
-		return 0;
+		ReadData(data, &header->Magic[0] , 8);
+		ReadData(data, &header->Cols     , 4);
+		ReadData(data, &header->Rows     , 4);
+		ReadData(data, &header->DataStart, 4);
 	}
 
 	size_t CRMatFGetSaveBufferSize(CR_MATF const* mat)
@@ -234,10 +144,12 @@ namespace cria_ai
 		/*
 		 * Validation check
 		 */
-		if (!VALID_MAT(mat) || CRByteBufferValid(buffer))
+		if (!VALID_MAT(mat) || !CRByteBufferValid(buffer))
 			return CRRES_ERR_INVALID_ARGUMENTS;
 		if (buffer->Size < CRMatFGetSaveBufferSize(mat))
 			return CRRES_ERR_INVALID_BYTE_BUFFER_SIZE;
+
+		size_t bufferStartPos = buffer->Position;
 
 		/*
 		 * File header
@@ -248,15 +160,152 @@ namespace cria_ai
 		header.Rows = mat->Rows;
 		header.DataStart = 8 + 4 + 4 + 4;
 
+		/*
+		 * Write the data
+		 */
+		CRWriteMatFFileHeader(buffer, &header);
+		buffer->Position = bufferStartPos + header.DataStart;
+		WriteData(buffer, &(mat->Data[0]), sizeof(float) * mat->Cols * mat->Rows);
+
+		return CRRES_OK;
 	}
 	crresult CRMatFSave(CR_MATF const* mat, const String& fileName)
 	{
+		/*
+		 * Validation
+		 */
+		if (!VALID_MAT(mat) || fileName.empty())
+			return CRRES_ERR_INVALID_ARGUMENTS;
+
+		/*
+		 * Create byte buffer
+		 */
+		CR_BYTE_BUFFER* buffer = CRByteBufferCreate(CRMatFGetSaveBufferSize(mat));
+		if (!CRByteBufferValid(buffer))
+			return CRRES_ERR_FAILED_TO_CREATE_BYTE_BUFFER;
+
+		/*
+		 * Call the CRMatFSave function with the byte buffer
+		 */
+		crresult result = CRMatFSave(mat, buffer);
+		if (CR_FAILED(result))
+		{
+			CRByteBufferDelete(buffer);
+			return result;
+		}
+
+		/*
+		 * Save the byte buffer content
+		 */
+		result = CRFileWrite(fileName, buffer); 
+		// Note I don't care if the result is negative I have to delete the buffer and return the result anyways
+
+		CRByteBufferDelete(buffer);
+		return result; //bye bye
 	}
 	CR_MATF* CRMatFLoad(CR_BYTE_BUFFER const* buffer, crresult* result)
 	{
+		/*
+		 * Validation
+		 */
+		if (!CRByteBufferValid(buffer))
+		{
+			if (result)
+				*result = CRRES_ERR_INVALID_ARGUMENTS;
+			return nullptr;
+		}
+		size_t bufferStartPos = buffer->Position;
+
+		/*
+		 * fill the file header and check for validation
+		 */
+		CR_MATF_FILE_HEADER header;
+		CRReadMatFFileHeader(buffer, &header);
+		
+		// validation
+		if (memcmp(&header.Magic[0], "CRAIMATF", 8) != 0 ||
+			header.Cols == 0 || header.Rows == 0)
+		{
+			if (result)
+				*result = CRRES_ERR_OS_FILE_FORMAT_UNKNOWN;
+			return nullptr;
+		}
+		
+		size_t dataSize = sizeof(float) * header.Cols * header.Rows;
+		if (bufferStartPos + header.DataStart + dataSize > buffer->Size)
+		{
+			if (result)
+				*result = CRRES_ERR_INVALID_BYTE_BUFFER_SIZE;
+			return nullptr;
+		}
+
+		/*
+		 *  Create the matrix and read the data
+		 */
+		CR_MATF* mat = CRMatFCreate(header.Cols, header.Rows);
+		if (!CRMatFValid(mat))
+		{
+			if (result)
+				*result = CRRES_ERR_MALLOC_FAILED;
+			return nullptr;
+		}
+		buffer->Position = bufferStartPos + header.DataStart;
+		ReadData(buffer, mat->Data, dataSize);
+
+		/*
+		 * throw the matrix back I don't want it anymore
+		 */
+		if (result)
+			*result = CRRES_OK;
+		return mat;
 	}
-	CR_MATF* CRMatFLoad(const String& file, crresult* result)
+	CR_MATF* CRMatFLoad(const String& fileName, crresult* result)
 	{
+		/*
+		* Validation
+		*/
+		if (fileName.empty())
+		{
+			if (result)
+				*result = CRRES_ERR_INVALID_ARGUMENTS;
+			return nullptr;
+		}
+
+		/*
+		* Create byte buffer
+		*/
+		CR_BYTE_BUFFER* buffer = CRFileRead(fileName, result);
+		if (!CRByteBufferValid(buffer))
+		{
+			if (buffer)
+				CRByteBufferDelete(buffer);
+
+			// The error should be saved to the result by the CRFileRead function
+			return nullptr;
+		}
+
+		/*
+		* Call the CRMatFSave function with the byte buffer
+		*/
+		CR_MATF* mat = CRMatFLoad(buffer, result);
+		if (!CRMatFValid(mat))
+		{
+			if (buffer)
+				CRByteBufferDelete(buffer);
+			if (mat)
+				CRMatFDelete(mat);
+
+			// The error should be saved to the result by the CRMatFLoad function
+			return nullptr; 
+		}
+
+		/*
+		* Finish the loading
+		*/
+		if (result)
+			*result = CRRES_OK;
+		CRByteBufferDelete(buffer);
+		return mat; 
 	}
 
 	bool       CRMatFSaveAsText(CR_MATF* mat, char const* fileName, uint decimals)

@@ -49,8 +49,8 @@ namespace cria_ai
 	crresult CRMatFSave(CR_MATF const* mat, CR_BYTE_BUFFER* buffer);
 	crresult CRMatFSave(CR_MATF const* mat, const String& fileName);
 
-	CR_MATF* CRMatFLoad(CR_BYTE_BUFFER const* buffer, crresult* result);
-	CR_MATF* CRMatFLoad(const String& file, crresult* result);
+	CR_MATF* CRMatFLoad(CR_BYTE_BUFFER const* buffer, crresult* result = nullptr);
+	CR_MATF* CRMatFLoad(const String& file, crresult* result = nullptr);
 
 	bool     CRMatFSave_DEP(CR_MATF* mat, char const* fileName);
 	CR_MATF* CRMatFLoad_DEP(char const* file);

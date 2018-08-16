@@ -175,7 +175,7 @@ memset(bmp->Data, 0, CR_FBMP_DATA_SIZE(bmp));
 		CRIA_AUTO_ASSERT(!file.empty(), "CRSaveBmp: The file name is invalid. The bitmap address is: %p", (srcBmp) ? srcBmp : nullptr);
 		CRIA_AUTO_ASSERT(srcBmp, "CRSaveBmp: The bitmap is invalid. The file Name is: %s", file.c_str());
 		if (!srcBmp || file.empty())
-			return CRRES_ERR_INVALUD_ARGUMENTS; /* you broke it */
+			return CRRES_ERR_INVALID_ARGUMENTS; /* you broke it */
 
 		 /*
 		 * making sure the directory exists.

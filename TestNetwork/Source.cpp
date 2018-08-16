@@ -193,6 +193,32 @@ public:
 			printf("}\n");
 		}
 	}
+	void saveWhatssoever(const String& layerName) const
+	{
+		size_t wSize = CRMatFGetSaveBufferSize(m_Weigths);
+		size_t bSize = CRMatFGetSaveBufferSize(m_Bias);
+		CR_BYTE_BUFFER* buffer = CRByteBufferCreate(wSize + bSize);
+		
+		CRMatFSave(m_Weigths, buffer);
+		buffer->Position = wSize;
+		CRMatFSave(m_Bias, buffer);
+
+		CRFileWrite(layerName + ".la", buffer);
+		CRByteBufferDelete(buffer);
+	}
+	void loadWhatssoever(const String& layerName)
+	{
+		CR_BYTE_BUFFER* buffer = CRFileRead(layerName + ".la");
+		CR_MATF* loadedWeight = CRMatFLoad(buffer);
+		CR_MATF* loadedBias = CRMatFLoad(buffer);
+
+		CR_MATF_COPY_DATA(m_Weigths, loadedWeight);
+		CR_MATF_COPY_DATA(m_Bias, loadedBias);
+
+		CRMatFDelete(loadedWeight);
+		CRMatFDelete(loadedBias);
+		CRByteBufferDelete(buffer);
+	}
 
 	void setNeuronBlame(uint neuronNo, float blame)
 	{
@@ -309,7 +335,16 @@ public:
 		m_OutputLayer.printInfo();
 	}
 
-
+	void saveDownTheWhat()
+	{
+		m_HiddenLayer.saveWhatssoever("h");
+		m_OutputLayer.saveWhatssoever("o");
+	}
+	void loadUpTheWhat()
+	{
+		m_HiddenLayer.loadWhatssoever("h");
+		m_OutputLayer.loadWhatssoever("o");
+	}
 };
 
 int main()
@@ -325,19 +360,20 @@ int main()
 	 */
 	srand(0);
 	NN nn(2, 5, 1);
+	nn.loadUpTheWhat();
 	nn.printInfo();
 	std::cin.get();
 	fvec trainDataInput[4]    = {{0.1f, 0.1f}, {0.1f, 0.9f}, {0.9f, 0.1f}, {0.9f, 0.9f}};
 	fvec trainDataIdealOut[4] = {{0.1f}, {0.9f}, {0.9f}, {0.1f}};
 
 	COORD curserPos = getConCursorPos();
-	for (uint trainNo = 0; trainNo < 100000; trainNo++)
+	for (uint trainNo = 0; trainNo < 1000; trainNo++)
 	{
 		uint trainIndex = rand() % 4;
 
 		nn.JSTrain(trainDataInput[trainIndex], trainDataIdealOut[trainIndex]);
 
-		if (trainNo % 25 == 0)
+		if (trainNo % 50 == 0)
 		{
 			setConCursorPos(curserPos);
 
@@ -377,6 +413,9 @@ int main()
 		}
 		
 	}
+	nn.printInfo();
+	nn.saveDownTheWhat();
+
 	printf("\n");
 
 	std::cin.get();
