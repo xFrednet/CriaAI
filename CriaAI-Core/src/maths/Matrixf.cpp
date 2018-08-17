@@ -308,91 +308,94 @@ namespace cria_ai
 		return mat; 
 	}
 
-	bool       CRMatFSaveAsText(CR_MATF* mat, char const* fileName, uint decimals)
+	crresult CRMatFSaveAsText(CR_MATF const* mat, std::ofstream& file, uint decimals)
 	{
 		using namespace std;
 
-		uint predecimals;
-		uint index;
-		
-		/* validation */
-		CRIA_AUTO_ASSERT(VALID_MAT(mat), "The matrix has to be valid!");
-		CRIA_AUTO_ASSERT(fileName, "I can't save data to \"null\"");
-		if (!VALID_MAT(mat) || !fileName)
-			return false;
+		/*
+		 * Validation
+		 */
+		if (!CRMatFValid(mat) || !file.good())
+			return CRRES_ERR_INVALID_ARGUMENTS;
 
-		/* init format values */
-		predecimals = (uint)log10f(
+		/*
+		 * init the format values
+		 */
+		uint predecimals = (uint)log10f(
 			MAX(abs(CRMatFGetMaxValue(mat)), abs(CRMatFGetMinValue(mat))) /* Getting the longest value */
 			) + 2 /* plus one for the sign and one because log10 returns one too short */;
-		
-		/* opening the file*/
-		CRCreateContainingDir(fileName);
-		ofstream file(fileName, ifstream::out | ofstream::binary);
-		CRIA_AUTO_ASSERT(file.is_open(), "Failed to create/open the File[%s]", fileName);
-		if (!file.is_open())
-			return false;
 
-		char* str = new char[1 + predecimals + 1 + decimals + 1 + 1 + 1];
-		str[1 + predecimals + 1 + decimals + 1] = 0;
-		str[1 + predecimals + 1 + decimals + 1 + 1] = 0;
-		for (index = 0; index < mat->Cols * mat->Rows; index++)
+		/*
+		 * Create buffer
+		 */
+		size_t bufferSize = 1 + predecimals + 1 + decimals + 1 + 1;
+		char* buffer = new char[bufferSize];
+		if (!buffer)
+			return CRRES_ERR_NEW_FAILED;
+		memset(buffer, '\0', bufferSize);
+		
+		/*
+		 * Write 
+		 */
+		for (uint index = 0; index < CR_MATF_VALUE_COUNT(mat); index++)
 		{
-			sprintf(str, "%+*.*f ", predecimals, decimals, mat->Data[index]);
-			file << str;
-			
+			// format and write
+			sprintf(buffer, "%+*.*f ", predecimals, decimals, mat->Data[index]);
+			file << buffer;
+
+			// add a line break after row
 			if ((index + 1) % mat->Cols == 0)
-				file << std::endl;
-		}
-		//TODO better error test for fprintf
-		delete[] str;
+				file << CR_FILE_ENDL;
 
-		file.close();
-		return true;
+			// Error check
+			if (!file.good())
+				return CRRES_ERR_OS_WRITE_TO_FILE_FAILED; // since I don't open the file I'll keep it open
+		}
+
+		/*
+		 * Finishing
+		 */
+		delete[] buffer;
+
+		return CRRES_OK; // since I don't open the file I'll keep it open
 	}
-	bool       CRMatfSaveAsBmp(CR_MATF* mat, char const* fileName)
+	crresult CRMatFSaveAsText(CR_MATF const* mat, const String& fileName, uint decimals)
 	{
-		using namespace bmp_renderer;
+		/*
+		 * Validation
+		 */
+		if (!CRMatFValid(mat) || fileName.empty())
+			return CRRES_ERR_INVALID_ARGUMENTS;
 
-		CRIA_AUTO_ASSERT(VALID_MAT(mat), "The matrix is invalid");
-		CRIA_AUTO_ASSERT(fileName, "null is not a valid file name, ask your OS");
-		if (!VALID_MAT(mat) || !fileName)
-			return false;
-
-		Bitmap* bmp = CreateBmp(mat->Cols, mat->Cols);
-		CRIA_AUTO_ASSERT(bmp, "The bitmap creation failed, report that to the creator of the BmpRenderer... fuck that's me");
-		if (!bmp)
-			return false;
-
-		uint8_t color;
-		uint row;
-		for (uint col = 0; col < mat->Cols; col++)
+		/*
+		 * Open file
+		 */
+		std::ofstream file = CROpenFileOut(fileName);
+		if (!file.good())
 		{
-			for (row = 0; row < mat->Rows; row++)
-			{
-				color = (uint8_t)(255.0f * mat->Data[row + col * mat->Rows]);
-				SetPixel(bmp, row, col, Color(color, color, color));
-			}
+			file.close();
+			return CRRES_ERR_OS_FILE_COULD_NOT_BE_OPENED;
 		}
 		
-		/* saving the file */
-		if (CRCreateContainingDir(fileName) && !SaveBitmap(bmp, fileName))
-		{
-			CRIA_AUTO_ASSERT(false, "The bitmap could not be saved sorry!!");
-			DeleteBmp(bmp);
-			return false;
-		}
-		
-		DeleteBmp(bmp);
-		return true;
+		/*
+		 * Save the matrix
+		 */
+		crresult result = CRMatFSaveAsText(mat, file, decimals);
+
+		/*
+		 * Calling the cleaning crew
+		 */
+		file.close();
+
+		return result;
 	}
 
-	bool       CRMatFValid(CR_MATF const* mat)
+	bool     CRMatFValid(CR_MATF const* mat)
 	{
 		return VALID_MAT(mat);
 	}
 
-	void       CRMatFFillRand(CR_MATF* mat)
+	void     CRMatFFillRand(CR_MATF* mat)
 	{
 		uint index;
 
@@ -406,7 +409,7 @@ namespace cria_ai
 		}
 	}
 
-	float      CRMatFGetMaxValue(CR_MATF const* mat)
+	float    CRMatFGetMaxValue(CR_MATF const* mat)
 	{
 		uint index;
 		float min;
@@ -427,7 +430,7 @@ namespace cria_ai
 		/* return */
 		return min;
 	}
-	float      CRMatFGetMinValue(CR_MATF const* mat)
+	float    CRMatFGetMinValue(CR_MATF const* mat)
 	{
 		uint index;
 		float max;
@@ -478,7 +481,7 @@ namespace cria_ai
 
 		return dstMat;
 	}
-	float CRMatFSum(CR_MATF const* mat)
+	float    CRMatFSum(CR_MATF const* mat)
 	{
 		/*
 		 * Validation

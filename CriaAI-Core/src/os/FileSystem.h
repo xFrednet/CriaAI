@@ -3,6 +3,10 @@
 #include "../Types.hpp"
 #include "../util/CRResult.h"
 
+#ifndef CR_FILE_ENDL
+#	define CR_FILE_ENDL "\r\n"
+#endif
+
 namespace cria_ai {
 
 	bool CRCreateContainingDir(const String& fileName);

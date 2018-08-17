@@ -205,6 +205,19 @@ public:
 
 		CRFileWrite(layerName + ".la", buffer);
 		CRByteBufferDelete(buffer);
+
+		CRMatFSaveAsText(m_Weigths, layerName + "WillThisCrash.txt");
+
+		std::ofstream stream = CROpenFileOut(layerName + "The_Layer.txt");
+		stream << "Neuron layer" << CR_FILE_ENDL;
+		
+		stream << "Weights:" << CR_FILE_ENDL;
+		CRMatFSaveAsText(m_Weigths, stream, 3);
+		
+		stream << CR_FILE_ENDL << " Bias: " << CR_FILE_ENDL;
+		CRMatFSaveAsText(m_Bias, stream, 3);
+
+		stream.close();
 	}
 	void loadWhatssoever(const String& layerName)
 	{
@@ -360,7 +373,7 @@ int main()
 	 */
 	srand(0);
 	NN nn(2, 5, 1);
-	nn.loadUpTheWhat();
+	//nn.loadUpTheWhat();
 	nn.printInfo();
 	std::cin.get();
 	fvec trainDataInput[4]    = {{0.1f, 0.1f}, {0.1f, 0.9f}, {0.9f, 0.1f}, {0.9f, 0.9f}};

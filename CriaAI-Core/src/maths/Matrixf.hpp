@@ -18,7 +18,6 @@ namespace cria_ai
 		uint Rows; /* the height */
 
 		float* Data;
-
 	};
 
 	/*
@@ -52,8 +51,6 @@ namespace cria_ai
 	CR_MATF* CRMatFLoad(CR_BYTE_BUFFER const* buffer, crresult* result = nullptr);
 	CR_MATF* CRMatFLoad(const String& file, crresult* result = nullptr);
 
-	bool     CRMatFSave_DEP(CR_MATF* mat, char const* fileName);
-	CR_MATF* CRMatFLoad_DEP(char const* file);
 	/**
 	 * \brief This function writes matrix in form of multiple floats
 	 * rounded up to the number of decimals specified.
@@ -61,13 +58,13 @@ namespace cria_ai
 	 * (The loading of this format is currently not supported)
 	 * 
 	 * \param mat      The CR_MATF that should be saved
-	 * \param fileName The name of the destination file. (It will be created or overridden)
+	 * \param file     The destination file that should be written do.
 	 * \param decimals The amount of decimals that should be written
 	 * 
 	 * \return This returns 1(true) on success.
 	 */
-	bool     CRMatFSaveAsText(CR_MATF* mat, char const* fileName, uint decimals = 3);
-	bool     CRMatfSaveAsBmp(CR_MATF* mat, char const* fileName);
+	crresult CRMatFSaveAsText(CR_MATF const* mat, std::ofstream& file    , uint decimals = 3);
+	crresult CRMatFSaveAsText(CR_MATF const* mat, const String&  fileName, uint decimals = 3);
 
 	bool     CRMatFValid(CR_MATF const* mat);
 
