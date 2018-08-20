@@ -3,7 +3,6 @@
 #include <AsyncInfo.h>
 
 #include "tests/MathTests.h"
-#include "src/network/Backprop.h"
 
 #define BOI_TITLE                      "Binding of Isaac: Afterbirth+"
 #define BOI_BASE_WIDTH                 512
@@ -45,32 +44,26 @@ CRNeuronNetwork* createBOINetwork(CRNeuronLayerPtr& outputLayer)
 {
 	std::cout << " > createBOINetwork" << std::endl;
 	CRNeuronNetwork* network = new CRNeuronNetwork;
-	
-	/*
-	 * Layer 1
-	 */
-	CRNeuronLayerPtr layer1 = make_shared<CRNeuronLayer>(nullptr, (BOI_BASE_WIDTH / BOI_SAMPLE_SIZE * BOI_BASE_HEIGHT / BOI_SAMPLE_SIZE));// 36864 Neurons :O
-	layer1->setActivationFunc(paco::CRSigmoid, paco::CRSigmoidInv);
-	network->addLayer(layer1);
 
 	/*
 	 * Layer 2
 	 */
-	CRNeuronLayerPtr layer2 = make_shared<CRNeuronLayer>(layer1.get(), 100);
+	uint inputNeuronCount = (BOI_BASE_WIDTH / BOI_SAMPLE_SIZE * BOI_BASE_HEIGHT / BOI_SAMPLE_SIZE);
+	CRNeuronLayerPtr layer2 = make_shared<CRNeuronLayer>(inputNeuronCount, 100);
 	layer2->setActivationFunc(paco::CRSigmoid, paco::CRSigmoidInv);
 	network->addLayer(layer2);
 
 	/*
 	* Layer 3
 	*/
-	CRNeuronLayerPtr layer3 = make_shared<CRNeuronLayer>(layer2.get(), 100);
+	CRNeuronLayerPtr layer3 = make_shared<CRNeuronLayer>(layer2->getNeuronCount(), 100);
 	layer3->setActivationFunc(paco::CRSigmoid, paco::CRSigmoidInv);
 	network->addLayer(layer3);
 
 	/*
 	* Layer 4
 	*/
-	outputLayer = make_shared<CRNeuronLayer>(layer3.get(), 12);//WASD[^][<][v][>][ ][STRG]EQ
+	outputLayer = make_shared<CRNeuronLayer>(layer3->getNeuronCount(), 12);//WASD[^][<][v][>][ ][STRG]EQ
 	outputLayer->setActivationFunc(paco::CRSigmoid, paco::CRSigmoidInv);
 	network->addLayer(outputLayer);
 
@@ -172,8 +165,6 @@ void testBOINetwork()
 	// network
 	CRNeuronLayerPtr outputLayer;
 	CRNeuronNetwork* network = createBOINetwork(outputLayer);
-	CR_NN_BP_LAYER_OUTPUTS* outputs = CRCreateBPLayerOut(network);
-	CR_NN_BP_INFO* bpInfo = CRCreateBPInfo(network, BOI_BATCH_SIZE);
 
 	std::cout << " [INFO] = init finish" << std::endl;
 
@@ -231,25 +222,13 @@ void testBOINetwork()
 			continue;
 
 		// process data
-		network->process(data, outputs);
-		if (bpInfo->TotalBPsCount == bpInfo->BatchSize)
-		{
-			printf("[INFO] Press P to apply backpropagation\n");
-			if (GetAsyncKeyState('P'))
-			{
-				CRApplyBackprop(network, bpInfo);
-				CRResetBPInfo(bpInfo);
-			}
-		} else
-		{
-			printf(" [INFO] backpropagation: %5i / %5i                       \n", bpInfo->TotalBPsCount, BOI_BATCH_SIZE);
-			CRBackprop(bpInfo, getCurrentInput(), outputs, network);
-		}
+		CR_MATF* output = network->feedForward(data);
 		//CRMatFDelete(data);
 
 		// print result
-		printBOIOutput(outputLayer->getOutput());
-		
+		printBOIOutput(output);
+		CRMatFDelete(output);
+
 		/*
 		 * Info 
 		 */

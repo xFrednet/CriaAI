@@ -32,7 +32,7 @@
 ******************************************************************************/
 #pragma once
 
-#include "NetworkUtil.h"
+#include "../Common.hpp"
 
 #include "../maths/Matrixf.hpp"
 
@@ -48,56 +48,43 @@ namespace cria_ai { namespace network {
 	 * 
 	 * [CRNeuronLayer]
 	 * 
-	 * m_ActivationFunc([input] * [m_Weights] - [m_Bias]) -> [m_LastOutput]
+	 * FeedForward:
+	 * m_ActivationFunc([m_Input] * [m_Weights] + [m_Bias]) -> [m_Output]
 	 * 
 	 */
 	class CRNeuronLayer
 	{
 	protected:
-		CRNeuronLayer const* m_PrevLayer;
+		uint m_InputCount;
+		uint m_NeuronCount;
 
+		CR_MATF* m_Input;
 		CR_MATF* m_Output;
 
 		CR_MATF* m_Weights;
 		CR_MATF* m_Bias;
 
-		uint m_NeuronCount;
-
 		paco::cr_activation_func     m_ActivationFunc;
 		paco::cr_activation_func_inv m_ActivationFuncInv;
-
-		bool m_IsOperational;
-
-		crresult initMatrices();
-		void updateIsOperational();
 	public:
-		/**
-		 * \brief 
-		 * 
-		 * \param prevLayer This is a pointer to the previous layer, this may only
-		 * be null if the created Layer is the first layer. In all other 
-		 * circumstances this pointer has to be valid.
-		 * 
-		 * \param neuronCount The amount of neurons in this layer.
-		 * 
-		 * \param result This is a pointer to retrieve the result of the creation operations.
-		 */
-		CRNeuronLayer(CRNeuronLayer const* prevLayer, uint neuronCount, crresult* result = nullptr);
+		CRNeuronLayer(uint inputCount, uint neuronCount, crresult* result = nullptr);
 		~CRNeuronLayer();
 
 		void intiRandom();
 
 		void setActivationFunc(paco::cr_activation_func activationFunc, paco::cr_activation_func_inv activationFuncInv);
 
-		void processData(CR_MATF const* inputData);
-
-		void applyBackpropagation(CR_MATF const* weightChange, CR_MATF const* biasChange);
+		void feedForward(CR_MATF const* data);
 
 		/*
 		 * getters
 		 */
+		uint getInputCount() const;
+		uint getNeuronCount() const;
+
 		CR_MATF* getOutput();
 		CR_MATF const* getOutput() const;
+
 		CR_MATF* getWeights();
 		CR_MATF const* getWeights() const;
 		CR_MATF* getBias();
@@ -105,8 +92,6 @@ namespace cria_ai { namespace network {
 
 		paco::cr_activation_func getActivationFunc() const;
 		paco::cr_activation_func_inv getActivationFuncInv() const;
-
-		uint getNeuronCount() const;
 	};
 
 	typedef cr_ptr<CRNeuronLayer> CRNeuronLayerPtr;

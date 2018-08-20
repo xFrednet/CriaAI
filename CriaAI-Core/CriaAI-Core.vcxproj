@@ -101,7 +101,6 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClCompile Include="Dependencies\BmpRenderer\src\API\ScreenDrawer.cpp" />
     <ClCompile Include="Dependencies\BmpRenderer\src\RendererBitmap.cpp" />
     <ClCompile Include="Dependencies\BmpRenderer\src\Renderer.cpp" />
-    <ClCompile Include="src\network\Backprop.cpp" />
     <ClCompile Include="src\network\NeuronLayer.cpp" />
     <ClCompile Include="src\paco\null\NuActivationFunctions.cpp" />
     <ClCompile Include="src\paco\null\NuBitmapUtil.cpp" />
@@ -135,7 +134,6 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="Dependencies\BmpRenderer\src\RendererBitmap.hpp" />
     <ClInclude Include="Dependencies\BmpRenderer\src\Common.h" />
     <ClInclude Include="Dependencies\BmpRenderer\src\Renderer.hpp" />
-    <ClInclude Include="src\network\Backprop.h" />
     <ClInclude Include="src\paco\BitmapUtil.h" />
     <ClInclude Include="src\paco\BitmapUtilMacros.h" />
     <ClInclude Include="src\paco\cuda\CuContext.cuh" />
@@ -162,7 +160,6 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="src\maths\Vec3.h" />
     <ClInclude Include="src\paco\ActivationFunctions.h" />
     <ClInclude Include="src\network\NeuronLayer.h" />
-    <ClInclude Include="src\network\NetworkUtil.h" />
     <ClInclude Include="src\network\NeuronNetwork.h" />
     <ClInclude Include="src\Types.hpp" />
     <ClInclude Include="src\util\FloatBitmap.h" />

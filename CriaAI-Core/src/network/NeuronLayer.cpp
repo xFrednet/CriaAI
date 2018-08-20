@@ -33,85 +33,71 @@
 #include "NeuronLayer.h"
 
 namespace cria_ai { namespace network {
-	
-	crresult CRNeuronLayer::initMatrices()
+
+	CRNeuronLayer::CRNeuronLayer(uint inputCount, uint neuronCount, crresult* result)
+		: m_InputCount(inputCount),
+		m_NeuronCount(neuronCount),
+		m_Input(nullptr),
+		m_Output(nullptr),
+		m_Weights(nullptr),
+		m_Bias(nullptr),
+		m_ActivationFunc(nullptr),
+		m_ActivationFuncInv(nullptr)
 	{
 		/*
-		 * Cleanup
+		 * Validation
 		 */
-		m_IsOperational = false;
-
-		if (m_Output || m_Weights || m_Bias)
-			return CRRES_ERR_NN_LAYER_MATRICIES_NOT_NULL;
-
-		/*
-		 * Validation check
-		 */
-		if (m_NeuronCount == 0)
-			return CRRES_ERR_NN_LAYER_INVALID_NEURON_COUNT;
-
-		m_Output = CRMatFCreate(1, m_NeuronCount);
-		if (!m_Output)
-			return CRRES_ERR_NN_LAYER_MATRICIES_INIT_FAILED;
-		if (m_PrevLayer && m_PrevLayer->getNeuronCount() != 0) // => if not first layer
+		if (inputCount == 0 || neuronCount == 0)
 		{
-			// m_Weights has one column per input neuron and one row per output neuron
-			m_Weights = CRMatFCreate(m_PrevLayer->getNeuronCount(), m_NeuronCount);
-			m_Bias = CRMatFCreate(1, m_NeuronCount);
-
-			if (!m_Weights || !m_Bias)
-				return CRRES_ERR_NN_LAYER_MATRICIES_INIT_FAILED;
+			if (result)
+			{
+				if (neuronCount == 0)
+					*result = CRRES_ERR_NN_LAYER_INVALID_NEURON_COUNT;
+				else 
+					*result = CRRES_ERR_INVALID_ARGUMENTS;
+			}
+			return;
 		}
 
-		return CRRES_OK;
-	}
-	void CRNeuronLayer::updateIsOperational()
-	{
-		m_IsOperational = (
-			m_Output &&
-			m_NeuronCount != 0 &&
-			m_ActivationFunc &&
-			m_ActivationFuncInv);
-	}
+		/*
+		 * init matrices
+		 */
+		m_Input   = CRMatFCreate(1           , m_InputCount);
+		m_Output  = CRMatFCreate(1           , m_NeuronCount);
 
-	CRNeuronLayer::CRNeuronLayer(CRNeuronLayer const* prevLayer, uint neuronCount, crresult* result)
-		: m_PrevLayer(prevLayer), 
-		m_Output(nullptr),
-		m_Weights(nullptr), 
-		m_Bias(nullptr),
-		m_NeuronCount(neuronCount),
-		m_ActivationFunc(nullptr), 
-		m_ActivationFuncInv(nullptr),
-		m_IsOperational(false)
-	{
-		crresult initRes = initMatrices();
+		m_Weights = CRMatFCreate(m_InputCount, m_NeuronCount);
+		m_Bias    = CRMatFCreate(1           , m_NeuronCount);
 
+		if (!m_Input || !m_Output || !m_Weights || !m_Bias)
+		{
+			if (result)
+				*result = CRRES_ERR_NN_LAYER_MATRICIES_INIT_FAILED;
+			
+			CR_MATF_DELETE_IF_VALID(m_Input);
+			CR_MATF_DELETE_IF_VALID(m_Output);
+
+			CR_MATF_DELETE_IF_VALID(m_Weights);
+			CR_MATF_DELETE_IF_VALID(m_Bias);
+
+			return;
+		}
+
+		/*
+		 * Everything worked yay
+		 */
 		if (result)
-			*result = initRes;
+			*result = CRRES_OK;
 	}
-
 	CRNeuronLayer::~CRNeuronLayer()
 	{
-		m_IsOperational = false;
-
 		/*
 		 * delete stuff
 		 */
-		if (m_Output)
-		{
-			CRMatFDelete(m_Output);
-			m_Output = nullptr;
-		}
-		if (m_Weights)
-		{
-			CRMatFDelete(m_Weights);
-			m_Weights = nullptr;
-		}
-		if (m_Bias)
-		{
-			CRMatFDelete(m_Bias);
-			m_Bias = nullptr;
-		}
+		CR_MATF_DELETE_IF_VALID(m_Input);
+		CR_MATF_DELETE_IF_VALID(m_Output);
+
+		CR_MATF_DELETE_IF_VALID(m_Weights);
+		CR_MATF_DELETE_IF_VALID(m_Bias);
 
 	}
 
@@ -130,70 +116,49 @@ namespace cria_ai { namespace network {
 		{
 			m_ActivationFunc    = nullptr;
 			m_ActivationFuncInv = nullptr;
-			
-			m_IsOperational = false;
 
 			return;
 		}
 
 		m_ActivationFunc = activationFunc;
 		m_ActivationFuncInv = activationFuncInv;
-
-		initMatrices();
-		updateIsOperational();
 	}
 
-	void CRNeuronLayer::processData(CR_MATF const* inputData)
+	void CRNeuronLayer::feedForward(CR_MATF const* data)
 	{
-		if (!m_IsOperational || !inputData)
+		/*
+		 * Validation
+		 */
+		if (!data)
 		{
-			memset(m_Output, 0, sizeof(float) * m_NeuronCount);
-			CRIA_INFO_PRINTF("CRNeuronLayer::processData: m_LastOutput was set to 0");
+			CR_MATF_FILL_ZERO(m_Input);
+			CR_MATF_FILL_ZERO(m_Output);
+
 			return;
 		}
 
 		/*
-		 * Process weights and biases
+		 * feed the matrices
 		 */
-		if (m_PrevLayer)
-		{
-			if (inputData->Rows != m_Weights->Cols) {
-				memset(m_Output, 0, sizeof(float) * m_NeuronCount);
-				CRIA_INFO_PRINTF("CRNeuronLayer::processData: m_LastOutput was set to 0");
-				return;
-			}
-
-			CR_MATF* weightOut = CRMatFMul(inputData, m_Weights);
-			CR_MATF* biasOut   = CRMatFAdd(weightOut, m_Bias);
-
-			m_ActivationFunc(biasOut, m_Output);
-
-			CRMatFDelete(weightOut);
-			CRMatFDelete(biasOut);
-		}
-		else
-		{
-			memcpy(m_Output->Data, inputData->Data, sizeof(float) * inputData->Rows);
-		}
-
-	}
-
-	void CRNeuronLayer::applyBackpropagation(CR_MATF const* weightChange, CR_MATF const* biasChange)
-	{
-		if (!weightChange || !biasChange)
-			return;
-
-		CR_MATF* newBias = CRMatFAdd(m_Bias, biasChange);
-		CR_MATF* newWeights = CRMatFAdd(m_Weights, weightChange);
-		CRMatFDelete(m_Bias);
-		CRMatFDelete(m_Weights);
-		m_Bias = newBias;
-		m_Weights = newWeights;
+		CR_MATF_COPY_DATA(m_Input, data);
+		CR_MATF* wOut = CRMatFMul(m_Input, m_Weights);
+		CR_MATF* bOut = CRMatFAdd(wOut   , m_Bias);
+		m_ActivationFunc(bOut, m_Output);
+		
 	}
 
 	/*
 	* getters
 	*/
+	uint CRNeuronLayer::getInputCount() const
+	{
+		return m_InputCount;
+	}
+	uint CRNeuronLayer::getNeuronCount() const
+	{
+		return m_NeuronCount;
+	}
+
 	CR_MATF* CRNeuronLayer::getOutput()
 	{
 		return m_Output;
@@ -228,9 +193,5 @@ namespace cria_ai { namespace network {
 		return m_ActivationFuncInv;
 	}
 
-	uint CRNeuronLayer::getNeuronCount() const
-	{
-		return m_NeuronCount;
-	}
 
 }}

@@ -14,22 +14,34 @@ namespace cria_ai { namespace network {
 		}
 	}
 
-	void CRNeuronNetwork::process(CR_MATF const* data, CR_NN_BP_LAYER_OUTPUTS* outputs)
+	CR_MATF* CRNeuronNetwork::feedForward(CR_MATF const* data)
 	{
-		uint outputNo = 0;
-		CR_MATF const* processData = data;
-
-		for (CRNeuronLayerPtr& ptr : m_LayerList)
+		/*
+		 * Validation 
+		 */
+		if (!data)
 		{
-			ptr->processData(processData);
-			processData = ptr->getOutput();
-
-
-			if (outputs)
-				CR_MATF_COPY_DATA(outputs->LayerOutputs[outputNo], processData);
-
-			outputNo++;
+			return nullptr;
 		}
+
+		/*
+		 * feed the layers
+		 */
+		CR_MATF const* nextLayerInput = data;
+		for (uint layerNo = 0; layerNo < m_LayerList.size(); layerNo++)
+		{
+			m_LayerList[layerNo]->feedForward(nextLayerInput);
+			nextLayerInput = m_LayerList[layerNo]->getOutput();
+		}
+
+		/*
+		 * Hand back the output
+		 */
+		CR_MATF* output = CRMatFCreate(nextLayerInput->Cols, nextLayerInput->Rows);
+		if (!output)
+			return nullptr;
+		CR_MATF_COPY_DATA(output, nextLayerInput);
+		return output;
 	}
 
 	uint CRNeuronNetwork::getLayerCount() const

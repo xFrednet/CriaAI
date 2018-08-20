@@ -2,10 +2,15 @@
 
 #include "../Common.hpp"
 
-#include "NetworkUtil.h"
-
 #include "NeuronLayer.h"
-#include "Backprop.h"
+
+#ifndef CR_BP_WEIGHT_LEARN_RATE
+#	define CR_BP_WEIGHT_LEARN_RATE 0.5f
+#endif
+
+#ifndef CR_BP_BIAS_LERN_RATE
+#	define CR_BP_BIAS_LERN_RATE 0.5f
+#endif
 
 namespace cria_ai { namespace network {
 	
@@ -20,7 +25,8 @@ namespace cria_ai { namespace network {
 
 		void initRandom();
 
-		void process(CR_MATF const* data, CR_NN_BP_LAYER_OUTPUTS* outputs = nullptr);
+		CR_MATF* feedForward(CR_MATF const* data);
+		void process(CR_MATF const* data);
 
 		uint getLayerCount() const;
 		std::vector<CRNeuronLayer*> getLayers();

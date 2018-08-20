@@ -453,9 +453,6 @@ namespace cria_ai { namespace network {
 		{
 			//if (layerNo != 0)
 				//CR_MATF_FILL_ZERO(bpInfo->BiasChanges[layerNo]); //TODO remove this !!!!!!!
-
-			if (layerNo != 0)
-				layer->applyBackpropagation(bpInfo->WeightChanges[layerNo], bpInfo->BiasChanges[layerNo]);
 			
 			layerNo++;
 		}

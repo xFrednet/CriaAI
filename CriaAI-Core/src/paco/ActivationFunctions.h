@@ -39,7 +39,7 @@
  * start this the paco specific prefix and continues with "AcrivationFunctions"
  */
 
-#include "../network/NetworkUtil.h"
+#include "../Common.hpp"
 
 #define CRIA_SIGMOID_VALIDATION_CHECK(inMat, outMat) \
 if (!inMat || !outMat || \
@@ -47,7 +47,7 @@ if (!inMat || !outMat || \
 	inMat->Rows != outMat->Rows) \
 { \
 	if (output)\
-		memset(outMat->Data, 0, sizeof(crnwdec) * output->Cols * output->Rows); \
+		memset(outMat->Data, 0, sizeof(float) * output->Cols * output->Rows); \
 	return; \
 }
 

@@ -68,7 +68,6 @@
 /*
  * Network
  */
-#include "src/network/NetworkUtil.h"
 #include "src/network/NeuronLayer.h"
 #include "src/network/NeuronNetwork.h"
 
