@@ -40,7 +40,7 @@ namespace cria_ai { namespace paco {
 	{
 		CRIA_SIGMOID_VALIDATION_CHECK(input, output);
 		
-		for (uint index = 0; index < input->Cols * input->Rows; index++) {
+		for (uint index = 0; index < CR_MATF_VALUE_COUNT(input); index++) {
 			output->Data[index] = 1 / (1 + exp(-input->Data[index]));
 		}
 	}
@@ -49,13 +49,8 @@ namespace cria_ai { namespace paco {
 	{
 		CRIA_SIGMOID_VALIDATION_CHECK(input, output);
 
-		for (uint index = 0; index < input->Cols * input->Rows; index++) {
-
-			if (input->Data[index] > 0 || input->Data[index] < 1)
-				output->Data[index] = -log((1 / input->Data[index]) - 1);
-			else
-				output->Data[index] = 0;
-
+		for (uint index = 0; index < CR_MATF_VALUE_COUNT(input); index++) {
+			output->Data[index] = input->Data[index] * (1.0f - input->Data[index]);
 		}
 	}
 

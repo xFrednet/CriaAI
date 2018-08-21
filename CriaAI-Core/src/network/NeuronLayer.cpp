@@ -147,6 +147,86 @@ namespace cria_ai { namespace network {
 		
 	}
 
+	void CRNeuronLayer::train(CR_MATF* neuronBlame, float weightLernRate, float biasLernRate)
+	{
+		/*
+		 * Validation
+		 */
+		if (!neuronBlame)
+			return;
+
+		/*
+		 * get the Inverse output
+		 */
+		CR_MATF* invOutput = CRMatFCreate(m_Output->Cols, m_Output->Rows);
+		if (!invOutput)
+			return;
+		m_ActivationFuncInv(m_Output, invOutput);
+
+		/*
+		 * loop through the neurons
+		 */
+		for (uint neuronNo = 0; neuronNo < m_NeuronCount; neuronNo++) 
+		{
+			float bpOutWrtNet = invOutput->Data[neuronNo];
+			float bpErrWrtNet = neuronBlame->Data[neuronNo] * bpOutWrtNet;
+
+			/*
+			 * Loop through the weights
+			 */
+			for (uint weightNo = 0; weightNo < m_InputCount; weightNo++) 
+			{
+				float weightErr = m_Input->Data[weightNo] * bpErrWrtNet;
+				float weightChange = weightErr * weightLernRate;
+				
+				m_Weights->Data[CR_MATF_VALUE_INDEX(weightNo, neuronNo, m_Weights)] += weightChange;
+			}
+
+			/*
+			 * Update bias
+			 */
+			m_Bias->Data[neuronNo] += bpErrWrtNet * biasLernRate;
+		}
+
+		/*
+		 * Call the cleanup crew
+		 */
+		CRMatFDelete(invOutput);
+	}
+	CR_MATF* CRNeuronLayer::blamePreviousLayer(CR_MATF* layerBlame) const
+	{
+		/*
+		 * Validation
+		 */
+		if (!layerBlame)
+			return nullptr;
+
+		/*
+		 * Create the output matrix
+		 */
+		CR_MATF* prevBlame = CRMatFCreate(1, m_InputCount);
+		if (!prevBlame)
+			return nullptr; 
+		CR_MATF_FILL_ZERO(prevBlame);
+
+		/*
+		 * Blame the previous layer
+		 */
+		for (uint neuronNo = 0; neuronNo < m_NeuronCount; neuronNo++) 
+		{
+			for (uint weightNo = 0; weightNo < m_InputCount; weightNo++)
+			{
+				float weightBlame = m_Weights->Data[CR_MATF_VALUE_INDEX(weightNo, neuronNo, m_Weights)] * layerBlame->Data[neuronNo];
+				prevBlame->Data[weightNo] += weightBlame;
+			}
+		}
+
+		/*
+		 * Return
+		 */
+		return prevBlame;
+	}
+
 	/*
 	* getters
 	*/

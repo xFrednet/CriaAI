@@ -31,7 +31,7 @@ namespace cria_ai { namespace paco {
 		int startIndex = blockIdx.x * blockDim.x + threadIdx.x;
 		int stride = blockDim.x * gridDim.x;
 
-		for (uint index = startIndex; index < input->Cols * input->Rows; index += stride)
+		for (uint index = startIndex; index < CR_MATF_VALUE_COUNT(input); index += stride)
 		{
 			output->Data[index] = 1.0f / (1.0f + __expf(-input->Data[index]));
 		}
@@ -59,12 +59,9 @@ namespace cria_ai { namespace paco {
 		int startIndex = blockIdx.x * blockDim.x + threadIdx.x;
 		int stride = blockDim.x * gridDim.x;
 
-		for (uint index = startIndex; index < input->Cols * input->Rows; index += stride) {
+		for (uint index = startIndex; index < CR_MATF_VALUE_COUNT(input); index += stride) {
 
-			if (input->Data[index] > 0 || input->Data[index] < 1)
-				output->Data[index] = -__logf((1 / input->Data[index]) - 1);
-			else 
-				output->Data[index] = 0;
+			output->Data[index] = input->Data[index] * (1.0f - input->Data[index]);
 
 		}
 	}

@@ -75,6 +75,8 @@ namespace cria_ai { namespace network {
 		void setActivationFunc(paco::cr_activation_func activationFunc, paco::cr_activation_func_inv activationFuncInv);
 
 		void feedForward(CR_MATF const* data);
+		void train(CR_MATF* neuronBlame, float weightLernRate, float biasLernRate);
+		CR_MATF* blamePreviousLayer(CR_MATF* layerBlame) const;
 
 		/*
 		 * getters

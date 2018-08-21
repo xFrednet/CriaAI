@@ -43,6 +43,57 @@ namespace cria_ai { namespace network {
 		CR_MATF_COPY_DATA(output, nextLayerInput);
 		return output;
 	}
+	void CRNeuronNetwork::train(CR_MATF* data, CR_MATF* idealOutput)
+	{
+		/*
+		 * Validation
+		 */
+		if (!data || !idealOutput)
+			return; // What else can I do??? Tell me!!!
+		
+		/*
+		 * Nom nom nom, I feed the network and I'm ashamed of these "jokes"
+		 */
+		CR_MATF* output = feedForward(data);
+
+		/*
+		 * BackProp the output layer
+		 */
+		uint layerCount = m_LayerList.size();
+		CRNeuronLayerPtr& outLayer = m_LayerList[layerCount - 1];
+		uint currentNeuronCount = outLayer->getNeuronCount();
+
+		CR_MATF* currentLayerBlame = CRMatFCreate(1, currentNeuronCount);
+
+		for (uint neuronNo = 0; neuronNo < currentNeuronCount; neuronNo++)
+		{
+			currentLayerBlame->Data[neuronNo] = idealOutput->Data[neuronNo] - output->Data[neuronNo];
+		}
+		outLayer->train(currentLayerBlame, CR_BP_WEIGHT_LEARN_RATE, CR_BP_BIAS_LERN_RATE);
+		CR_MATF* prevLayerBlame = outLayer->blamePreviousLayer(currentLayerBlame);
+
+		/*
+		 * BackProp the hidden layer/layers
+		 */
+		for (int layerNo = (int)layerCount - 2; layerNo >= 0; layerNo--)
+		{
+			CRMatFDelete(currentLayerBlame);
+			currentLayerBlame = prevLayerBlame;
+
+			CRNeuronLayerPtr& layer = m_LayerList[layerNo];
+			
+			layer->train(currentLayerBlame, CR_BP_WEIGHT_LEARN_RATE, CR_BP_BIAS_LERN_RATE);
+
+			prevLayerBlame = layer->blamePreviousLayer(currentLayerBlame);
+		}
+
+		/*
+		 * Clean up
+		 */
+		CRMatFDelete(output);
+		CRMatFDelete(currentLayerBlame);
+		CRMatFDelete(prevLayerBlame);
+	}
 
 	uint CRNeuronNetwork::getLayerCount() const
 	{
@@ -69,4 +120,5 @@ namespace cria_ai { namespace network {
 
 		return constList;
 	}
+
 }}

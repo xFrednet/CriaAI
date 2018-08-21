@@ -253,6 +253,126 @@ void testBOINetwork()
 	std::cout << "< testBOINetwork" << std::endl;
 }
 
+CRNeuronNetwork* CreateXORNetwork()
+{
+	CRNeuronNetwork* network = new CRNeuronNetwork();
+	
+	CRNeuronLayerPtr h1Layer = make_shared<CRNeuronLayer>(2, 5);
+	h1Layer->setActivationFunc(paco::CRSigmoid, paco::CRSigmoidInv);
+	network->addLayer(h1Layer);
+
+	CRNeuronLayerPtr oLayer = make_shared<CRNeuronLayer>(5, 1);
+	oLayer->setActivationFunc(paco::CRSigmoid, paco::CRSigmoidInv);
+	network->addLayer(oLayer);
+
+	return network;
+}
+CR_MATF** CreateDataInputs()
+{
+	CR_MATF** dataInput = new CR_MATF*[4];
+
+	for (uint index = 0; index < 4; index++) 
+	{
+		dataInput[index] = CRMatFCreate(1, 2);
+	}
+
+	dataInput[0]->Data[0] = 0.1f;
+	dataInput[0]->Data[1] = 0.1f;
+
+	dataInput[1]->Data[0] = 0.1f;
+	dataInput[1]->Data[1] = 0.9f;
+
+	dataInput[2]->Data[0] = 0.9f;
+	dataInput[2]->Data[1] = 0.1f;
+
+	dataInput[3]->Data[0] = 0.9f;
+	dataInput[3]->Data[1] = 0.9f;
+
+	return dataInput;
+}
+CR_MATF** CreateDataIdealOutputs()
+{
+	CR_MATF** idealOut = new CR_MATF*[4];
+
+	for (uint index = 0; index < 4; index++) {
+		idealOut[index] = CRMatFCreate(1, 1);
+	}
+
+	idealOut[0]->Data[0] = 0.1f;
+	idealOut[1]->Data[0] = 0.9f;
+	idealOut[2]->Data[0] = 0.9f;
+	idealOut[3]->Data[0] = 0.1f;
+
+	return idealOut;
+}
+float calTotalError(CR_MATF* realOut, CR_MATF* idelOut)
+{
+	float totalError = 0.0f;
+
+	uint outCount = CR_MATF_VALUE_COUNT(realOut);
+	for (uint outNo = 0; outNo < outCount; outNo++)
+	{
+		float errorsqrt = abs(idelOut->Data[outNo] - realOut->Data[outNo]);
+		totalError += errorsqrt / outCount;
+	}
+
+	return totalError;
+}
+void testXORNetwork ()
+{
+	CRRandSetSeed(0);
+	CRNeuronNetwork* network = CreateXORNetwork();
+	network->initRandom();
+	CR_MATF** dataInputs   = CreateDataInputs();
+	CR_MATF** idealOutputs = CreateDataIdealOutputs();
+
+	COORD curserPos = getConCursorPos();
+	for (uint trainNo = 0; trainNo < 100000; trainNo++)
+	{
+		uint trainIndex = rand() % 4;
+
+		network->train(dataInputs[trainIndex], idealOutputs[trainIndex]);
+
+		if (trainNo % 50 == 0)
+		{
+			setConCursorPos(curserPos);
+
+			printf("Epoch No: %6u \n\n", trainNo);
+
+			float totalErr = 0.0f;
+			for (uint printNo = 0; printNo < 4; printNo++) 
+			{
+				CR_MATF* nnInput = dataInputs[printNo];
+				CR_MATF* nnIdealOut = idealOutputs[printNo];
+				CR_MATF* nnOut = network->feedForward(nnInput);
+				printf("Input: {%1.1f, %1.1f}, ", nnInput->Data[0], nnInput->Data[1]);
+
+				printf("Output: {");
+				for (uint outNo = 0; outNo < CR_MATF_VALUE_COUNT(nnOut); outNo++) {
+					printf("%1.1f", nnOut->Data[outNo]);
+					printf(" [%1.1f]", nnIdealOut->Data[outNo]);
+
+					if (outNo != CR_MATF_VALUE_COUNT(nnOut) - 1)
+						printf(", ");
+				}
+				printf("} ");
+
+				float error = calTotalError(nnOut, nnIdealOut);
+				printf(", Error: %1.6f \n", error);
+				totalErr += error;
+			}
+
+			printf("\n");
+
+			printf("Average Error: %1.6f\n", totalErr / 4);
+
+			printf("\n");
+
+			os::CROSContext::Sleep(0, 100);
+		}
+	}
+}
+
 int main(int argc, char* argv)
 {
 	cout << "Hello world" << endl;
@@ -266,7 +386,11 @@ int main(int argc, char* argv)
 	 * CROSContext
 	 */
 	r = os::CROSContext::InitInstance();
-	printf("os::CROSContext::InitInstance: %s \n", CRGetCRResultName(r).c_str());
+	printf("os::CROSContext::InitInstance: %s \n\n", CRGetCRResultName(r).c_str());
+
+	testXORNetwork();
+	std::cin.get();
+	return 0;
 
 	std::cout << std::endl;
 	std::cout << "Press Y to skip" << std::endl;
