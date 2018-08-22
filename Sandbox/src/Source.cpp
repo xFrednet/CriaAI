@@ -53,17 +53,17 @@ CRNeuronNetwork* createBOINetwork(CRNeuronLayerPtr& outputLayer)
 	layer2->setActivationFunc(paco::CRSigmoid, paco::CRSigmoidInv);
 	network->addLayer(layer2);
 
-	/*
-	* Layer 3
-	*/
-	CRNeuronLayerPtr layer3 = make_shared<CRNeuronLayer>(layer2->getNeuronCount(), 100);
-	layer3->setActivationFunc(paco::CRSigmoid, paco::CRSigmoidInv);
-	network->addLayer(layer3);
+	///*
+	//* Layer 3
+	//*/
+	//CRNeuronLayerPtr layer3 = make_shared<CRNeuronLayer>(layer2->getNeuronCount(), 100);
+	//layer3->setActivationFunc(paco::CRSigmoid, paco::CRSigmoidInv);
+	//network->addLayer(layer3);
 
 	/*
 	* Layer 4
 	*/
-	outputLayer = make_shared<CRNeuronLayer>(layer3->getNeuronCount(), 12);//WASD[^][<][v][>][ ][STRG]EQ
+	outputLayer = make_shared<CRNeuronLayer>(layer2->getNeuronCount(), 12);//WASD[^][<][v][>][ ][STRG]EQ
 	outputLayer->setActivationFunc(paco::CRSigmoid, paco::CRSigmoidInv);
 	network->addLayer(outputLayer);
 
@@ -120,7 +120,7 @@ CR_MATF* getCurrentInput()
 	short buttons[12] = {'W', 'A', 'S', 'D', VK_UP, VK_DOWN, VK_LEFT, VK_RIGHT, ' ', VK_LCONTROL, 'E', 'Q'};
 	for (uint index = 0; index < 12; index++)
 	{
-		g_CurrentInput->Data[index] = (GetAsyncKeyState(buttons[index]) == 0) ? 0.0f : 1.0f;
+		g_CurrentInput->Data[index] = (GetAsyncKeyState(buttons[index]) == 0) ? 0.1f : 0.9f;
 	}
 
 	return g_CurrentInput;
@@ -135,6 +135,18 @@ void printBOIOutput(CR_MATF const* mat)
 	{
 		printf("BOI Button: [%5s] [%3f]; y: [%3f]\n", buttons[index].c_str(), mat->Data[index], g_CurrentInput->Data[index]);
 	}
+}
+float calTotalError(CR_MATF const* realOut, CR_MATF const* idealOut)
+{
+	float totalError = 0.0f;
+
+	uint outCount = CR_MATF_VALUE_COUNT(realOut);
+	for (uint outNo = 0; outNo < outCount; outNo++) {
+		float errorsqrt = abs(idealOut->Data[outNo] - realOut->Data[outNo]);
+		totalError += errorsqrt / outCount;
+	}
+
+	return totalError;
 }
 
 void testBOINetwork()
@@ -179,7 +191,9 @@ void testBOINetwork()
 	uint frameNo = 0;
 	StopWatch timer;
 	uint iterations = 0;
+	uint totalIterations = 0;
 	bool running = true;
+	float totalError = 0.0f;
 	while (running)
 	{
 		/*
@@ -222,21 +236,38 @@ void testBOINetwork()
 			continue;
 
 		// process data
-		CR_MATF* output = network->feedForward(data);
-		//CRMatFDelete(data);
+		getCurrentInput();
+		network->train(data, g_CurrentInput);
+		CR_MATF const* output = network->getLastOutput();
+		float error = calTotalError(output, g_CurrentInput);
+		totalError += error / 10.0f;
 
 		// print result
-		printBOIOutput(output);
-		CRMatFDelete(output);
+		if (totalIterations % 10 == 0)
+		{
+			printf("\nIteration: %8u\n\n", totalIterations);
+			printBOIOutput(output);
+			printf("\nTotal average Error: %1.3f\n", totalError);
+			totalError = 0.0f;
+		}
 
 		/*
 		 * Info 
 		 */
 		iterations++;
+		totalIterations++;
 		if (timer.getTimeMSSinceStart() >= 1000)
 		{
+			if (totalIterations % 10 != 1) {
+				printf("\nIteration: %8u\n\n", totalIterations);
+				printBOIOutput(output);
+				printf("\nTotal average Error: %1.3f\n", totalError);
+				totalError = 0.0f;
+			}
+
 			std::cout << std::endl;
-			std::cout << " [INFO] IPS: " << iterations << ", average time[ms] :" << (timer.getTimeMSSinceStart() / iterations) << std::endl;
+			printf(" [INFO] IPS: %3u, average time[ms] : %3u", iterations, (timer.getTimeMSSinceStart() / iterations));
+			//std::cout << " [INFO] IPS: " << iterations << ", average time[ms] :" << (timer.getTimeMSSinceStart() / iterations) << std::endl;
 			std::cout << std::endl;
 
 			timer.start();
@@ -304,19 +335,6 @@ CR_MATF** CreateDataIdealOutputs()
 	idealOut[3]->Data[0] = 0.1f;
 
 	return idealOut;
-}
-float calTotalError(CR_MATF* realOut, CR_MATF* idelOut)
-{
-	float totalError = 0.0f;
-
-	uint outCount = CR_MATF_VALUE_COUNT(realOut);
-	for (uint outNo = 0; outNo < outCount; outNo++)
-	{
-		float errorsqrt = abs(idelOut->Data[outNo] - realOut->Data[outNo]);
-		totalError += errorsqrt / outCount;
-	}
-
-	return totalError;
 }
 void testXORNetwork ()
 {
@@ -388,9 +406,12 @@ int main(int argc, char* argv)
 	r = os::CROSContext::InitInstance();
 	printf("os::CROSContext::InitInstance: %s \n\n", CRGetCRResultName(r).c_str());
 
-	testXORNetwork();
-	std::cin.get();
-	return 0;
+	if (GetAsyncKeyState('L'))
+	{
+		testXORNetwork();
+		std::cin.get();
+		return 0;
+	}
 
 	std::cout << std::endl;
 	std::cout << "Press Y to skip" << std::endl;

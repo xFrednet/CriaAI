@@ -121,4 +121,8 @@ namespace cria_ai { namespace network {
 		return constList;
 	}
 
+	CR_MATF const* CRNeuronNetwork::getLastOutput() const
+	{
+		return m_LayerList[m_LayerList.size() - 1]->getOutput();
+	}
 }}

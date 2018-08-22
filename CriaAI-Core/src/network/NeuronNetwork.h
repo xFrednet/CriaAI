@@ -5,11 +5,11 @@
 #include "NeuronLayer.h"
 
 #ifndef CR_BP_WEIGHT_LEARN_RATE
-#	define CR_BP_WEIGHT_LEARN_RATE 0.5f
+#	define CR_BP_WEIGHT_LEARN_RATE 0.25f
 #endif
 
 #ifndef CR_BP_BIAS_LERN_RATE
-#	define CR_BP_BIAS_LERN_RATE 0.5f
+#	define CR_BP_BIAS_LERN_RATE 0.25f
 #endif
 
 namespace cria_ai { namespace network {
@@ -31,6 +31,8 @@ namespace cria_ai { namespace network {
 		uint getLayerCount() const;
 		std::vector<CRNeuronLayer*> getLayers();
 		std::vector<CRNeuronLayer const*> getLayers() const;
+
+		CR_MATF const* getLastOutput() const;
 	};
 
 }}
