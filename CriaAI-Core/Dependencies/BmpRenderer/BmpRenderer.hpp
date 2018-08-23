@@ -35,7 +35,7 @@
 
 #include "src/API/ScreenDrawer.hpp"
 
-#include "src/Bitmap.hpp"
+#include "src/RendererBitmap.hpp"
 
 #include "src/Renderer.hpp"
 

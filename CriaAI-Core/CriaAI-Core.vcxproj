@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -99,26 +99,31 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
   <ItemGroup>
     <ClCompile Include="Dependencies\BmpRenderer\Dependencies\libbmpread\bmpread.c" />
     <ClCompile Include="Dependencies\BmpRenderer\src\API\ScreenDrawer.cpp" />
-    <ClCompile Include="Dependencies\BmpRenderer\src\Bitmap.cpp" />
+    <ClCompile Include="Dependencies\BmpRenderer\src\RendererBitmap.cpp" />
     <ClCompile Include="Dependencies\BmpRenderer\src\Renderer.cpp" />
-    <ClCompile Include="src\api\FileSystem.cpp" />
-    <ClCompile Include="src\api\InputLogger.cpp" />
-    <ClCompile Include="src\api\InputUtil.cpp" />
-    <ClCompile Include="src\api\OSContext.cpp" />
-    <ClCompile Include="src\api\ScreenCapturer.cpp" />
-    <ClCompile Include="src\api\Window.cpp" />
-    <ClCompile Include="src\api\win\WinInputLogger.cpp" />
-    <ClCompile Include="src\api\win\WinInputSimulator.cpp" />
-    <ClCompile Include="src\api\win\WinOSContext.cpp" />
-    <ClCompile Include="src\api\win\WinScreenCapturer.cpp" />
-    <ClCompile Include="src\api\InputSimulator.cpp" />
-    <ClCompile Include="src\api\win\WinWindow.cpp" />
+    <ClCompile Include="src\network\NeuronLayer.cpp" />
+    <ClCompile Include="src\paco\null\NuActivationFunctions.cpp" />
+    <ClCompile Include="src\paco\null\NuBitmapUtil.cpp" />
+    <ClCompile Include="src\paco\null\NuContext.cpp" />
+    <ClCompile Include="src\paco\PaCoContext.cpp" />
+    <ClCompile Include="src\os\FileSystem.cpp" />
+    <ClCompile Include="src\os\InputLogger.cpp" />
+    <ClCompile Include="src\os\InputUtil.cpp" />
+    <ClCompile Include="src\os\OSContext.cpp" />
+    <ClCompile Include="src\os\ScreenCapturer.cpp" />
+    <ClCompile Include="src\os\Window.cpp" />
+    <ClCompile Include="src\os\win\WinInputLogger.cpp" />
+    <ClCompile Include="src\os\win\WinInputSimulator.cpp" />
+    <ClCompile Include="src\os\win\WinOSContext.cpp" />
+    <ClCompile Include="src\os\win\WinScreenCapturer.cpp" />
+    <ClCompile Include="src\os\InputSimulator.cpp" />
+    <ClCompile Include="src\os\win\WinWindow.cpp" />
     <ClCompile Include="src\maths\Matrixf.cpp" />
-    <ClCompile Include="src\network\layers\BmpInLayer.cpp" />
     <ClCompile Include="src\network\NeuronNetwork.cpp" />
-    <CudaCompile Include="src\util\FloatBitmap.cu">
-      <FileType>Document</FileType>
-    </CudaCompile>
+    <CudaCompile Include="src\paco\cuda\CuActivationFunctions.cu" />
+    <CudaCompile Include="src\paco\cuda\CuBitmapUtil.cu" />
+    <ClCompile Include="src\util\FloatBitmap.cpp" />
+    <ClCompile Include="src\util\Clock.cpp" />
     <ClCompile Include="src\util\Random.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -126,22 +131,26 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="Dependencies\BmpRenderer\BmpRenderer.hpp" />
     <ClInclude Include="Dependencies\BmpRenderer\Dependencies\libbmpread\bmpread.h" />
     <ClInclude Include="Dependencies\BmpRenderer\src\API\ScreenDrawer.hpp" />
-    <ClInclude Include="Dependencies\BmpRenderer\src\Bitmap.hpp" />
+    <ClInclude Include="Dependencies\BmpRenderer\src\RendererBitmap.hpp" />
     <ClInclude Include="Dependencies\BmpRenderer\src\Common.h" />
     <ClInclude Include="Dependencies\BmpRenderer\src\Renderer.hpp" />
-    <ClInclude Include="src\api\cuda\CudaContext.cuh" />
-    <ClInclude Include="src\api\FileSystem.h" />
-    <ClInclude Include="src\api\InputLogger.h" />
-    <ClInclude Include="src\api\InputSimulator.h" />
-    <ClInclude Include="src\api\InputUtil.h" />
-    <ClInclude Include="src\api\OSContext.h" />
-    <ClInclude Include="src\api\ScreenCapturer.h" />
-    <ClInclude Include="src\api\Window.h" />
-    <ClInclude Include="src\api\win\WinOSContext.h" />
-    <ClInclude Include="src\api\win\WinInputLogger.h" />
-    <ClInclude Include="src\api\win\WinInputSimulator.h" />
-    <ClInclude Include="src\api\win\WinScreenCapturer.h" />
-    <ClInclude Include="src\api\win\WinWindow.h" />
+    <ClInclude Include="src\paco\BitmapUtil.h" />
+    <ClInclude Include="src\paco\BitmapUtilMacros.h" />
+    <ClInclude Include="src\paco\cuda\CuContext.cuh" />
+    <ClInclude Include="src\paco\null\NuContext.h" />
+    <ClInclude Include="src\paco\PaCoContext.h" />
+    <ClInclude Include="src\os\FileSystem.h" />
+    <ClInclude Include="src\os\InputLogger.h" />
+    <ClInclude Include="src\os\InputSimulator.h" />
+    <ClInclude Include="src\os\InputUtil.h" />
+    <ClInclude Include="src\os\OSContext.h" />
+    <ClInclude Include="src\os\ScreenCapturer.h" />
+    <ClInclude Include="src\os\Window.h" />
+    <ClInclude Include="src\os\win\WinOSContext.h" />
+    <ClInclude Include="src\os\win\WinInputLogger.h" />
+    <ClInclude Include="src\os\win\WinInputSimulator.h" />
+    <ClInclude Include="src\os\win\WinScreenCapturer.h" />
+    <ClInclude Include="src\os\win\WinWindow.h" />
     <ClInclude Include="src\Common.hpp" />
     <ClInclude Include="src\Macros.hpp" />
     <ClInclude Include="src\maths\Maths.h" />
@@ -149,16 +158,17 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <ClInclude Include="src\maths\Rectangle2D.h" />
     <ClInclude Include="src\maths\Vec2.h" />
     <ClInclude Include="src\maths\Vec3.h" />
-    <ClInclude Include="src\network\Layer.h" />
-    <ClInclude Include="src\network\layers\BmpInLayer.h" />
+    <ClInclude Include="src\paco\ActivationFunctions.h" />
+    <ClInclude Include="src\network\NeuronLayer.h" />
     <ClInclude Include="src\network\NeuronNetwork.h" />
     <ClInclude Include="src\Types.hpp" />
-    <ClInclude Include="src\util\CRResult.h" />
     <ClInclude Include="src\util\FloatBitmap.h" />
+    <ClInclude Include="src\util\Clock.h" />
+    <ClInclude Include="src\util\CRResult.h" />
     <ClInclude Include="src\util\Random.h" />
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="src\api\cuda\CudaContext.cu" />
+    <CudaCompile Include="src\paco\cuda\CuContext.cu" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
